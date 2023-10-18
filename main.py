@@ -1,16 +1,28 @@
-# This is a sample Python script.
+from dotenv import dotenv_values
 
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
+conf = dotenv_values(".env")
 
+print(conf['COOKIE_NAME'], conf['COOKIE_VALUE'])
+strData = [conf['FBC_LT6']][0]
+fbc = strData.split(",")
+print(fbc)
+print(conf['FBC_LF'].split(","))
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press ⌘F8 to toggle the breakpoint.
+# search and replace the COOKIE_NAME & COOKIE_VALUE values
+# in the .env file
+search_text = conf['COOKIE_NAME']
+replace_text = '__ac_'
 
+# open the file in a read mode
+f = open(".env", "r")
+# Reading the content of the file using the read() function them in a new variable
+data = f.read()
+# Searching and replacing the text using the replace() function
+data = data.replace(search_text, replace_text)
+# open file in the write mode
+fw = open(".env", "w")
+# Writing the replaced data in our text (.env) file
+fw.write(data)
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+f.close()
+fw.close()
