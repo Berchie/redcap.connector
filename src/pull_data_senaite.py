@@ -68,7 +68,7 @@ def getSampleType():
 def getanalyses_result():
     # connect to senaite via the senaite api
     res_analyses = requests.get(config["BASE_URL"] + "/search", params={"catalog": "senaite_catalog_sample", "getClientTitle": "Malaria Birth Cohort - MBC",
-                                                                        "sort_on": "getDateSampled", "sort_order": "asc",
+                                                                        "sort_on": "getDateSampled", "sort_order": "asc", "review_state": "published",
                                                                         "recent_created": "yesterday this-week", "children": "true"},
                                 cookies={config["COOKIE_NAME"]: config["COOKIE_VALUE"]})
 
@@ -99,10 +99,10 @@ def getanalyses_result():
                     analyses_data.update({fbc_keys["M19_FBC_FV"][r_data_dict_items[i]["children"][child]["title"]]:
                                               r_data_dict_items[i]["children"][child]["Result"]})
 
-                    # update the data list variable with the analyses_data
-                    # will later update or write it to a json for import into REDCap
-                    data.append(analyses_data)
-        # analyses_data.clear()
+            # update the data list variable with the analyses_data
+            # will later update or write it to a json for import into REDCap
+            data.append(analyses_data.copy())
+
 
     # print or return data
     return data
@@ -114,10 +114,10 @@ try:
     sampleTypes = getSampleType()
     fbc = getanalyses_result()
 
-    print(clients)
-    print(sampleTypes)
-    print(json.dumps(fbc_keys, indent=2))
-    print(fbc)
+    #print(clients)
+    #print(sampleTypes)
+    #print(json.dumps(fbc_keys, indent=2))
+    print(json.dumps(fbc,indent=2))
 
 
 # resq_item = requests.get(config["BASE_URL"] + "/search", params={"catalog": "senaite_catalog_sample", "getClientTitle": "Malaria Birth Cohort - MBC",

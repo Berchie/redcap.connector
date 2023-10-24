@@ -1,6 +1,7 @@
 {
     "M19_FBC_FV": {
       "id": "m_subbarcode",
+      "Event_Name": "redcap_event_name",
       "ClientSampleID": "ch_subbbarcode",
       "DateSampled": "lf_datefbc_t",
       "HBG": "lf_fbchgb_q",
@@ -26,6 +27,7 @@
     },
     "M19_FBC_TV": {
       "id": "m_subbarcode",
+      "Event_Name": "redcap_event_name",
       "ClientSampleID": "ch_subbbarcode",
       "DateSampled": "lt6_datefbc_t",
       "HCT": "lt6_fbchct_q",
