@@ -1,4 +1,4 @@
-#!/usr/bin/ python
+#!/usr/bin/env python
 
 from dotenv import dotenv_values
 import requests
@@ -8,6 +8,7 @@ import json, logging
 logging.basicConfig(filename='../log/logfile.log', encoding='utf-8', format="%(asctime)s - %(message)s\n",
                     level=logging.INFO)
 logging.getLogger().addHandler(logging.StreamHandler())
+logging.getLogger().error("There's an error importing data.")
 
 
 def import_records(record):
@@ -31,6 +32,8 @@ def import_records(record):
 
         # when record successful imported write it to csv(import_data_[date&time])
         # or json file(imported_fbc_data.json). use function for both.
+    except IOError:
+        print("There's an error importing data.")
     except Exception as error:
         logging.exception(f"Unexpected Error Occurred: {error: }")
 

@@ -1,7 +1,8 @@
-#!/usr/bin/ python
+#!/usr/bin/env python
 
 # import modules
 from dotenv import dotenv_values
+from functions import read_json
 import requests
 import json
 import logging
@@ -20,12 +21,16 @@ data = []  # this variable is to hold the all the compile lab results from senai
 analyses_data = {}
 sampleTypes = []
 
-# Opening JSON file
-f = open('../config/redcap_variables.json', 'r')
-# returns JSON object as a dictionary
-fbc_keys = json.loads(f.read())
-# closing file
-f.close()
+# read the json file
+fbc_keys = read_json('../config/redcap_variables.json')
+
+
+# clear the content in the import_data.json file
+with open("../data/import_data.json", "r+") as importfile:
+    # check if the file is not empty
+    if not importfile.read():
+        # clear the file content
+        importfile.truncate(0)
 
 
 # define function for each active connection to senaite
@@ -69,43 +74,45 @@ def getanalyses_result():
     # connect to senaite via the senaite api
     res_analyses = requests.get(config["BASE_URL"] + "/search", params={"catalog": "senaite_catalog_sample", "getClientTitle": "Malaria Birth Cohort - MBC",
                                                                         "sort_on": "getDateSampled", "sort_order": "asc", "review_state": "published",
-                                                                        "recent_created": "yesterday this-week", "children": "true"},
+                                                                        "recent_created": "yesterday", "children": "true"},
                                 cookies={config["COOKIE_NAME"]: config["COOKIE_VALUE"]})
 
     # returns respond data as a JSON object
     r_data = json.dumps(res_analyses.json())
 
-    # returns JSON object as a dictionary
-    r_data_dict = json.loads(r_data)
-    r_data_dict_items = r_data_dict['items']
-    print(f"Number of found items: {r_data_dict['count']}")
-    print(f"number of total pages: {r_data_dict['pages']}")
+    if res_analyses.status_code == 200 and r_data:
+        # returns JSON object as a dictionary
+        r_data_dict = json.loads(r_data)
+        r_data_dict_items = r_data_dict['items']
+        print(f"Number of found items: {r_data_dict['count']}")
+        print(f"number of total pages: {r_data_dict['pages']}")
 
-    # loop through the r_data_dict
-    for i in range(r_data_dict['count']):
-        # check if the sample type is EDTA blood
-        if r_data_dict_items[i]["getSampleTypeTitle"] == 'EDTA Blood':
-            analyses_data["ch_subbbarcode"] = r_data_dict_items[i]["getClientSampleID"]
-            analyses_data[fbc_keys["M19_FBC_FV"]['DateSampled']] = str(r_data_dict_items[i]['getDateSampled'])[:16].replace("T"," ")
+        # loop through the r_data_dict
+        for i in range(r_data_dict['count']):
+            # check if the sample type is EDTA blood
+            if r_data_dict_items[i]["getSampleTypeTitle"] == 'EDTA Blood':
+                analyses_data["ch_subbbarcode"] = r_data_dict_items[i]["getClientSampleID"]
+                analyses_data[fbc_keys["M19_FBC_FV"]['DateSampled']] = str(r_data_dict_items[i]['getDateSampled'])[:16].replace("T", " ")
 
-            # children_items = r_data_dict_items[i]['children']
+                # children_items = r_data_dict_items[i]['children']
 
-            # loop through the children object to get values or results of the analysis
-            for child in range(r_data_dict_items[i]["children_count"] - 2):
-                # check if the analysis title or name is found in the redcap_variables json file
-                if r_data_dict_items[i]["children"][child]["title"] in fbc_keys["M19_FBC_FV"]:
-                    # if true, get the key value of the analysis title from the redcap_variables json file
-                    # and use it as the key for the Result value e.g {"lf_fbchgb_q":"9.5"}
-                    analyses_data.update({fbc_keys["M19_FBC_FV"][r_data_dict_items[i]["children"][child]["title"]]:
-                                              r_data_dict_items[i]["children"][child]["Result"]})
+                # loop through the children object to get values or results of the analysis
+                for child in range(r_data_dict_items[i]["children_count"] - 2):
 
-            # update the data list variable with the analyses_data
-            # will later update or write it to a json for import into REDCap
-            data.append(analyses_data.copy())
+                    # check if the analysis title or name is found in the redcap_variables json file
+                    if r_data_dict_items[i]["children"][child]["title"] in fbc_keys["M19_FBC_FV"]:
+                        # if true, get the key value of the analysis title from the redcap_variables json file
+                        # and use it as the key for the Result value e.g {"lf_fbchgb_q":"9.5"}
+                        analyses_data.update({fbc_keys["M19_FBC_FV"][r_data_dict_items[i]["children"][child]["title"]]:
+                                                  r_data_dict_items[i]["children"][child]["Result"]})
 
-
-    # print or return data
-    return data
+                # update the data list variable with the analyses_data
+                # will later update or write it to a json for import into REDCap
+                data.append(analyses_data.copy())
+        # print or return data
+        return data
+    else:
+        print("No records was found!")
 
 
 try:
@@ -114,10 +121,10 @@ try:
     sampleTypes = getSampleType()
     fbc = getanalyses_result()
 
-    #print(clients)
-    #print(sampleTypes)
-    #print(json.dumps(fbc_keys, indent=2))
-    print(json.dumps(fbc,indent=2))
+    # print(clients)
+    # print(sampleTypes)
+    # print(json.dumps(fbc_keys, indent=2))
+    print(json.dumps(fbc, indent=2))
 
 
 # resq_item = requests.get(config["BASE_URL"] + "/search", params={"catalog": "senaite_catalog_sample", "getClientTitle": "Malaria Birth Cohort - MBC",

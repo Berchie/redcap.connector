@@ -1,6 +1,9 @@
 import json
+import csv
 import requests
 from dotenv import dotenv_values
+from urllib.request import urlopen as url
+from urllib.error import *
 
 conf = dotenv_values(".env")
 
@@ -52,4 +55,53 @@ r = requests.post('https://redcap-testing.bibbox.bnitm.de/api/',data=data_e)
 print('HTTP Status: ' + str(r.status_code))
 #print(json.dumps(r.json(),indent=2))
 
+# check if
+try:
+    redcap_server = url('https://redcap-testing.bibbox.bnitm.de')
 
+except HTTPError as e:
+    print("HTTP error", e)
+except URLError as e:
+    print("Opps! REDCap server not found!", e)
+else:
+    print("Yeah! REDCap server is online")
+
+try:
+    respond = requests.head('https://redcap-testing.bibbox.bnitm.de')
+    if respond.status_code == 200:
+        print("Yeah! REDCap server is online")
+    else:
+        print("Opps! REDCap server not found!")
+except requests.ConnectionError as e:
+    print(e)
+
+
+# check for internet connection
+try:
+    pass
+    # connect to a URL
+    url("https://www.google.com/", timeout=5)
+    print('SUCCESS: Internet connection is available')
+except ConnectionError as error:
+    print("FAIL: Internet connection is not available")
+
+
+# write dict to csv
+csv_columns = ['No', 'Name', 'Country']
+dict_data = [
+    {'No': 1, 'Name': 'Kelvin', 'Country': 'USA'},
+    {'No': 2, 'Name': 'Kwame', 'Country': 'Ghana'},
+    {'No': 3, 'Name': 'Wibke', 'Country': 'Germany'},
+    {'No': 4, 'Name': 'Smith', 'Country': 'UK'},
+    {'No': 5, 'Name': 'Berchie', 'Country': 'Ghana'}
+    ]
+csv_file = "names.csv"
+
+try:
+    with open(csv_file, 'w') as csvfile:
+        writer = csv.DictWriter(csvfile,fieldnames=csv_columns)
+        writer.writeheader()
+        for data in dict_data:
+            writer.writerow(data)
+except IOError:
+    print("I/O error")
