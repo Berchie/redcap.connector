@@ -1,5 +1,7 @@
 import json
 import csv
+import socket
+
 import requests
 from dotenv import dotenv_values
 from urllib.request import urlopen as url
@@ -51,9 +53,9 @@ data_e = {
     'exportDataAccessGroups': 'false',
     'returnFormat': 'json'
 }
-r = requests.post('https://redcap-testing.bibbox.bnitm.de/api/',data=data_e)
+r = requests.post('https://redcap-testing.bibbox.bnitm.de/api/', data=data_e)
 print('HTTP Status: ' + str(r.status_code))
-#print(json.dumps(r.json(),indent=2))
+# print(json.dumps(r.json(),indent=2))
 
 # check if
 try:
@@ -75,7 +77,6 @@ try:
 except requests.ConnectionError as e:
     print(e)
 
-
 # check for internet connection
 try:
     pass
@@ -85,7 +86,6 @@ try:
 except ConnectionError as error:
     print("FAIL: Internet connection is not available")
 
-
 # write dict to csv
 csv_columns = ['No', 'Name', 'Country']
 dict_data = [
@@ -94,14 +94,38 @@ dict_data = [
     {'No': 3, 'Name': 'Wibke', 'Country': 'Germany'},
     {'No': 4, 'Name': 'Smith', 'Country': 'UK'},
     {'No': 5, 'Name': 'Berchie', 'Country': 'Ghana'}
-    ]
+]
 csv_file = "names.csv"
 
 try:
     with open(csv_file, 'w') as csvfile:
-        writer = csv.DictWriter(csvfile,fieldnames=csv_columns)
+        writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
         writer.writeheader()
         for data in dict_data:
             writer.writerow(data)
 except IOError:
     print("I/O error")
+
+
+def check_internet_connection():
+    remote_server = "www.google.com"
+    port = 80
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.settimeout(5)
+    try:
+        sock.connect((remote_server, port))
+        return True
+    except socket.error:
+        return False
+    finally:
+        sock.close()
+
+
+data = [
+    {'No': 1, 'Name': 'Kelvin', 'Country': 'USA'},
+    {'No': 2, 'Name': 'Kwame', 'Country': 'Ghana'},
+    {'No': 3, 'Name': 'Wibke', 'Country': 'Germany'},
+    {'No': 4, 'Name': 'Smith', 'Country': 'UK'},
+    {'No': 5, 'Name': 'Berchie', 'Country': 'Ghana'}
+]
+print(data[0].keys())
