@@ -8,12 +8,13 @@ import os
 import requests
 import json
 import logging
+import operator
 
 # load the .env values
 config = dotenv_values("../.env")
 
 # logging any error or any exception to a log file
-logging.basicConfig(filename='../log/logfile.log', encoding='utf-8', format="%(asctime)s - %(message)s\n",
+logging.basicConfig(filename='../log/redcap_connector.log', encoding='utf-8', format="%(asctime)s - %(message)s\n",
                     level=logging.INFO)
 logging.getLogger().addHandler(logging.StreamHandler())
 
@@ -133,16 +134,17 @@ def get_analyses_result(project_id):
                 # date and time of FBC performed
                 analyses_data[redcap_variables['DateSampled']] = str(r_data_dict_items[i]['getDateSampled'])[:16].replace("T", " ")
 
-                # children_items = r_data_dict_items[i]['children']
+                # Sort the list of dictionaries by the SortKey value
+                sorted_analysis = sorted(r_data_dict_items[i]['children'], key=operator.itemgetter('SortKey'))
 
                 # loop through the children object to get values or results of the analysis
                 for child in range(r_data_dict_items[i]["children_count"] - 2):
 
                     # check if the analysis title or name is found in the redcap_variables dictionary
-                    if r_data_dict_items[i]["children"][child]["title"] in redcap_variables:
+                    if sorted_analysis[child]["title"] in redcap_variables:
                         # if true, get the key value of the analysis title from the redcap_variables json file
                         # and use it as the key for the Result value e.g {"lf_fbchgb_q":"9.5"}
-                        analyses_data.update({redcap_variables[r_data_dict_items[i]["children"][child]["title"]]: r_data_dict_items[i]["children"][child]["Result"]})
+                        analyses_data.update({redcap_variables[sorted_analysis[child]["title"]]: r_data_dict_items[i]["children"][child]["Result"]})
 
                 # update the data list variable with the analyses_data
                 data.append(analyses_data.copy())
@@ -153,7 +155,7 @@ def get_analyses_result(project_id):
         # next_page = 2
         next_batch = r_data_dict['next']  # url for the next batch of records
 
-        while next_batch:     # next_page <= total_pages
+        while next_batch is not None:     # next_page <= total_pages
             # print(r_data_dict['next'])
 
             # clear the analysis_data for the next analysis results or data
@@ -201,14 +203,17 @@ def get_analyses_result(project_id):
                         # this contains the analysis result of participant's visit
                         nb_data_children = next_batch_data[nb]['children']
 
+                        # Sort the list of dictionaries by the SortKey value
+                        nb_sorted_analysis = sorted(nb_data_children, key=operator.itemgetter('SortKey'))
+
                         # loop through nb_data_children to get results of the analysis
                         for ch in range(next_batch_data[nb]['children_count'] - 2):
 
                             # check if the analysis title or name is found in the redcap_variables dictionary
-                            if nb_data_children[ch]['title'] in nb_redcap_variables:
+                            if nb_sorted_analysis[ch]['title'] in nb_redcap_variables:
                                 # if true, get the key value of the analysis title from the redcap_variables json file
                                 # and use it as the key for the Result value e.g {"lf_fbchgb_q":"9.5"}
-                                analyses_data.update({nb_redcap_variables[nb_data_children[ch]['title']]: nb_data_children[ch]['Result']})
+                                analyses_data.update({nb_redcap_variables[nb_sorted_analysis[ch]['title']]: nb_data_children[ch]['Result']})
 
                         # append the analysis results to the data list
                         # using the dictionary copy() method (dict.copy())

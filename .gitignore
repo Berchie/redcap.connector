@@ -7,6 +7,9 @@ src/.DS_Store
 
 # IntelliJ project files
 .idea
+.idea/misc.xml
 *.iml
 out
 gen
+/.python-version
+/.venv/

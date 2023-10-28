@@ -1,11 +1,14 @@
 import json
 import csv
+import os
 import socket
 
 import requests
 from dotenv import dotenv_values
 from urllib.request import urlopen as url
 from urllib.error import *
+#from src.functions import read_json
+
 
 conf = dotenv_values(".env")
 
@@ -98,11 +101,12 @@ dict_data = [
 csv_file = "names.csv"
 
 try:
-    with open(csv_file, 'w') as csvfile:
+    with open(csv_file, 'a', newline='') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
-        writer.writeheader()
-        for data in dict_data:
-            writer.writerow(data)
+        # writer.writeheader()
+
+        for i in dict_data:
+            writer.writerow(i)
 except IOError:
     print("I/O error")
 
@@ -129,3 +133,5 @@ data = [
     {'No': 5, 'Name': 'Berchie', 'Country': 'Ghana'}
 ]
 print(data[0].keys())
+
+print(os.getcwd())

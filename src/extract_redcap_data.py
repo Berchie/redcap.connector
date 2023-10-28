@@ -6,7 +6,7 @@ import json
 import logging
 
 # logging any error or any exception to a log file
-logging.basicConfig(filename='../log/logfile.log', encoding='utf-8', format="%(asctime)s - %(message)s\n",
+logging.basicConfig(filename='../log/redcap_connector.log', encoding='utf-8', format="%(asctime)s - %(message)s\n",
                     level=logging.INFO)
 logging.getLogger().addHandler(logging.StreamHandler())
 
