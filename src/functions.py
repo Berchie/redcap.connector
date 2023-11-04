@@ -59,23 +59,26 @@ def write_json(dictionary):
 
 
 # write the results to csv file
-def write_result_csv(datafile):
+def write_result_csv(results):
     mbc_t6_t12 = ['T6', 'T7', 'T8', 'T9', 'T10', 'T11']
     mbc_fever_visits = ['F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12', 'F13', 'F14', 'F15']
 
     # data from the json file
     # analysis_result = read_json(datafile)
 
-    with open(datafile) as df:
+    # with open(data_import, 'r') as df:
         # data = df.read()
-        new_data_dict = json.load(df)
+    #    new_data_dict = json.load(df)
+
+    new_data_dict = json.loads(results)
 
     # new_data_dict = {}
 
-    #for index in new_data_dict:
+    # for index in new_data_dict:
     #    print(index.values())
 
-        # print(new_data_dict)
+    print(new_data_dict)
+    print(type(new_data_dict))
 
     # mbc_t6_t12_columns = []
     # mbc_fever_visits_columns = []
@@ -93,8 +96,8 @@ def write_result_csv(datafile):
         if str(data['m_subbarcode'])[:3] == 'M19':
 
             # write the T6-T12 (API) visits lab result to csv file
-            if str(data['redcap_event_name'])[:3].upper() in mbc_t6_t12:
-
+            if str(data['redcap_event_name'])[0:3].rstrip('_').upper() in mbc_t6_t12:
+                
                 mbc_t6_t12_columns = data.keys()
 
                 csv_filename = f'{strftime("%Y%m%d", localtime())}_mbc_t6_t12_lab_result.csv'
@@ -104,8 +107,8 @@ def write_result_csv(datafile):
                         with open(f"{file_path}/{csv_filename}", 'a', newline='') as open_csvfile:
                             csv_writer = csv.writer(open_csvfile)
                             # for row in analysis_result[r]:
-                            lt_data = dict(data)  # typecast the string to dict
-                            csv_writer.writerow(lt_data.values())   # useing the values of the dict
+                            lt_data = data  # typecast the string to dict
+                            csv_writer.writerow(lt_data.values())  # use values of the dict
 
                     except IOError:
                         print('An error occurred while writing to the file.')
@@ -116,14 +119,14 @@ def write_result_csv(datafile):
                         with open(f"{file_path}/{csv_filename}", 'w', newline='') as open_csvfile:
                             cs_writer = csv.DictWriter(open_csvfile, fieldnames=mbc_t6_t12_columns)
                             cs_writer.writeheader()
-                            lt_data = dict(data)  # typecast the string to dict
-                            cs_writer.writerow(lt_data)     # used the dict
+                            lt_data = data  # typecast the string to dict
+                            cs_writer.writerow(lt_data)  # use the dict
 
                     except IOError:
                         print('An error occurred while writing to the file.')
                         logging.exception('An error occurred while writing to the file.')
 
-            elif str(data['redcap_event_name'])[:3].upper() in mbc_fever_visits:
+            elif str(data['redcap_event_name'])[0:3].rstrip('_').upper() in mbc_fever_visits:
 
                 # write the fever visits lab result to csv file
                 mbc_fever_visits_columns = data.keys()
@@ -135,8 +138,8 @@ def write_result_csv(datafile):
                     try:
                         with open(f'{file_path}/{csv_filename}', 'a', newline="") as csvfile:
                             writer = csv.writer(csvfile)
-                            lf_data = dict(data)  # typecast the string to dict
-                            writer.writerow(lf_data.values())   # useing the values of the dict
+                            lf_data = data  # typecast the string to dict
+                            writer.writerow(lf_data.values())  # use values of the dict
 
                     except IOError:
                         print('An error occurred while writing to the file.')
@@ -149,8 +152,8 @@ def write_result_csv(datafile):
                         with open(f"{file_path}/{csv_filename}", 'w', newline='') as csvfile:
                             cs_writer = csv.DictWriter(csvfile, mbc_fever_visits_columns)
                             cs_writer.writeheader()
-                            new_data = dict(data)  # typecast the string to list
-                            cs_writer.writerow(new_data)    # use the dict
+                            new_data = data  # typecast the string to list
+                            cs_writer.writerow(new_data)  # use the dict
 
                     except IOError:
                         print('An error occurred while writing to the file.')
@@ -170,7 +173,7 @@ def sort_analysis(analysis):
         if analysis[i]["SortKey"] in sort_key_values:
             # the wbc sort key in senaite is 0. Its output is null in the api call.
             # assign 0 to the variable index instead of null for sort the analysis
-            if analysis[i]["SortKey"] == 'null':
+            if not analysis[i]["SortKey"]:
                 index = 0
             else:
                 index = int(analysis[i]["SortKey"])
@@ -183,12 +186,13 @@ def sort_analysis(analysis):
     return new_analysis
 
 
-def check_internet_connection():
+def check_internet_connection(redcap_url):
     try:
         pass
         # connect to a URL
-        url("https://www.google.com/", timeout=5)
+        url(redcap_url, timeout=5)
         print('SUCCESS: Internet connection is available')
+        print('SUCCESS: REDCap Server is available')
         return True
     except URLError:
         print("FAIL: Internet connection is not available")
@@ -229,4 +233,60 @@ def check_senaite_connection():
 # stop logging
 logging.shutdown()
 
-write_result_csv('/Users/berchie.agyemang.nti.admin/Developer/redcap.connector/data/import_data.json')
+if __name__ == '__main__':
+    data = [
+        {
+            "m_subbarcode": "M19-20754-T0--1",
+            "redcap_event_name": "f6_arm_2",
+            "lf_datefbc_t": "2023-11-02 09:54",
+            "lf_fbcpdw_q": 11.2,
+            "lf_fbcrbc_q": 4.19,
+            "lf_fbcmpv_q": 9.6,
+            "lf_fbcwbc_q": 8.34,
+            "lf_fbcneutpro_q": 39.6,
+            "lf_fbcneut_q": 3.3,
+            "lf_fbcmchc_q": 33.8,
+            "lf_fbcplt_q": 311.0,
+            "lf_fbcmcv_q": 68.5,
+            "lf_fbcplcr_q": 23.4,
+            "lf_fbclym_q": 4.16,
+            "lf_fbcrdwsd_q": 43.5,
+            "lf_fbclympro_q": 49.9,
+            "lf_fbcpct_q": 0.3,
+            "lf_fbchct_q": 28.7,
+            "lf_fbcmch_q": 23.2,
+            "lf_fbcrdwcv_q": 17.3,
+            "lf_fbcmid_q": 0.71,
+            "lf_fbcmidpro_q": 8.5
+        },
+        {
+            "m_subbarcode": "M19-21217-T0--1",
+            "redcap_event_name": "t7_arm_2",
+            "lt6_datefbc_t": "2023-11-02 12:48",
+            "lt6_fbcpdw_q": 9.0,
+            "lt6_fbcrbc_q": 5.18,
+            "lt6_fbcmpv_q": 8.6,
+            "lt6_fbcwbc_q": 8.2,
+            "lt6_fbcneutpro_q": 21.9,
+            "lt6_fbcneut_q": 1.8,
+            "lt6_fbcmchc_q": 31.4,
+            "lt6_fbcplt_q": 306.0,
+            "lt6_fbcmcv_q": 72.0,
+            "lt6_fbcplcr_q": 14.8,
+            "lt6_fbclym_q": 5.36,
+            "lt6_fbcrdwsd_q": 45.7,
+            "lt6_fbclympro_q": 65.4,
+            "lt6_fbcpct_q": 0.26,
+            "lt6_fbchct_q": 37.3,
+            "lt6_fbcmch_q": 22.6,
+            "lt6_fbcrdwcv_q": 18.9,
+            "lt6_fbcmid_q": 0.48,
+            "lt6_fbchgb_q": 11.7,
+            "lt6_fbcmidpro_q": 5.9
+        }
+    ]
+    check_internet_connection("https://www.google.com")
+    write_result_csv(data)
+    read_json("data/import_data.json")
+    write_json("data/import_data.json")
+

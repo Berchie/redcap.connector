@@ -2,13 +2,14 @@
 
 # import modules
 from dotenv import dotenv_values
-from functions import read_json, write_json
+from functions import read_json, write_json, sort_analysis
 from extract_redcap_data import *
 import os
 import requests
 import json
 import logging
 import operator
+import time
 
 # load the .env values
 config = dotenv_values("../.env")
@@ -75,7 +76,6 @@ def getSampleType():
 #  "count"(number of found items), "pages" (number of total pages), "next" (URL to the next batch), "pagesize" (items per page)
 # parameters for get_analysis_result() => project_id, from_date to_date (date range to filter the json data),
 def get_analyses_result(project_id):
-
     nb_redcap_variables = {}  # to hold the next batch redcap variables
 
     mbc_t6_t12 = ['T6', 'T7', 'T8', 'T9', 'T10', 'T11']
@@ -89,7 +89,7 @@ def get_analyses_result(project_id):
     # connect to senaite via the senaite api
     res_analyses = requests.get(config["BASE_URL"] + "/search", params={"catalog": "senaite_catalog_sample", "getClientTitle": client_title,
                                                                         "sort_on": "getDateSampled", "sort_order": "asc", "review_state": "published",
-                                                                        "recent_created": "this-month", "children": "true"},
+                                                                        "recent_created": "this-week", "children": "true"},
                                 cookies={config["COOKIE_NAME"]: config["COOKIE_VALUE"]})
 
     # returns respond data as a JSON object
@@ -134,17 +134,16 @@ def get_analyses_result(project_id):
                 # date and time of FBC performed
                 analyses_data[redcap_variables['DateSampled']] = str(r_data_dict_items[i]['getDateSampled'])[:16].replace("T", " ")
 
-                # Sort the list of dictionaries by the SortKey value
-                sorted_analysis = sorted(r_data_dict_items[i]['children'], key=operator.itemgetter('SortKey'))
+                children_data = r_data_dict_items[i]['children']
 
                 # loop through the children object to get values or results of the analysis
                 for child in range(r_data_dict_items[i]["children_count"] - 2):
 
                     # check if the analysis title or name is found in the redcap_variables dictionary
-                    if sorted_analysis[child]["title"] in redcap_variables:
+                    if children_data[child]["title"] in redcap_variables:
                         # if true, get the key value of the analysis title from the redcap_variables json file
                         # and use it as the key for the Result value e.g {"lf_fbchgb_q":"9.5"}
-                        analyses_data.update({redcap_variables[sorted_analysis[child]["title"]]: r_data_dict_items[i]["children"][child]["Result"]})
+                        analyses_data.update({redcap_variables[children_data[child]["title"]]: float(r_data_dict_items[i]["children"][child]["Result"])})
 
                 # update the data list variable with the analyses_data
                 data.append(analyses_data.copy())
@@ -155,7 +154,7 @@ def get_analyses_result(project_id):
         # next_page = 2
         next_batch = r_data_dict['next']  # url for the next batch of records
 
-        while next_batch is not None:     # next_page <= total_pages
+        while next_batch is not None:  # next_page <= total_pages
             # print(r_data_dict['next'])
 
             # clear the analysis_data for the next analysis results or data
@@ -203,9 +202,6 @@ def get_analyses_result(project_id):
                         # this contains the analysis result of participant's visit
                         nb_data_children = next_batch_data[nb]['children']
 
-                        # Sort the list of dictionaries by the SortKey value
-                        nb_sorted_analysis = sorted(nb_data_children, key=operator.itemgetter('SortKey'))
-
                         # loop through nb_data_children to get results of the analysis
                         for ch in range(next_batch_data[nb]['children_count'] - 2):
 
@@ -213,7 +209,7 @@ def get_analyses_result(project_id):
                             if nb_sorted_analysis[ch]['title'] in nb_redcap_variables:
                                 # if true, get the key value of the analysis title from the redcap_variables json file
                                 # and use it as the key for the Result value e.g {"lf_fbchgb_q":"9.5"}
-                                analyses_data.update({nb_redcap_variables[nb_sorted_analysis[ch]['title']]: nb_data_children[ch]['Result']})
+                                analyses_data.update({nb_redcap_variables[nb_sorted_analysis[ch]['title']]: float(nb_data_children[ch]['Result'])})
 
                         # append the analysis results to the data list
                         # using the dictionary copy() method (dict.copy())
@@ -236,12 +232,16 @@ try:
     # call the getCleints() function
     clients = getClients()
     # sampleTypes = getSampleType()
+    time_start_ = time.time()
     fbc = get_analyses_result('M19')
+    time_end_ = time.time()
 
+    print(f'process time: {(time_end_ - time_start_)} seconds')
     # print(clients)
     # print(sampleTypes)
     # print(json.dumps(fbc_keys, indent=2))
     print(json.dumps(fbc, indent=2))
+
 
 
 # resq_item = requests.get(config["BASE_URL"] + "/search", params={"catalog": "senaite_catalog_sample", "getClientTitle": "Malaria Birth Cohort - MBC",
@@ -253,3 +253,6 @@ except Exception as error:
 
 # stop logging
 logging.shutdown()
+
+if __name__ == '__main__':
+    get_analyses_result('M19')
