@@ -12,8 +12,8 @@ from time import localtime, strftime
 # from pull_data_senaite import get_analyses_result
 
 # logging any error or any exception to a log file
-logging.basicConfig(filename='../redcap_connector.log', encoding='utf-8', format="%(asctime)s - %(message)s\n",
-                    level=logging.INFO)
+logging.basicConfig(filename='../log/redcap_connector.log', encoding='utf-8', format="%(asctime)s - %(message)s\n",
+                    level=logging.DEBUG)
 logging.getLogger().addHandler(logging.StreamHandler())
 
 
@@ -62,102 +62,104 @@ def write_json(dictionary):
 def write_result_csv(results):
     mbc_t6_t12 = ['T6', 'T7', 'T8', 'T9', 'T10', 'T11']
     mbc_fever_visits = ['F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12', 'F13', 'F14', 'F15']
+    csv_columns = read_json("../config/redcap_variables.json")
 
     # data from the json file
     # analysis_result = read_json(datafile)
 
     # with open(data_import, 'r') as df:
-        # data = df.read()
+    # data = df.read()
     #    new_data_dict = json.load(df)
 
-    new_data_dict = json.loads(results)
+    if os.path.isfile(results):
+        new_data_dict = read_json(results)
+    else:
+        new_data_dict = json.loads(results)
+
+    # new_data_dict = json.loads(results)
+    # new_data_dict = read_json(results)
 
     # new_data_dict = {}
 
     # for index in new_data_dict:
     #    print(index.values())
 
-    print(new_data_dict)
-    print(type(new_data_dict))
-
     # mbc_t6_t12_columns = []
     # mbc_fever_visits_columns = []
     # csv_filename = ""
+    try:
+        os.chdir("..")
+        # print(os.path.abspath(os.curdir))
+        file_path = f'{os.path.abspath(os.curdir)}/data'
 
-    os.chdir("..")
-    # print(os.path.abspath(os.curdir))
-    file_path = f'{os.path.abspath(os.curdir)}/data'
+        # determine project analysis result
+        # and it event or visit
 
-    # determine project analysis result
-    # and it event or visit
+        for data_result in new_data_dict:
+            if data_result:
+                if str(data_result['m_subbarcode'])[:3] == 'M19':
 
-    for data in new_data_dict:
+                    # write the T6-T12 (API) visits lab result to csv file
+                    if str(data_result['redcap_event_name'])[0:3].rstrip('_').upper() in mbc_t6_t12:
 
-        if str(data['m_subbarcode'])[:3] == 'M19':
+                        # mbc_t6_t12_columns = data_result.keys()
+                        mbc_t6_t12_columns = csv_columns["M19_FBC_TV"].values()
 
-            # write the T6-T12 (API) visits lab result to csv file
-            if str(data['redcap_event_name'])[0:3].rstrip('_').upper() in mbc_t6_t12:
-                
-                mbc_t6_t12_columns = data.keys()
+                        csv_filename = f'{strftime("%Y%m%d", localtime())}_mbc_t6_t12_lab_result.csv'
 
-                csv_filename = f'{strftime("%Y%m%d", localtime())}_mbc_t6_t12_lab_result.csv'
+                        if is_not_empty_file(f'{file_path}/{csv_filename}'):
 
-                if is_not_empty_file(f'{file_path}/{csv_filename}'):
-                    try:
-                        with open(f"{file_path}/{csv_filename}", 'a', newline='') as open_csvfile:
-                            csv_writer = csv.writer(open_csvfile)
-                            # for row in analysis_result[r]:
-                            lt_data = data  # typecast the string to dict
-                            csv_writer.writerow(lt_data.values())  # use values of the dict
+                            with open(f"{file_path}/{csv_filename}", 'a', newline='') as open_csvfile:
+                                csv_writer = csv.writer(open_csvfile)
+                                # for row in analysis_result[r]:
+                                lt_data = data_result  # typecast the string to dict
+                                # csv_writer.writerow(lt_data.values())  # use values of the dict
+                                csv_writer.writerow([lt_data.get(col, 0) for col in mbc_t6_t12_columns])  # make a list value in the order of the dict columns and write them
 
-                    except IOError:
-                        print('An error occurred while writing to the file.')
-                        logging.exception('An error occurred while writing to the file.')
-                else:
+                        else:
 
-                    try:
-                        with open(f"{file_path}/{csv_filename}", 'w', newline='') as open_csvfile:
-                            cs_writer = csv.DictWriter(open_csvfile, fieldnames=mbc_t6_t12_columns)
-                            cs_writer.writeheader()
-                            lt_data = data  # typecast the string to dict
-                            cs_writer.writerow(lt_data)  # use the dict
+                            with open(f"{file_path}/{csv_filename}", 'w', newline='') as open_csvfile:
+                                cs_writer = csv.writer(open_csvfile)
+                                cs_writer.writerow(mbc_t6_t12_columns)
+                                new_lt_data = data_result  # typecast the string to dict
+                                # cs_writer.writerow(lt_data)  # use the dict
+                                cs_writer.writerow([new_lt_data.get(col, 0) for col in mbc_t6_t12_columns])  # make a list value in the order of the dict columns and write them
 
-                    except IOError:
-                        print('An error occurred while writing to the file.')
-                        logging.exception('An error occurred while writing to the file.')
+                    elif str(data_result['redcap_event_name'])[0:3].rstrip('_').upper() in mbc_fever_visits:
 
-            elif str(data['redcap_event_name'])[0:3].rstrip('_').upper() in mbc_fever_visits:
+                        # write the fever visits lab result to csv file
+                        mbc_fever_visits_columns = csv_columns["M19_FBC_FV"].values()
 
-                # write the fever visits lab result to csv file
-                mbc_fever_visits_columns = data.keys()
+                        csv_filename = f'{strftime("%Y%m%d", localtime())}_mbc_fever_visit_lab_result.csv'
 
-                csv_filename = f'{strftime("%Y%m%d", localtime())}_mbc_fever_visit_lab_result.csv'
+                        if is_not_empty_file(f'{file_path}/{csv_filename}'):
 
-                if is_not_empty_file(f'{file_path}/{csv_filename}'):
+                            with open(f'{file_path}/{csv_filename}', 'a', newline="") as csvfile:
+                                writer = csv.writer(csvfile)
+                                lf_data = dict(data_result)  # typecast the string to dict
+                                # writer.writerow(lf_data.values())  # use values of the dict
+                                writer.writerow([lf_data.get(col, 0) for col in mbc_fever_visits_columns])  # make a list value in the order of the dict columns and write them
 
-                    try:
-                        with open(f'{file_path}/{csv_filename}', 'a', newline="") as csvfile:
-                            writer = csv.writer(csvfile)
-                            lf_data = data  # typecast the string to dict
-                            writer.writerow(lf_data.values())  # use values of the dict
+                        else:
 
-                    except IOError:
-                        print('An error occurred while writing to the file.')
-                        logging.exception('An error occurred while writing to the file.')
+                            # print(data)
+                            with open(f"{file_path}/{csv_filename}", 'w', newline='') as csvfile:
+                                cs_writer = csv.writer(csvfile)
+                                cs_writer.writerow(mbc_fever_visits_columns)
+                                new_data = data_result  # typecast the string to list
+                                # cs_writer.writerow(new_data)  # use the dict
+                                cs_writer.writerow([new_data.get(col, 0) for col in mbc_fever_visits_columns])  # make a list value in the order of the dict columns and write them
 
-                else:
-
-                    try:
-                        # print(data)
-                        with open(f"{file_path}/{csv_filename}", 'w', newline='') as csvfile:
-                            cs_writer = csv.DictWriter(csvfile, mbc_fever_visits_columns)
-                            cs_writer.writeheader()
-                            new_data = data  # typecast the string to list
-                            cs_writer.writerow(new_data)  # use the dict
-
-                    except IOError:
-                        print('An error occurred while writing to the file.')
-                        logging.exception('An error occurred while writing to the file.')
+    except IOError as ioe:
+        logging.error(ioe)
+        print('An error occurred while writing to the file.')
+    except KeyError as ke:
+        logging.error(ke)
+    except Exception as e:
+        logging.exception('An error occurred while writing to the file.', e)
+    else:
+        logging.info("Data successfully written to CSV file!!!")
+        print()
 
 
 # this function is to sort the analysis by their SortKey
@@ -286,7 +288,6 @@ if __name__ == '__main__':
         }
     ]
     check_internet_connection("https://www.google.com")
-    write_result_csv(data)
-    read_json("data/import_data.json")
-    write_json("data/import_data.json")
-
+    write_result_csv("../data/import_data.json")
+    # read_json("data/import_data.json")
+    # write_json("data/import_data.json")
