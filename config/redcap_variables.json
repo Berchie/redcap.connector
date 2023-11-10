@@ -1,9 +1,9 @@
 {
     "M19_FBC_FV": {
       "id": "m_subbarcode",
-      "ClientSampleID": "ch_subbbarcode",
+      "Event_Name": "redcap_event_name",
       "DateSampled": "lf_datefbc_t",
-      "HBG": "lf_fbchgb_q",
+      "HGB": "lf_fbchgb_q",
       "HCT": "lf_fbchct_q",
       "LYMPH#": "lf_fbclym_q",
       "LYMPH%": "lf_fbclympro_q",
@@ -26,7 +26,7 @@
     },
     "M19_FBC_TV": {
       "id": "m_subbarcode",
-      "ClientSampleID": "ch_subbbarcode",
+      "Event_Name": "redcap_event_name",
       "DateSampled": "lt6_datefbc_t",
       "HCT": "lt6_fbchct_q",
       "HGB": "lt6_fbchgb_q",

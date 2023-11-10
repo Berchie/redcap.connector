@@ -1,9 +1,15 @@
 ### Example user template template
 ### Example user template
 .env
+names.csv
+src/__pycache__/
+src/.DS_Store
 
 # IntelliJ project files
 .idea
+.idea/misc.xml
 *.iml
 out
 gen
+/.python-version
+/.venv/

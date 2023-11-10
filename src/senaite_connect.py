@@ -6,10 +6,10 @@ import json
 import logging
 
 # load the .env values
-config = dotenv_values(".env")
+config = dotenv_values("../.env")
 
 # logging any error or any exception to a log file
-logging.basicConfig(filename='log/logfile.log', encoding='utf-8', format="%(asctime)s - %(message)s\n",
+logging.basicConfig(filename='../log/redcap_connector.log', encoding='utf-8', format="%(asctime)s - %(message)s\n",
                     level=logging.INFO)
 logging.getLogger().addHandler(logging.StreamHandler())
 
@@ -34,7 +34,7 @@ try:
         replace_cookie_value = cookie.replace(";", "=").split("=")[1]
 
         # open the file in a read mode
-        f = open(".env", "r")
+        f = open("../.env", "r")
 
         # Reading the content of the file using the read() function them in a new variable
         data = f.read()
@@ -46,7 +46,7 @@ try:
         f.close()
 
         # open file in the write mode
-        fw = open(".env", "w")
+        fw = open("../.env", "w")
         # Writing the replaced data in our text (.env) file
         fw.write(data)
 
