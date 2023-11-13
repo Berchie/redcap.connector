@@ -1,2 +1,56 @@
-2023-11-09 12:45:23,551 - Data successfully written to CSV file!!!
-
+13-11-2023 11:12:35   __main__     INFO: Data successfully written to CSV file!!!
+13-11-2023 11:18:19   __main__     INFO: SUCCESS: Internet connection is available
+13-11-2023 11:18:19   __main__     INFO: SUCCESS: REDCap Server is available
+13-11-2023 11:29:52   __main__    ERROR: FAIL: Internet or REDCap Server connection is not available
+13-11-2023 11:39:43   __main__     INFO: Internet or REDCap Server connection is available
+13-11-2023 11:39:43   __main__     INFO: Data successfully written to CSV file!!!
+13-11-2023 11:50:56       root     INFO: 19 record(s) were imported successfully!!!
+13-11-2023 11:53:22       root     INFO: 19 record(s) were imported successfully!!!
+13-11-2023 11:59:41       root    ERROR: Unexpected Error Occurred
+Traceback (most recent call last):
+  File "/Users/berchie.agyemang.nti.admin/Developer/redcap.connector/src/importdata.py", line 49, in import_records
+    logging.info(f"{len(count.get('ids', 0))} record(s) were imported successfully!!!")
+                        ^^^^^^^^^
+AttributeError: 'list' object has no attribute 'get'
+13-11-2023 12:00:18       root     INFO: 19 record(s) were imported successfully!!!
+13-11-2023 12:00:50       root     INFO: 19 record(s) were imported successfully!!!
+13-11-2023 12:53:30       root    ERROR: Connection Error Occurred string indices must be integers, not 'str'
+Traceback (most recent call last):
+  File "/Users/berchie.agyemang.nti.admin/Developer/redcap.connector/src/extract_redcap_data.py", line 74, in redcap_mbc_record_id
+    print(json.dumps(r.json(), indent=2)[0]['m_subbarcode'])
+          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+TypeError: string indices must be integers, not 'str'
+13-11-2023 12:54:32       root    ERROR: Connection Error Occurred
+Traceback (most recent call last):
+  File "/Users/berchie.agyemang.nti.admin/Developer/redcap.connector/src/extract_redcap_data.py", line 74, in redcap_mbc_record_id
+    print(json.dumps(r.json(), indent=2)[0]['m_subbarcode'])
+          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+TypeError: string indices must be integers, not 'str'
+13-11-2023 14:50:15   __main__     INFO: Internet or REDCap Server connection is available
+13-11-2023 14:50:15   __main__    ERROR: there was an error resolving the host
+13-11-2023 14:53:02   __main__     INFO: Internet or REDCap Server connection is available
+13-11-2023 14:53:02   __main__    ERROR: there was an error resolving the host
+13-11-2023 14:53:50   __main__     INFO: Internet or REDCap Server connection is available
+13-11-2023 14:53:50   __main__    ERROR: there was an error resolving the host
+Traceback (most recent call last):
+  File "/Users/berchie.agyemang.nti.admin/Developer/redcap.connector/src/functions.py", line 228, in check_senaite_connection
+    host_ip = socket.gethostbyname("https://senaite.bnitm.de/senaite")
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 8] nodename nor servname provided, or not known
+13-11-2023 14:54:44   __main__     INFO: Internet or REDCap Server connection is available
+13-11-2023 14:54:44   __main__    ERROR: there was an error resolving the host
+Traceback (most recent call last):
+  File "/Users/berchie.agyemang.nti.admin/Developer/redcap.connector/src/functions.py", line 228, in check_senaite_connection
+    host_ip = socket.gethostbyname("https://senaite.bnitm.de/")
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 8] nodename nor servname provided, or not known
+13-11-2023 14:55:10   __main__     INFO: Internet or REDCap Server connection is available
+13-11-2023 14:55:10   __main__    ERROR: there was an error resolving the host
+Traceback (most recent call last):
+  File "/Users/berchie.agyemang.nti.admin/Developer/redcap.connector/src/functions.py", line 228, in check_senaite_connection
+    host_ip = socket.gethostbyname("https://senaite.bnitm.de/")
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 8] nodename nor servname provided, or not known
+13-11-2023 14:58:09   __main__     INFO: Internet or REDCap Server connection is available
+13-11-2023 14:58:09   __main__     INFO: the socket has successfully connected to SENAITE
+13-11-2023 14:58:09   __main__     INFO: Data successfully written to CSV file!!!

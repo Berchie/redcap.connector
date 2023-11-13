@@ -1,24 +1,29 @@
 #!/usr/bin/env python
-import re
 
 # import modules
 from dotenv import dotenv_values
-from functions import read_json, write_json, sort_analysis
+from functions import read_json, write_json
 from extract_redcap_data import *
 import os
+import re
 import requests
 import json
-import logging
-import operator
+import logging.config
 import time
+import yaml
+
 
 # load the .env values
 config = dotenv_values("../.env")
 
+# import the customise logger YAML dictionary configuration file
 # logging any error or any exception to a log file
-logging.basicConfig(filename='../log/redcap_connector.log', encoding='utf-8', format="%(asctime)s - %(message)s\n",
-                    level=logging.DEBUG)
-logging.getLogger().addHandler(logging.StreamHandler())
+with open('../config_log.yaml', 'r') as f:
+    yaml_config = yaml.safe_load(f.read())
+    logging.config.dictConfig(yaml_config)
+
+logger = logging.getLogger(__name__)
+
 
 # create variables
 clients = {}
@@ -30,45 +35,60 @@ sampleTypes = []
 fbc_keys = read_json('../config/redcap_variables.json')
 
 # clear the content in the import_data.json file
-if os.path.exists("../data/import_data.json"):
-    with open("../data/import_data.json", "r+") as importfile:
-        # check if the file is not empty
-        if importfile.read() is not None:
-            # clear the file content
-            importfile.truncate(0)
+try:
+    if os.path.exists("../data/import_data.json"):
+        with open("../data/import_data.json", "r+") as importfile:
+            # check if the file is not empty
+            if importfile.read() is not None:
+                # clear the file content
+                importfile.truncate(0)
+except IOError as ioe:
+    logger.error("An error occurred while reading the 'import_data.json' file")
+except Exception as er:
+    logger.exception(f"Exception occurred - {er}", exc_info=True)
 
 
 # define function for each active connection to senaite
 # getClients() is to get the clients in senaite lims
 def getClients():
-    # connection to the senaite via the senaite api "title"
-    resq = requests.get(config["BASE_URL"] + "/client", cookies={config["COOKIE_NAME"]: config["COOKIE_VALUE"]})
+    try:
+        # connection to the senaite via the senaite api "title"
+        resq = requests.get(config["BASE_URL"] + "/client", cookies={config["COOKIE_NAME"]: config["COOKIE_VALUE"]})
 
-    # print(json.dumps(resq.json(), indent=2))
+        # print(json.dumps(resq.json(), indent=2))
 
-    client_data = {}
+        client_data = {}
 
-    if resq.status_code == 200 and resq.json()["items"]:
-        for item in resq.json()["items"]:
-            client_data[item["getClientID"]] = item["title"]
+        if resq.status_code == 200 and resq.json()["items"]:
+            for item in resq.json()["items"]:
+                client_data[item["getClientID"]] = item["title"]
 
-    # print(client_data)
-    return client_data
+        # print(client_data)
+        return client_data
+    except ConnectionError as cr:
+        logger.error("An error occurred while connecting to SENAITE LIMS server.", exc_info=True)
+    except Exception as err:
+        logger.exception(f"Exception occurred - {err}", exc_info=True)
 
 
 def getSampleType():
-    # connection to the senaite via the senaite api
-    res_sample = requests.get(config["BASE_URL"] + "/SampleType", cookies={config["COOKIE_NAME"]: config["COOKIE_VALUE"]})
-    # print(json.dumps(resq.json(), indent=2))
+    try:
+        # connection to the senaite via the senaite api
+        res_sample = requests.get(config["BASE_URL"] + "/SampleType", cookies={config["COOKIE_NAME"]: config["COOKIE_VALUE"]})
+        # print(json.dumps(resq.json(), indent=2))
 
-    samples = []
+        samples = []
 
-    if res_sample.status_code == 200 and res_sample.json()["items"]:
-        for item in res_sample.json()["items"]:
-            samples.append(item["title"])
+        if res_sample.status_code == 200 and res_sample.json()["items"]:
+            for item in res_sample.json()["items"]:
+                samples.append(item["title"])
 
-    # print(samples)
-    return samples
+        # print(samples)
+        return samples
+    except ConnectionError as cr:
+        logger.error(f"A connection error occurred. {cr}", exc_info=True)
+    except Exception as er:
+        logger.exception(f"An exception occurred - {er}", er, exc_info=True)
 
 
 # keys or items to extract from respond data from senaite analyses
@@ -242,10 +262,16 @@ def get_analyses_result(project_id):
             write_json(data)
             return data
         else:
-            print("No records was found!")
+            logger.info("SENAITE: No records was found!")
 
+    except ConnectionError as cr:
+        logger.error(f"An error occurred while connecting to SENAITE LIMS server. {cr}", exc_info=True)
+    except KeyError as kr:
+        logger.error(f"Key Error Occurred. {kr}", exc_info=True)
+    except ValueError as vr:
+        logger.error(f"Value error occurred. {vr}", exc_info=True)
     except Exception as error:
-        logging.exception(error)
+        logger.exception(f"Exception occurred. {error}", exc_info=True)
 
 
 # stop logging
