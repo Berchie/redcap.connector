@@ -18,7 +18,7 @@ handlers:
     level: DEBUG
     filename: '../log/redcap_connector.log'
     maxBytes: 10240
-    backupCount: 3
+    # backupCount: 3
 loggers:
   connectorLogger:
     level: DEBUG

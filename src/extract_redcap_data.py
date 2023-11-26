@@ -15,13 +15,19 @@ with open('../config_log.yaml', 'r') as f:
 logger = logging.getLogger(__name__)
 
 
-def redcap_event(event):
+def redcap_event(event, project_id):
+    api_token = None
     try:
         # load the .env values
         env_config = dotenv_values("../.env")
 
+        if project_id == 'M19':
+            api_token = env_config['M19_API_TOKEN']
+        elif project_id == 'P21':
+            api_token = env_config['P21_API_TOKEN']
+
         data = {
-            'token': env_config['API_TOKEN'],
+            'token': api_token,
             'content': 'event',
             'format': 'json',
             'arms': '',  # change the key:value ('arms':'') to pull all events in the database (arms[0]:'2')
@@ -39,9 +45,9 @@ def redcap_event(event):
                 # print(f'redcap_event_name: {event_name}')
                 return event_name
     except ConnectionError as cr:
-        logger.error("Connection Error to REDCap database. Check your internet connection", exc_info=True)
+        logger.error(f"Connection Error to REDCap database. Check your internet connection: {cr}")
     except Exception as e:
-        logger.error("Exception Occurred", exc_info=True)
+        logger.error(f"Exception Occurred: {e}")
 
 
 def redcap_mbc_record_id(studyID):
@@ -76,14 +82,14 @@ def redcap_mbc_record_id(studyID):
 
     except ConnectionError as cr:
         print("Connection Error to REDCap database. Check your internet connection")
-        logging.debug(f"Connection Error to REDCap database. Check your internet connection: {cr}", exc_info=True)
+        logging.debug(f"Connection Error to REDCap database. Check your internet connection: {cr}")
     except Exception as error:
-        logging.error(f"Connection Error Occurred", exc_info=True)
+        logging.error(f"Connection Error Occurred: {error}")
 
 
 # stop logging
 logging.shutdown()
 
 if __name__ == '__main__':
-    redcap_event("T6")
+    redcap_event("T6", 'M19')
     redcap_mbc_record_id("M19-20001-T0")

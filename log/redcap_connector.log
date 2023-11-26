@@ -1,56 +1,82 @@
-13-11-2023 11:12:35   __main__     INFO: Data successfully written to CSV file!!!
-13-11-2023 11:18:19   __main__     INFO: SUCCESS: Internet connection is available
-13-11-2023 11:18:19   __main__     INFO: SUCCESS: REDCap Server is available
-13-11-2023 11:29:52   __main__    ERROR: FAIL: Internet or REDCap Server connection is not available
-13-11-2023 11:39:43   __main__     INFO: Internet or REDCap Server connection is available
-13-11-2023 11:39:43   __main__     INFO: Data successfully written to CSV file!!!
-13-11-2023 11:50:56       root     INFO: 19 record(s) were imported successfully!!!
-13-11-2023 11:53:22       root     INFO: 19 record(s) were imported successfully!!!
-13-11-2023 11:59:41       root    ERROR: Unexpected Error Occurred
+22-11-2023 12:16:48   __main__    ERROR: Exception occurred - HTTPConnectionPool(host='172.102.10.1', port=8091): Max retries exceeded with url: /agogo-test/@@API/senaite/v1/client (Caused by ConnectTimeoutError(<urllib3.connection.HTTPConnection object at 0x1063dbe50>, 'Connection to 172.102.10.1 timed out. (connect timeout=None)'))
 Traceback (most recent call last):
-  File "/Users/berchie.agyemang.nti.admin/Developer/redcap.connector/src/importdata.py", line 49, in import_records
-    logging.info(f"{len(count.get('ids', 0))} record(s) were imported successfully!!!")
-                        ^^^^^^^^^
-AttributeError: 'list' object has no attribute 'get'
-13-11-2023 12:00:18       root     INFO: 19 record(s) were imported successfully!!!
-13-11-2023 12:00:50       root     INFO: 19 record(s) were imported successfully!!!
-13-11-2023 12:53:30       root    ERROR: Connection Error Occurred string indices must be integers, not 'str'
+  File "/Users/berchie.agyemang.nti.admin/Developer/redcap.connector/.venv/lib/python3.11/site-packages/urllib3/connection.py", line 203, in _new_conn
+    sock = connection.create_connection(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/berchie.agyemang.nti.admin/Developer/redcap.connector/.venv/lib/python3.11/site-packages/urllib3/util/connection.py", line 85, in create_connection
+    raise err
+  File "/Users/berchie.agyemang.nti.admin/Developer/redcap.connector/.venv/lib/python3.11/site-packages/urllib3/util/connection.py", line 73, in create_connection
+    sock.connect(sa)
+TimeoutError: [Errno 60] Operation timed out
+
+The above exception was the direct cause of the following exception:
+
 Traceback (most recent call last):
-  File "/Users/berchie.agyemang.nti.admin/Developer/redcap.connector/src/extract_redcap_data.py", line 74, in redcap_mbc_record_id
-    print(json.dumps(r.json(), indent=2)[0]['m_subbarcode'])
-          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
-TypeError: string indices must be integers, not 'str'
-13-11-2023 12:54:32       root    ERROR: Connection Error Occurred
+  File "/Users/berchie.agyemang.nti.admin/Developer/redcap.connector/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 791, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "/Users/berchie.agyemang.nti.admin/Developer/redcap.connector/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 497, in _make_request
+    conn.request(
+  File "/Users/berchie.agyemang.nti.admin/Developer/redcap.connector/.venv/lib/python3.11/site-packages/urllib3/connection.py", line 395, in request
+    self.endheaders()
+  File "/Users/berchie.agyemang.nti.admin/.pyenv/versions/3.11.6/lib/python3.11/http/client.py", line 1281, in endheaders
+    self._send_output(message_body, encode_chunked=encode_chunked)
+  File "/Users/berchie.agyemang.nti.admin/.pyenv/versions/3.11.6/lib/python3.11/http/client.py", line 1041, in _send_output
+    self.send(msg)
+  File "/Users/berchie.agyemang.nti.admin/.pyenv/versions/3.11.6/lib/python3.11/http/client.py", line 979, in send
+    self.connect()
+  File "/Users/berchie.agyemang.nti.admin/Developer/redcap.connector/.venv/lib/python3.11/site-packages/urllib3/connection.py", line 243, in connect
+    self.sock = self._new_conn()
+                ^^^^^^^^^^^^^^^^
+  File "/Users/berchie.agyemang.nti.admin/Developer/redcap.connector/.venv/lib/python3.11/site-packages/urllib3/connection.py", line 212, in _new_conn
+    raise ConnectTimeoutError(
+urllib3.exceptions.ConnectTimeoutError: (<urllib3.connection.HTTPConnection object at 0x1063dbe50>, 'Connection to 172.102.10.1 timed out. (connect timeout=None)')
+
+The above exception was the direct cause of the following exception:
+
 Traceback (most recent call last):
-  File "/Users/berchie.agyemang.nti.admin/Developer/redcap.connector/src/extract_redcap_data.py", line 74, in redcap_mbc_record_id
-    print(json.dumps(r.json(), indent=2)[0]['m_subbarcode'])
-          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
-TypeError: string indices must be integers, not 'str'
-13-11-2023 14:50:15   __main__     INFO: Internet or REDCap Server connection is available
-13-11-2023 14:50:15   __main__    ERROR: there was an error resolving the host
-13-11-2023 14:53:02   __main__     INFO: Internet or REDCap Server connection is available
-13-11-2023 14:53:02   __main__    ERROR: there was an error resolving the host
-13-11-2023 14:53:50   __main__     INFO: Internet or REDCap Server connection is available
-13-11-2023 14:53:50   __main__    ERROR: there was an error resolving the host
+  File "/Users/berchie.agyemang.nti.admin/Developer/redcap.connector/.venv/lib/python3.11/site-packages/requests/adapters.py", line 486, in send
+    resp = conn.urlopen(
+           ^^^^^^^^^^^^^
+  File "/Users/berchie.agyemang.nti.admin/Developer/redcap.connector/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 845, in urlopen
+    retries = retries.increment(
+              ^^^^^^^^^^^^^^^^^^
+  File "/Users/berchie.agyemang.nti.admin/Developer/redcap.connector/.venv/lib/python3.11/site-packages/urllib3/util/retry.py", line 515, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPConnectionPool(host='172.102.10.1', port=8091): Max retries exceeded with url: /agogo-test/@@API/senaite/v1/client (Caused by ConnectTimeoutError(<urllib3.connection.HTTPConnection object at 0x1063dbe50>, 'Connection to 172.102.10.1 timed out. (connect timeout=None)'))
+
+During handling of the above exception, another exception occurred:
+
 Traceback (most recent call last):
-  File "/Users/berchie.agyemang.nti.admin/Developer/redcap.connector/src/functions.py", line 228, in check_senaite_connection
-    host_ip = socket.gethostbyname("https://senaite.bnitm.de/senaite")
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-socket.gaierror: [Errno 8] nodename nor servname provided, or not known
-13-11-2023 14:54:44   __main__     INFO: Internet or REDCap Server connection is available
-13-11-2023 14:54:44   __main__    ERROR: there was an error resolving the host
+  File "/Users/berchie.agyemang.nti.admin/Developer/redcap.connector/src/pathos.py", line 54, in getClients
+    resq = requests.get(config["BASE_URL"] + "/client", cookies={config["COOKIE_NAME"]: config["COOKIE_VALUE"]})
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/berchie.agyemang.nti.admin/Developer/redcap.connector/.venv/lib/python3.11/site-packages/requests/api.py", line 73, in get
+    return request("get", url, params=params, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/berchie.agyemang.nti.admin/Developer/redcap.connector/.venv/lib/python3.11/site-packages/requests/api.py", line 59, in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/berchie.agyemang.nti.admin/Developer/redcap.connector/.venv/lib/python3.11/site-packages/requests/sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/berchie.agyemang.nti.admin/Developer/redcap.connector/.venv/lib/python3.11/site-packages/requests/sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/berchie.agyemang.nti.admin/Developer/redcap.connector/.venv/lib/python3.11/site-packages/requests/adapters.py", line 507, in send
+    raise ConnectTimeout(e, request=request)
+requests.exceptions.ConnectTimeout: HTTPConnectionPool(host='172.102.10.1', port=8091): Max retries exceeded with url: /agogo-test/@@API/senaite/v1/client (Caused by ConnectTimeoutError(<urllib3.connection.HTTPConnection object at 0x1063dbe50>, 'Connection to 172.102.10.1 timed out. (connect timeout=None)'))
+22-11-2023 12:16:48   __main__    ERROR: Exception occurred. 'NoneType' object is not subscriptable
 Traceback (most recent call last):
-  File "/Users/berchie.agyemang.nti.admin/Developer/redcap.connector/src/functions.py", line 228, in check_senaite_connection
-    host_ip = socket.gethostbyname("https://senaite.bnitm.de/")
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-socket.gaierror: [Errno 8] nodename nor servname provided, or not known
-13-11-2023 14:55:10   __main__     INFO: Internet or REDCap Server connection is available
-13-11-2023 14:55:10   __main__    ERROR: there was an error resolving the host
+  File "/Users/berchie.agyemang.nti.admin/Developer/redcap.connector/src/pathos.py", line 106, in get_analyses_result
+    client_title = client_title[project_id]
+                   ~~~~~~~~~~~~^^^^^^^^^^^^
+TypeError: 'NoneType' object is not subscriptable
+22-11-2023 13:01:05   __main__    ERROR: Key Error Occurred. 'items'
 Traceback (most recent call last):
-  File "/Users/berchie.agyemang.nti.admin/Developer/redcap.connector/src/functions.py", line 228, in check_senaite_connection
-    host_ip = socket.gethostbyname("https://senaite.bnitm.de/")
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-socket.gaierror: [Errno 8] nodename nor servname provided, or not known
-13-11-2023 14:58:09   __main__     INFO: Internet or REDCap Server connection is available
-13-11-2023 14:58:09   __main__     INFO: the socket has successfully connected to SENAITE
-13-11-2023 14:58:09   __main__     INFO: Data successfully written to CSV file!!!
+  File "/Users/berchie.agyemang.nti.admin/Developer/redcap.connector/src/pathos.py", line 140, in get_analyses_result
+    if http_status_code == 200 and r_data_dict['items']:
+                                   ~~~~~~~~~~~^^^^^^^^^
+KeyError: 'items'
+22-11-2023 13:35:24       root     INFO: 224 record(s) were imported successfully!!!

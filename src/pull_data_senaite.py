@@ -66,7 +66,7 @@ def getClients():
         # print(client_data)
         return client_data
     except ConnectionError as cr:
-        logger.error("An error occurred while connecting to SENAITE LIMS server.", exc_info=True)
+        logger.error(f"An error occurred while connecting to SENAITE LIMS server. {cr}", exc_info=True)
     except Exception as err:
         logger.exception(f"Exception occurred - {err}", exc_info=True)
 
@@ -87,8 +87,8 @@ def getSampleType():
         return samples
     except ConnectionError as cr:
         logger.error(f"A connection error occurred. {cr}", exc_info=True)
-    except Exception as er:
-        logger.exception(f"An exception occurred - {er}", er, exc_info=True)
+    except Exception as err:
+        logger.exception(f"An exception occurred - {err}", er, exc_info=True)
 
 
 # keys or items to extract from respond data from senaite analyses
@@ -178,6 +178,11 @@ def get_analyses_result(project_id):
                     # update the data list variable with the analyses_data
                     data.append(analyses_data.copy())
 
+                    # change the id to 2nd entry id for only MBC(M19) Project or double entry project database
+                    if client_id == 'M19':
+                        analyses_data[redcap_variables["id"]] = client_sample_id.replace(client_sample_id[10:], 'T0--2')
+                        data.append(analyses_data.copy())
+
                     analyses_data.clear()  # clear the analysis_data dictionary
 
             # fetch the next page of the analysis data or result
@@ -219,7 +224,7 @@ def get_analyses_result(project_id):
                                     nb_redcap_variables = fbc_keys['M19_FBC_FV']
 
                             # redcap record id
-                            client_sample_id = str(r_data_dict_items[nb].get("getClientSampleID"))
+                            client_sample_id = str(next_batch_data[nb].get("getClientSampleID"))
                             client_sample_id = re.sub(r'--?', '-', client_sample_id)
 
                             if client_sample_id:
@@ -250,9 +255,13 @@ def get_analyses_result(project_id):
 
                             # append the analysis results to the data list
                             # using the dictionary copy() method (dict.copy())
-                            data.append((analyses_data.copy()))
+                            data.append(analyses_data.copy())
 
-                            analyses_data.clear()  # clear the analysis_data dictionary
+                            # change the id to 2nd entry id for only MBC(M19) Project or double entry project database
+                            if client_id == 'M19':
+                                analyses_data[nb_redcap_variables["id"]] = client_sample_id.replace(client_sample_id[10:], 'T0--2')
+                            data.append(analyses_data.copy())
+                            analyses_data.clear()
 
                 next_batch = res_next_batch.json()['next']  # assign the next batch url
 
