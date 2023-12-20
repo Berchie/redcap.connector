@@ -25,10 +25,10 @@ def is_not_empty_file(filepath):
     try:
         return os.path.isfile(filepath) and os.path.getsize(filepath) > 0
     except IOError as err:
-        print("An error occurred while locating the file.")
+        print(f"An error occurred while locating the file - {err}")
         logger.error("An error occurred while locating the file.", exc_info=True)
     except Exception as Argument:
-        logger.exception("An error occurred while locating the file", exc_info=True)
+        logger.exception(f"An error occurred while locating the file - {Argument}", exc_info=True)
 
 
 def read_json(file_path):
