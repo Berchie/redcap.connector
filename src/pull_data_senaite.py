@@ -225,13 +225,14 @@ def get_analyses_result(project_id, period="today"):
                         analyses_data.clear()  # clear the analysis_data dictionary
 
             else:
-                logger.info("SENAITE: No records was found!")
+                logger.info(f"SENAITE: No {project_id} lab records was found!")
 
             next_batch = r_data_dict['next']  # url for the next batch of records
             # print(f"Next Page: {next_batch}")
 
         # print or return data or write to json file
-        write_json(data)
+        if data:
+            write_json(data)
         return data
 
     except ConnectionError as cr:
@@ -249,7 +250,7 @@ logging.shutdown()
 
 if __name__ == '__main__':
     time_start_ = time.perf_counter()
-    fbc = get_analyses_result('P21', 'this-week')
+    fbc = get_analyses_result('M19', 'this-week')
     print(json.dumps(fbc, indent=4))
     time_end_ = time.perf_counter()
     print(f'process time: {(time_end_ - time_start_)} seconds')

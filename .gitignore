@@ -5,6 +5,11 @@ names.csv
 src/__pycache__/
 src/.DS_Store
 *.conf
+.DS_Store
+*.csv
+./data/*.csv
+./data/csv/*.csv
+
 
 # IntelliJ project files
 .idea

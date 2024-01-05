@@ -113,7 +113,7 @@ def write_result_csv(results, project_id):
                             # mbc_t6_t12_columns = data_result.keys()
                             mbc_t6_t12_columns = csv_columns["M19_FBC_TV"].values()
 
-                            csv_filename = f'{strftime("%Y%m%d", localtime())}_mbc_t6_t12_lab_result.csv'
+                            csv_filename = f'{strftime("%Y%m%d", localtime())}_mbc_t612visit_labresult.csv'
 
                             if is_not_empty_file(f'{file_path}/{csv_filename}'):
 
@@ -138,7 +138,7 @@ def write_result_csv(results, project_id):
                             # write the fever visits lab result to csv file
                             mbc_fever_visits_columns = csv_columns["M19_FBC_FV"].values()
 
-                            csv_filename = f'{strftime("%Y%m%d", localtime())}_mbc_fever_visit_lab_result.csv'
+                            csv_filename = f'{strftime("%Y%m%d", localtime())}_mbc_fevervisit_labresult.csv'
 
                             if is_not_empty_file(f'{file_path}/{csv_filename}'):
 
@@ -161,7 +161,7 @@ def write_result_csv(results, project_id):
                     # pedvac columns
                     pedvac_columns = csv_columns["PEDVAC"].values()
 
-                    csv_filename = f'{strftime("%Y%m%d", localtime())}_pedvac_lab_result.csv'
+                    csv_filename = f'{strftime("%Y%m%d", localtime())}_pedvac_labresult.csv'
 
                     if is_not_empty_file(f'{file_path}/{csv_filename}'):
 
