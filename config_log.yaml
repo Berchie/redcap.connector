@@ -1,0 +1,29 @@
+version: 1
+formatters:
+  brief:
+    format: '%(asctime)s %(levelname)8s - %(message)s'
+    datefmt: '%d-%m-%Y %H:%M:%S'
+  precise:
+    format: '%(asctime)s %(name)10s %(levelname)8s: %(message)s'
+    datefmt: '%d-%m-%Y %H:%M:%S'
+handlers:
+  console:
+    class: logging.StreamHandler
+    formatter: brief
+    level: INFO
+    stream: ext://sys.stdout
+  file:
+    class: logging.handlers.RotatingFileHandler
+    formatter: precise
+    level: DEBUG
+    filename: '../log/redcap_connector.log'
+    maxBytes: 10240
+    # backupCount: 3
+loggers:
+  connectorLogger:
+    level: DEBUG
+    handlers: [console,file]
+    propagate: no
+root:
+  level: INFO
+  handlers: [console, file]

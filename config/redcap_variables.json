@@ -24,6 +24,7 @@
       "RDW-SD": "lf_fbcrdwsd_q",
       "WBC": "lf_fbcwbc_q"
     },
+
     "M19_FBC_TV": {
       "id": "m_subbarcode",
       "Event_Name": "redcap_event_name",
@@ -48,6 +49,32 @@
       "RDW-CV": "lt6_fbcrdwcv_q",
       "RDW-SD": "lt6_fbcrdwsd_q",
       "WBC": "lt6_fbcwbc_q"
-    }
+    },
 
+  "PEDVAC": {
+    "id": "c_subbarcode",
+    "Event_Name": "redcap_event_name",
+    "DateSampled": "l_datefbc_t",
+    "TimeSampled" : "l_datefbc_t_2",
+    "WBC": "l_fbcwbc_q",
+    "RBC": "l_fbcrbc_q",
+    "HGB" : "l_fbchgb_q",
+    "HCT" : "l_fbchct_q",
+    "MCV": "l_fbcmcv_q",
+    "MCH": "l_fbcmch_q",
+    "MCHC" : "l_fbcmchc_q",
+    "PLT": "l_fbcplt_q",
+    "LYMPH%": "l_fbclympro_q",
+    "MONO%": "l_fbcmidpro_q",
+    "NEUT%": "l_fbcneutpro_q",
+    "LYMPH#": "l_fbclym_q",
+    "MONO#": "l_fbcmid_q",
+    "NEUT#": "l_fbcneut_q",
+    "RDW-SD": "l_fbcrdwsd_q",
+    "RDW-CV": "l_fbcrdwcv_q",
+    "PDW": "l_fbcpdw_q",
+    "MPV": "l_fbcmpv_q",
+    "P-LCR": "l_fbcplcr_q",
+    "PCT": "l_fbcpct_q"
+  }
 }
