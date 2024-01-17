@@ -7,6 +7,7 @@ import requests
 import logging.config
 import yaml
 # import notify2
+# import click
 from dotenv import dotenv_values
 from functions import check_internet_connection
 from pathlib import Path
@@ -14,7 +15,7 @@ from pathlib import Path
 
 # import the customise logger YAML dictionary configuration file
 # logging any error or any exception to a log file
-with open('../config_log.yaml', 'r') as f:
+with open('./config_log.yaml', 'r') as f:
     config = yaml.safe_load(f.read())
     logging.config.dictConfig(config)
 
@@ -32,9 +33,9 @@ logger = logging.getLogger(__name__)
 
 
 def records_to_csv_file(csv_file):
-    MBC_TVISIT_CSV_DIR = '../data/csv/mbc_tvisit_labresult.csv'
-    MBC_FVISIT_CSV_DIR = '../data/csv/mbc_fevervisit_labresult.csv'
-    PEDVAC_CSV_DIR = '../data/csv/pedvac_labresult.csv'
+    MBC_TVISIT_CSV_DIR = f'{os.path.abspath(os.curdir)}/data/csv/mbc_tvisit_labresult.csv'
+    MBC_FVISIT_CSV_DIR = f'{os.path.abspath(os.curdir)}/data/csv/mbc_fevervisit_labresult.csv'
+    PEDVAC_CSV_DIR = f'{os.path.abspath(os.curdir)}/data/csv/pedvac_labresult.csv'
 
     try:
         records = csv_file.name.split('_')
@@ -68,7 +69,7 @@ def import_csv_data(csv_file, project):
     try:
 
         # load the .env values
-        env_config = dotenv_values("../.env")
+        env_config = dotenv_values(f"{os.path.abspath(os.curdir)}/.env")
 
         with open(csv_file, 'r') as csvfile:
             data = csvfile.read()
@@ -116,7 +117,7 @@ def import_csv_data(csv_file, project):
 
 
 def search_csv_file(mode='a', project='', check_days=1):
-    SEARCH_DIR = '../data'
+    SEARCH_DIR = f'{os.path.abspath(os.curdir)}/data'
     str_date = (datetime.date.today() - datetime.timedelta(days=check_days)).strftime('%Y%m%d')
     CHECK_DATE = (datetime.date.today() - datetime.timedelta(days=check_days))
 
@@ -186,7 +187,7 @@ def search_csv_file(mode='a', project='', check_days=1):
                         if item_split[0] == 'import' and item_split[1] == 'm19':
                             import_csv_data(item, 'M19')
                         else:
-                            logger.info('CHECK_STATUS: Import csv file was not found for M19 lab results..')
+                            logger.info('CHECK_STATUS: Import csv file was not found for M19 lab results.')
 
                             message = f'''
                             Import csv file was not found for MBC.The importing of records into the REDCap database 
@@ -222,8 +223,17 @@ def search_csv_file(mode='a', project='', check_days=1):
         logger.error(f"There's an error searching csv file and importing data. {error}")
 
 
-def status(project='', period=1) -> any:
-    search_dir = '../data'
+# @click.command()
+# @click.option(
+#     '--days',
+#     type=int,
+#     # required=True,
+#     default=1,
+#     show_default=True,
+#     help="number of day(s) back to check the status of the transfer of analysis results"
+# )
+def status(days):
+    search_dir = f'{os.path.abspath(os.curdir)}/data'
     # m19_csv = 'import_m19_data.csv'
     # p21_csv = 'import_p21_data.csv'
     successfulCount = 0
@@ -233,11 +243,11 @@ def status(project='', period=1) -> any:
     no_import_project = []
     no_senaite_record = []
 
-    with open('../log/redcap_connector.log') as log_file:
+    with open(f'{os.path.abspath(os.curdir)}/log/redcap_connector.log') as log_file:
         statement = log_file.readlines()
         #  print(statement)
-        check_date = (datetime.date.today() - datetime.timedelta(days=period)).strftime('%d-%m-%Y')
-        print(f'check date: {check_date}')
+        check_date = (datetime.date.today() - datetime.timedelta(days=days)).strftime('%d-%m-%Y')
+        # click.echo(f'check date: {check_date}', color=True)
 
         for line in statement:
             line_split = line.split()
@@ -267,12 +277,12 @@ def status(project='', period=1) -> any:
     found_file = []
     for file in Path(search_dir).iterdir():
         file_split = file.name.split('_')
-        if file.is_file() and file.lstat().st_atime == datetime.date.today() - datetime.timedelta(days=period):
-            if file_split[0] == (datetime.date.today() - datetime.timedelta(days=period)).strftime('%Y%m%d') and file_split[2] == 't612visit':
+        if file.is_file() and file.lstat().st_atime == datetime.date.today() - datetime.timedelta(days=days):
+            if file_split[0] == (datetime.date.today() - datetime.timedelta(days=days)).strftime('%Y%m%d') and file_split[2] == 't612visit':
                 found_file.append('t612visit')
-            elif file_split[0] == (datetime.date.today() - datetime.timedelta(days=period)).strftime('%Y%m%d') and file_split[2] == 'fevervisit':
+            elif file_split[0] == (datetime.date.today() - datetime.timedelta(days=days)).strftime('%Y%m%d') and file_split[2] == 'fevervisit':
                 found_file.append('fevervisit')
-            elif file_split[0] == (datetime.date.today() - datetime.timedelta(days=period)).strftime('%Y%m%d') and file_split[1] == 'pedvac':
+            elif file_split[0] == (datetime.date.today() - datetime.timedelta(days=days)).strftime('%Y%m%d') and file_split[1] == 'pedvac':
                 found_file.append('pedvac')
             else:
                 logger.info('No search files found.')
@@ -321,15 +331,15 @@ def status(project='', period=1) -> any:
     else:
         if successfulCount == 1:
             if 'M19' not in sucessfulProject:
-                search_csv_file(mode='s', project='M19', check_days=period)
+                search_csv_file(mode='s', project='M19', check_days=days)
             elif 'P21' not in sucessfulProject:
-                search_csv_file(mode='s', project='P21', check_days=period)
+                search_csv_file(mode='s', project='P21', check_days=days)
         elif sucessfulProject == 0:
             # check if project lab result csv was found or created
             if 0 < len(found_file) < 4:
-                search_csv_file(mode='d', check_days=period)
+                search_csv_file(mode='d', check_days=days)
             elif len(found_file) == 0:
-                search_csv_file(mode='a', check_days=period)
+                search_csv_file(mode='a', check_days=days)
         else:
             pass
         # else:
@@ -337,4 +347,4 @@ def status(project='', period=1) -> any:
 
 
 if __name__ == '__main__':
-    status(period=0)
+    status(1)
