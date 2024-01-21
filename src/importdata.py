@@ -4,7 +4,7 @@ import re
 import sys
 from pathlib import Path
 import pandas as pd
-from functions import check_internet_connection, write_result_csv
+from .functions import check_internet_connection, write_result_csv
 from dotenv import dotenv_values
 import requests
 import json
@@ -22,10 +22,6 @@ with open('./config_log.yaml', 'r') as f:
     logging.config.dictConfig(config)
 
 logger = logging.getLogger(__name__)
-
-RESULTS_JSON_FILE = './data/import_data.json'
-
-# click.echo(RESULTS_JSON_FILE)
 
 
 def to_csv_file():
@@ -68,18 +64,12 @@ def to_csv_file():
                         pedvac_df.to_csv(PEDVAC_CSV_DIR, index=False)
 
 
-# @click.command()
-# @click.option(
-#     '--project_id',
-#     type=click.Choice(['M19', 'P21']),
-#     required=True,
-#     help="name of the project_id. 'M19' => MBC, 'P21' => PEDVAC"
-# )
 def data_import(project_id):
-    m19_csv_file = f'{os.path.abspath(os.curdir)}data/import_m19_data.csv'
-    p21_csv_file = f'{os.path.abspath(os.curdir)}/data/import_p21_data.csv'
+    m19_csv_file = 'import_m19_data.csv'
+    p21_csv_file = 'import_p21_data.csv'
     record = f'{os.path.abspath(os.curdir)}/data/import_data.json'
 
+    
     try:
         # load the .env values
         env_config = dotenv_values(f"{os.path.abspath(os.curdir)}/.env")
@@ -96,9 +86,9 @@ def data_import(project_id):
             # use the read the csv object or file to be imported into REDCap database
             df_obj = pd.read_json(record, orient='records', precise_float=True)
             if project_id == 'M19':
-                df_obj.to_csv(f'./data/{m19_csv_file}', index=False)
+                df_obj.to_csv(f'{os.path.abspath(os.curdir)}/data/{m19_csv_file}', index=False)
 
-                with open(f'./data/{m19_csv_file}') as csv_file:
+                with open(f'{os.path.abspath(os.curdir)}/data/{m19_csv_file}') as csv_file:
                     data = csv_file.read()
 
             else:
@@ -154,7 +144,7 @@ def data_import(project_id):
                 write_result_csv(record, project_id)
 
                 # copy the transfer or imported data to a csv file in the cvs dir
-            # to_csv_file()
+                to_csv_file()
             else:
                 # write the data to csv file(s) if there is no internet connection
                 write_result_csv(record, project_id)

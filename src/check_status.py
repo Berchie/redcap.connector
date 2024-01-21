@@ -2,6 +2,7 @@ import logging
 import os
 import re
 import datetime
+import click
 import pandas as pd
 import requests
 import logging.config
@@ -223,15 +224,15 @@ def search_csv_file(mode='a', project='', check_days=1):
         logger.error(f"There's an error searching csv file and importing data. {error}")
 
 
-# @click.command()
-# @click.option(
-#     '--days',
-#     type=int,
-#     # required=True,
-#     default=1,
-#     show_default=True,
-#     help="number of day(s) back to check the status of the transfer of analysis results"
-# )
+@click.command()
+@click.option(
+    '--days',
+    type=int,
+    # required=True,
+    default=1,
+    show_default=True,
+    help="number of day(s) back to check the status of the transfer of analysis results"
+)
 def status(days):
     search_dir = f'{os.path.abspath(os.curdir)}/data'
     # m19_csv = 'import_m19_data.csv'

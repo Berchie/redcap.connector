@@ -69,7 +69,7 @@ def write_json(dictionary):
 def write_result_csv(results, project_id):
     mbc_t6_t12 = ['T6', 'T7', 'T8', 'T9', 'T10', 'T11']
     mbc_fever_visits = ['F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12', 'F13', 'F14', 'F15']
-    csv_columns = read_json("./config/redcap_variables.json")
+    csv_columns = read_json(f"{os.path.abspath(os.curdir)}/config/redcap_variables.json")
 
     # data from the json file
     # analysis_result = read_json(datafile)
@@ -252,7 +252,7 @@ def check_senaite_connection():
     try:
         host_ip = socket.gethostbyname("www.google.com")
     except socket.gaierror as sg:
-        logger.error("there was an error resolving the host", exc_info=True)
+        logger.error(f"there was an error resolving the host: {sg}", exc_info=True)
         sys.exit()
     else:
         s.connect((host_ip, port))

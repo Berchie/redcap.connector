@@ -1,7 +1,8 @@
 # import modules
+import click
 from dotenv import dotenv_values
-from functions import read_json, write_json
-from extract_redcap_data import *
+from .functions import read_json, write_json
+from .extract_redcap_data import *
 import os
 import re
 import requests
@@ -9,8 +10,9 @@ import json
 import logging.config
 import time
 import yaml
-# import click
 import sys
+from .importdata import data_import
+
 
 # add the path of the new different folder (the folder from where we want to import the modules)
 sys.path.insert(0, './src')
@@ -98,20 +100,20 @@ def getSampleType():
 #  "count"(number of found items), "pages" (number of total pages), "next" (URL to the next batch), "pagesize" (items per page)
 # parameters for get_analysis_result() => project_id, from_date to_date (date range to filter the json data),
 
-# @click.command()
-# @click.option(
-#     '-p', '--project',
-#     type=click.Choice(['M19', 'P21']),
-#     required=True,
-#     help="name of the project. 'M19' => MBC, 'P21' => PEDVAC"
-# )
-# @click.option(
-#     '--period',
-#     type=click.Choice(['today', 'yesterday', 'this-week', 'this-month', 'this-year']),
-#     default='today',
-#     show_default=True,
-#     help='period or date the sample or analysis was published'
-# )
+@click.command()
+@click.option(
+    '-p', '--project',
+    type=click.Choice(['M19', 'P21']),
+    required=True,
+    help="name of the project. 'M19' => MBC, 'P21' => PEDVAC"
+)
+@click.option(
+    '--period',
+    type=click.Choice(['today', 'yesterday', 'this-week', 'this-month', 'this-year']),
+    default='today',
+    show_default=True,
+    help='period or date the sample or analysis was published'
+)
 def get_analyses_result(project, period):
     mbc_t6_t12 = ['T6', 'T7', 'T8', 'T9', 'T10', 'T11']
     mbc_fever_visits = ['F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12', 'F13', 'F14', 'F15']
@@ -251,7 +253,12 @@ def get_analyses_result(project, period):
         # print or return data or write to json file
         if data:
             write_json(data)
+        
+        # importing the data or results into REDCap project database
+        data_import(project)
+        
         return data
+        
 
     except ConnectionError as cr:
         logger.error(f"An error occurred while connecting to SENAITE LIMS server. {cr}", exc_info=True)

@@ -4,7 +4,7 @@ import requests
 import json
 import logging.config
 import yaml
-
+import click
 
 # import the customize logger YAML dictionary configuration file
 # logging any error or any exception to a log file
@@ -15,7 +15,7 @@ with open(f'{os.path.abspath(os.curdir)}/config_log.yaml', 'r') as f:
 logger = logging.getLogger(__name__)
 
 
-
+@click.command
 def senaite_connect():
     try:
         # load the .env values
@@ -70,5 +70,5 @@ def senaite_connect():
 # stop logging
 logging.shutdown()
 
-# if __name__ == '__main__':
-#     senaite_connect()
+if __name__ == '__main__':
+    senaite_connect()
