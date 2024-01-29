@@ -37,7 +37,7 @@ def to_csv_file():
         # print(item)
         if item.is_file() and item.name.split('.')[-1] == 'csv':
             if CHECK_DATE == datetime.date.fromtimestamp(item.lstat().st_atime):
-                print(f'file: {item.name}\n\tdate:{datetime.datetime.fromtimestamp(item.lstat().st_atime)}')  # strftime("%Y%m%d")
+                # print(f'file: {item.name}\n\tdate:{datetime.datetime.fromtimestamp(item.lstat().st_atime)}')  # strftime("%Y%m%d")
                 if item.name.split('_')[0] == CHECK_FILE_DATE_STRING and item.name.split('_')[1] == 'mbc':
                     # print(item.name.split('_'))
                     # print(item)
@@ -127,7 +127,7 @@ def data_import(project_id):
                 count = r.json()
                 if r.status_code == 200:
                     logging.info(f"{count.get('count', 0)} of {project_id} record(s) were imported successfully!!!")
-                    print(count)
+                    # print(count)
                 else:
                     count = re.sub(r"[\\{}]", "", r.text)
                     logger.error(f'HTTP Status:{r.status_code} - {count}')
