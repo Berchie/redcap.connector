@@ -1,9 +1,8 @@
-#!/usr/bin/env python
-
 # import modules
+import click
 from dotenv import dotenv_values
-from functions import read_json, write_json
-from extract_redcap_data import *
+from .functions import read_json, write_json
+from .extract_redcap_data import *
 import os
 import re
 import requests
@@ -11,13 +10,19 @@ import json
 import logging.config
 import time
 import yaml
+import sys
+from .importdata import data_import
+
+
+# add the path of the new different folder (the folder from where we want to import the modules)
+sys.path.insert(0, './src')
 
 # load the .env values
-config = dotenv_values("../.env")
+config = dotenv_values(f"{os.path.abspath(os.curdir)}/.env")
 
 # import the customise logger YAML dictionary configuration file
 # logging any error or any exception to a log file
-with open('../config_log.yaml', 'r') as f:
+with open(f'{os.path.abspath(os.curdir)}/config_log.yaml', 'r') as f:
     yaml_config = yaml.safe_load(f.read())
     logging.config.dictConfig(yaml_config)
 
@@ -30,12 +35,12 @@ analyses_data = {}
 sampleTypes = []
 
 # read the json file
-fbc_keys = read_json('../config/redcap_variables.json')
+fbc_keys = read_json(f'{os.path.abspath(os.curdir)}/config/redcap_variables.json')
 
 # clear the content in the import_data.json file
 try:
-    if os.path.exists("../data/import_data.json"):
-        with open("../data/import_data.json", "r+") as importfile:
+    if os.path.exists(f"{os.path.abspath(os.curdir)}/data/import_data.json"):
+        with open(f"{os.path.abspath(os.curdir)}/data/import_data.json", "r+") as importfile:
             # check if the file is not empty
             if importfile.read() is not None:
                 # clear the file content
@@ -90,20 +95,35 @@ def getSampleType():
 
 
 # keys or items to extract from respond data from senaite analyses
-# "getClientSampleID" or "ClientSampleID", "getClientID", "getDateSampled" (work on the date "2023-10-12T13:56:00+00:00" to get "2023-10-12 13:56" for mbc )
+# "getClientSampleID" or "ClientSampleID", "getClientID", "getDateSampled" (work on the date "2024-01-12T13:56:00+00:00" to get "2024-01-12 13:56" for mbc )
 #  "getSampleTypeTitle" or "SampleTypeTitle" (for comparison), "DateSampled", "items" "children"
 #  "count"(number of found items), "pages" (number of total pages), "next" (URL to the next batch), "pagesize" (items per page)
 # parameters for get_analysis_result() => project_id, from_date to_date (date range to filter the json data),
-def get_analyses_result(project_id, period="today"):
+
+@click.command()
+@click.option(
+    '-p', '--project',
+    type=click.Choice(['M19', 'P21']),
+    required=True,
+    help="name of the project. 'M19' => MBC, 'P21' => PEDVAC"
+)
+@click.option(
+    '--period',
+    type=click.Choice(['today', 'yesterday', 'this-week', 'this-month', 'this-year']),
+    default='today',
+    show_default=True,
+    help='period or date the sample or analysis was published'
+)
+def get_analyses_result(project, period):
     mbc_t6_t12 = ['T6', 'T7', 'T8', 'T9', 'T10', 'T11']
     mbc_fever_visits = ['F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12', 'F13', 'F14', 'F15']
 
     try:
 
         # get the project name and client or project id
-        client_id = project_id
+        client_id = project
         client_title = getClients()
-        client_title = client_title[project_id]
+        client_title = client_title[project]
 
         next_batch = None
 
@@ -173,7 +193,7 @@ def get_analyses_result(project_id, period="today"):
                                     analyses_data[redcap_variables["id"]] = client_sample_id.replace(client_sample_id[10:], 'T0--1')
 
                                     # slice the study id to get event name to search for the redcap event name
-                                    analyses_data[redcap_variables["Event_Name"]] = redcap_event(str(r_data_dict_items[i]["getClientSampleID"])[10:], project_id)
+                                    analyses_data[redcap_variables["Event_Name"]] = redcap_event(str(r_data_dict_items[i]["getClientSampleID"])[10:], project)
 
                                     # date and time of FBC performed
                                     analyses_data[redcap_variables['DateSampled']] = str(r_data_dict_items[i]['getDateSampled'])[:16].replace("T", " ")
@@ -225,7 +245,7 @@ def get_analyses_result(project_id, period="today"):
                         analyses_data.clear()  # clear the analysis_data dictionary
 
             else:
-                logger.info(f"SENAITE: No {project_id} lab records was found!")
+                logger.info(f"SENAITE: No {project} lab records was found!")
 
             next_batch = r_data_dict['next']  # url for the next batch of records
             # print(f"Next Page: {next_batch}")
@@ -233,7 +253,12 @@ def get_analyses_result(project_id, period="today"):
         # print or return data or write to json file
         if data:
             write_json(data)
+        
+        # importing the data or results into REDCap project database
+        data_import(project)
+        
         return data
+        
 
     except ConnectionError as cr:
         logger.error(f"An error occurred while connecting to SENAITE LIMS server. {cr}", exc_info=True)

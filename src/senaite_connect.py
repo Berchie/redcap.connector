@@ -1,23 +1,25 @@
-#!/usr/bin/ python
+import os
 from dotenv import dotenv_values
 import requests
 import json
 import logging.config
 import yaml
+import click
 
-# import the customise logger YAML dictionary configuration file
+# import the customize logger YAML dictionary configuration file
 # logging any error or any exception to a log file
-with open('../config_log.yaml', 'r') as f:
+with open(f'{os.path.abspath(os.curdir)}/config_log.yaml', 'r') as f:
     config = yaml.safe_load(f.read())
     logging.config.dictConfig(config)
 
 logger = logging.getLogger(__name__)
 
 
-def senaite_connection():
+@click.command
+def senaite_connect():
     try:
         # load the .env values
-        env_config = dotenv_values("../.env")
+        env_config = dotenv_values(f"{os.path.abspath(os.curdir)}/.env")
 
         reqs = requests.post(env_config["BASE_URL"] + "/login", params={"__ac_name": env_config['SENAITE_USERNAME'],
                                                                         "__ac_password": env_config['SEANITE_PASSWORD']})
@@ -39,7 +41,7 @@ def senaite_connection():
             replace_cookie_value = cookie.replace(";", "=").split("=")[1]
 
             # open the file in a read mode
-            env_file = open("../.env", "r")
+            env_file = open(f"{os.path.abspath(os.curdir)}/.env", "r")
 
             # Reading the content of the file using the read() function them in a new variable
             data = env_file.read()
@@ -51,7 +53,7 @@ def senaite_connection():
             env_file.close()
 
             # open file in the write mode
-            fw = open("../.env", "w")
+            fw = open(f"{os.path.abspath(os.curdir)}/.env", "w")
             # Writing the replaced data in our text (.env) file
             fw.write(data)
 
@@ -68,6 +70,5 @@ def senaite_connection():
 # stop logging
 logging.shutdown()
 
-
 if __name__ == '__main__':
-    senaite_connection()
+    senaite_connect()
