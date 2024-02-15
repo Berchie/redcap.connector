@@ -3,6 +3,7 @@ import os
 import re
 import sys
 from pathlib import Path
+import time
 import pandas as pd
 from .functions import check_internet_connection, write_result_csv
 from dotenv import dotenv_values
@@ -10,7 +11,6 @@ import requests
 import json
 import logging.config
 import yaml
-
 
 # add the path of the new different folder (the folder from where we want to import the modules)
 sys.path.insert(0, './src')
@@ -69,7 +69,6 @@ def data_import(project_id):
     p21_csv_file = 'import_p21_data.csv'
     record = f'{os.path.abspath(os.curdir)}/data/import_data.json'
 
-    
     try:
         # load the .env values
         env_config = dotenv_values(f"{os.path.abspath(os.curdir)}/.env")
@@ -82,6 +81,10 @@ def data_import(project_id):
         # data = json.dumps(import_record)
 
         if os.path.getsize(record) != 0:
+
+            # wrap the importing processing with click progressbar
+            # with click.progressbar(label='Processing data to import into REDCap database', length=100, fill_char=u'█', empty_char='', width=100) as data_bar:
+
             # convert json data to csv object
             # use the read the csv object or file to be imported into REDCap database
             df_obj = pd.read_json(record, orient='records', precise_float=True)
@@ -97,10 +100,20 @@ def data_import(project_id):
                 with open(f'{os.path.abspath(os.curdir)}/data/{p21_csv_file}') as csv_file:
                     data = csv_file.read()
 
+            # data_bar.update(5)
+            # time.sleep(1.01)
+            # data_bar.update(20)
+            # time.sleep(1.25)
+            # data_bar.update(25)
+            # time.sleep(2)
+            # data_bar.update(25)
+            # time.sleep(3)
+            # data_bar.update(25)
+
             # with open('./data/import_data.csv') as csv_file:
             #     data = csv_file.read()
 
-            #click.echo(data)
+            # click.echo(data)
 
             if project_id == 'M19':
                 api_token = env_config['M19_API_TOKEN']
@@ -119,12 +132,14 @@ def data_import(project_id):
                 'returnFormat': 'json'
             }
 
+            # with click.progressbar(label='Importing data into the REDCap database', length=100, fill_char=u'█', empty_char='', width=100) as import_data_bar:
             # check for internet is available or REDCap server is online(available)
             if check_internet_connection("https://redcap-testing.bibbox.bnitm.de/"):
                 # import records into the REDCap database
                 r = requests.post(env_config['API_URL'], data=fields)
-                print(f'HTTP Status: {str(r.status_code)}')
+                # print(f'HTTP Status: {str(r.status_code)}')
                 count = r.json()
+
                 if r.status_code == 200:
                     logging.info(f"{count.get('count', 0)} of {project_id} record(s) were imported successfully!!!")
                     # print(count)
@@ -145,9 +160,21 @@ def data_import(project_id):
 
                 # copy the transfer or imported data to a csv file in the cvs dir
                 to_csv_file()
+
             else:
                 # write the data to csv file(s) if there is no internet connection
                 write_result_csv(record, project_id)
+
+            # import_data_bar.update(5)
+            # time.sleep(1.01)
+            # import_data_bar.update(20)
+            # time.sleep(1.25)
+            # import_data_bar.update(25)
+            # time.sleep(2)
+            # import_data_bar.update(25)
+            # time.sleep(3)
+            # import_data_bar.update(25)
+
         else:
             logger.info(f'No {project_id} data to import.')
             # click.echo(f'No {project_id} data to import.')

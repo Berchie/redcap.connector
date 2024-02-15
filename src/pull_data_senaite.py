@@ -12,7 +12,7 @@ import time
 import yaml
 import sys
 from .importdata import data_import
-
+from tqdm import tqdm, trange
 
 # add the path of the new different folder (the folder from where we want to import the modules)
 sys.path.insert(0, './src')
@@ -63,7 +63,8 @@ def getClients():
         client_data = {}
 
         if resq.status_code == 200 and resq.json()["items"]:
-            for item in resq.json()["items"]:
+            for item in tqdm(resq.json()["items"], desc='Getting Clients from SENAITE'):
+                time.sleep(0.1)
                 client_data[item["getClientID"]] = item["title"]
 
         # print(client_data)
@@ -127,25 +128,57 @@ def get_analyses_result(project, period):
 
         next_batch = None
 
-        items_resp = requests.get(config["BASE_URL"] + "/search", params={"catalog": "senaite_catalog_sample", "getClientTitle": client_title,
-                                                                          "sort_on": "getDateSampled", "sort_order": "asc", "review_state": "published",
-                                                                          "recent_modified": period, "children": "true"}, cookies={config["COOKIE_NAME"]: config["COOKIE_VALUE"]})
+        # wrap the requests api in click progressbar
+        with click.progressbar(
+                label='Getting Analysis Results from SENAITE',
+                length=100,
+                show_eta=True,
+                fill_char=u'█',
+                empty_char='',
+                width=100
+        ) as request_progressbar:
+            items_resp = requests.get(config["BASE_URL"] + "/search", params={"catalog": "senaite_catalog_sample", "getClientTitle": client_title,
+                                                                              "sort_on": "getDateSampled", "sort_order": "asc", "review_state": "published",
+                                                                              "recent_modified": period, "children": "true"}, cookies={config["COOKIE_NAME"]: config["COOKIE_VALUE"]})
+            request_progressbar.update(0)
+            time.sleep(1.01)
+            request_progressbar.update(25)
+            time.sleep(1.25)
+            request_progressbar.update(25)
+            time.sleep(2)
+            request_progressbar.update(25)
+            time.sleep(3)
+            request_progressbar.update(25)
 
         resp_pages = int(items_resp.json()["pages"])
         # next_batch = items_resp.json()['next']  # url for the next batch of records
         http_status_code = items_resp.status_code
         # print(resp_pages)
 
-        for batch in range(resp_pages):
+        # tqm progressbar
+        for batch in trange(resp_pages, desc=f'Processing Analysis Results in {resp_pages} Batch(es)'):
+            time.sleep(0.01)
+            # for batch in range(resp_pages):
 
             if batch > 0:
+                with click.progressbar(label='Getting Next Analysis Results from SENAITE', length=100, show_eta=True, fill_char=u'█', width=100) as nextbatch_progressbar:
 
-                next_batch_resp = requests.get(next_batch, cookies={config["COOKIE_NAME"]: config["COOKIE_VALUE"]})
+                    next_batch_resp = requests.get(next_batch, cookies={config["COOKIE_NAME"]: config["COOKIE_VALUE"]})
 
-                # returns respond data as a JSON object
-                r_data = json.dumps(next_batch_resp.json())
+                    nextbatch_progressbar.update(5)
+                    time.sleep(1.01)
+                    nextbatch_progressbar.update(20)
+                    time.sleep(1.25)
+                    nextbatch_progressbar.update(25)
+                    time.sleep(2)
+                    nextbatch_progressbar.update(25)
+                    time.sleep(3)
+                    nextbatch_progressbar.update(25)
 
-                http_status_code = next_batch_resp.status_code
+                    # returns respond data as a JSON object
+                    r_data = json.dumps(next_batch_resp.json())
+
+                    http_status_code = next_batch_resp.status_code
 
             else:
                 # returns respond data as a JSON object
@@ -163,7 +196,11 @@ def get_analyses_result(project, period):
 
                 r_data_dict_items = r_data_dict['items']
 
-                for i in range(len(r_data_dict_items)):
+                # tq
+                for i in trange(len(r_data_dict_items), desc=f'Analysis Result Batch {batch}', leave=False):
+                    time.sleep(0.002)
+
+                    # for i in range(len(r_data_dict_items)):
 
                     # check if the sample type is EDTA blood
                     if r_data_dict_items[i]["getSampleTypeTitle"] == 'EDTA Blood':
@@ -195,6 +232,9 @@ def get_analyses_result(project, period):
                                     # slice the study id to get event name to search for the redcap event name
                                     analyses_data[redcap_variables["Event_Name"]] = redcap_event(str(r_data_dict_items[i]["getClientSampleID"])[10:], project)
 
+                                    # add check option for result from SENAITE
+                                    analyses_data[redcap_variables["New_Result"]] = 1
+
                                     # date and time of FBC performed
                                     analyses_data[redcap_variables['DateSampled']] = str(r_data_dict_items[i]['getDateSampled'])[:16].replace("T", " ")
 
@@ -212,6 +252,9 @@ def get_analyses_result(project, period):
 
                                 # slice the study id to get event name to search for the redcap event name
                                 analyses_data[redcap_variables["Event_Name"]] = 'laboratory_arm_1'
+
+                                # add check option for result from SENAITE
+                                analyses_data[redcap_variables["New_Result"]] = 1
 
                                 # date and time of FBC performed
                                 analyses_data[redcap_variables['DateSampled']] = str(r_data_dict_items[i]['getDateSampled'])[:10]
@@ -253,12 +296,11 @@ def get_analyses_result(project, period):
         # print or return data or write to json file
         if data:
             write_json(data)
-        
+
         # importing the data or results into REDCap project database
         data_import(project)
-        
+
         return data
-        
 
     except ConnectionError as cr:
         logger.error(f"An error occurred while connecting to SENAITE LIMS server. {cr}", exc_info=True)
