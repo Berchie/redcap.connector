@@ -133,7 +133,7 @@ def search_csv_file(mode='a', project='', check_days=1):
                             print(item.name.split('_'))
                             if project == 'M19':
                                 if item.name.split('_')[1] == 'mbc' and 't612visit' == item.name.split('_')[2]:
-                                    print(item)
+                                    # print(item)
                                     import_csv_data(item, project)
                                 elif item.name.split('_')[1] == 'mbc' and 't612visit' == item.name.split('_')[2]:
                                     import_csv_data(item, project)
@@ -148,7 +148,7 @@ def search_csv_file(mode='a', project='', check_days=1):
                                     # redcap_connector_notification(message=message)
                             else:
                                 if item.name.split('_')[1] == 'pedvac' and project == 'P21':
-                                    print(item)
+                                    # print(item)
                                     import_csv_data(item, project)
                                 else:
                                     logging.info('CHECK_STATUS: No csv file for PEDVAC lab results was found.')
@@ -253,26 +253,27 @@ def status(days):
         for line in statement:
             line_split = line.split()
             # print(line_split)
-            if line_split[0] == check_date and 'INFO:' in line_split and 'CHECK_STATUS:' not in line_split:
+            if line_split:
+                if line_split[0] == check_date and 'INFO:' in line_split and 'CHECK_STATUS:' not in line_split:
 
-                if line_split[4].isnumeric() and int(line_split[4]) > 0 and 'record(s) were imported successfully!!!' in line:
-                    if line_split[6] == 'M19':
-                        successfulCount += 1
-                        sucessfulProject.append('M19')
-                    elif line_split[6] == 'P21':
-                        successfulCount += 1
-                        sucessfulProject.append('P21')
-                elif line_split[4].isalpha() and len(re.findall('No|data|to|import', line, flags=re.IGNORECASE)) != 0:
-                    noImportCount += 1
-                    no_import_project.append(line_split[5])
+                    if line_split[4].isnumeric() and int(line_split[4]) > 0 and 'record(s) were imported successfully!!!' in line:
+                        if line_split[6] == 'M19':
+                            successfulCount += 1
+                            sucessfulProject.append('M19')
+                        elif line_split[6] == 'P21':
+                            successfulCount += 1
+                            sucessfulProject.append('P21')
+                    elif line_split[4].isalpha() and len(re.findall('No|data|to|import', line, flags=re.IGNORECASE)) != 0:
+                        noImportCount += 1
+                        no_import_project.append(line_split[5])
 
-            elif line_split[0] == check_date and 'ERROR:' in line_split:
-                # print(line)
-                errorCount += 1
+                elif line_split[0] == check_date and 'ERROR:' in line_split:
+                    # print(line)
+                    errorCount += 1
 
-            if line_split[0] == check_date and 'SENAITE:' in line_split:
-                if line_split[6] == 'M19' or line_split[6] == 'P21':
-                    no_senaite_record.append(line_split[6])
+                if line_split[0] == check_date and 'SENAITE:' in line_split:
+                    if line_split[6] == 'M19' or line_split[6] == 'P21':
+                        no_senaite_record.append(line_split[6])
 
     # search for project csv file
     found_file = []

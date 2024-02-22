@@ -4,8 +4,8 @@ import re
 import sys
 from pathlib import Path
 import time
-import pandas as pd
-from .functions import check_internet_connection, write_result_csv
+import pandas
+from src.functions import check_internet_connection, write_result_csv
 from dotenv import dotenv_values
 import requests
 import json
@@ -13,22 +13,22 @@ import logging.config
 import yaml
 
 # add the path of the new different folder (the folder from where we want to import the modules)
-sys.path.insert(0, './src')
+# sys.path.insert(0, './src')
 
 # import the customise logger YAML dictionary configuration file
 # logging any error or any exception to a log file
-with open('./config_log.yaml', 'r') as f:
-    config = yaml.safe_load(f.read())
-    logging.config.dictConfig(config)
+with open(f'{os.path.abspath(".")}/config_log.yaml', 'r') as f:
+    yaml_config = yaml.safe_load(f.read())
+    logging.config.dictConfig(yaml_config)
 
 logger = logging.getLogger(__name__)
 
 
 def to_csv_file():
-    DATA_DIR = './data'
-    MBC_TVISIT_CSV_DIR = f'{os.path.abspath(os.curdir)}/data/csv/mbc_tvisit_labresult.csv'
-    MBC_FVISIT_CSV_DIR = f'{os.path.abspath(os.curdir)}/data/csv/mbc_fevervisit_labresult.csv'
-    PEDVAC_CSV_DIR = f'{os.path.abspath(os.curdir)}/data/csv/pedvac_labresult.csv'
+    DATA_DIR = f'{os.path.abspath(".")}/data'
+    MBC_TVISIT_CSV_DIR = f'{os.path.abspath(".")}/data/csv/mbc_tvisit_labresult.csv'
+    MBC_FVISIT_CSV_DIR = f'{os.path.abspath(".")}/data/csv/mbc_fevervisit_labresult.csv'
+    PEDVAC_CSV_DIR = f'{os.path.abspath(".")}/data/csv/pedvac_labresult.csv'
     CHECK_DATE = datetime.date.today()
     CHECK_FILE_DATE_STRING = datetime.date.today().strftime('%Y%m%d')
 
@@ -42,14 +42,14 @@ def to_csv_file():
                     # print(item.name.split('_'))
                     # print(item)
                     if 'mbc_t612visit_labresult.csv' in item.name:
-                        df_tv = pd.read_csv(item)
+                        df_tv = pandas.read_csv(item)
                         if os.path.exists(MBC_TVISIT_CSV_DIR) and os.path.getsize(MBC_TVISIT_CSV_DIR) > 0:
                             df_tv.to_csv(MBC_TVISIT_CSV_DIR, index=False, header=False, mode='a')
                         else:
                             df_tv.to_csv(MBC_TVISIT_CSV_DIR, index=False)
                     else:
                         # mbc_fevervisit_labresult.csv
-                        df_fv = pd.read_csv(item)
+                        df_fv = pandas.read_csv(item)
                         if os.path.exists(MBC_FVISIT_CSV_DIR) and os.path.getsize(MBC_TVISIT_CSV_DIR) > 0:
                             df_fv.to_csv(MBC_FVISIT_CSV_DIR, index=False, header=False, mode='a')
                         else:
@@ -57,7 +57,7 @@ def to_csv_file():
                 else:
                     # print(item.name.split('_'))
                     # pedvac_labresult.csv
-                    pedvac_df = pd.read_csv(item)
+                    pedvac_df = pandas.read_csv(item)
                     if os.path.exists(PEDVAC_CSV_DIR) and os.path.getsize(PEDVAC_CSV_DIR) > 0:
                         pedvac_df.to_csv(PEDVAC_CSV_DIR, index=False, header=False, mode='a')
                     else:
@@ -67,11 +67,12 @@ def to_csv_file():
 def data_import(project_id):
     m19_csv_file = 'import_m19_data.csv'
     p21_csv_file = 'import_p21_data.csv'
-    record = f'{os.path.abspath(os.curdir)}/data/import_data.json'
+    # record = f'{os.path.abspath("..")}/data/import_data.json'
+    record = './data/import_data.json'
 
     try:
         # load the .env values
-        env_config = dotenv_values(f"{os.path.abspath(os.curdir)}/.env")
+        env_config = dotenv_values(f"{os.path.abspath('.')}/.env")
 
         # read the file import_json file
         # if os.path.getsize(record) != 0:
@@ -87,17 +88,17 @@ def data_import(project_id):
 
             # convert json data to csv object
             # use the read the csv object or file to be imported into REDCap database
-            df_obj = pd.read_json(record, orient='records', precise_float=True)
+            df_obj = pandas.read_json(record, orient='records')
             if project_id == 'M19':
-                df_obj.to_csv(f'{os.path.abspath(os.curdir)}/data/{m19_csv_file}', index=False)
+                df_obj.to_csv(f'{os.path.abspath(".")}/data/{m19_csv_file}', index=False)
 
-                with open(f'{os.path.abspath(os.curdir)}/data/{m19_csv_file}') as csv_file:
+                with open(f'{os.path.abspath(".")}/data/{m19_csv_file}') as csv_file:
                     data = csv_file.read()
 
             else:
-                df_obj.to_csv(f'{os.path.abspath(os.curdir)}/data/{p21_csv_file}', index=False)
+                df_obj.to_csv(f'{os.path.abspath(".")}/data/{p21_csv_file}', index=False)
 
-                with open(f'{os.path.abspath(os.curdir)}/data/{p21_csv_file}') as csv_file:
+                with open(f'{os.path.abspath(".")}/data/{p21_csv_file}') as csv_file:
                     data = csv_file.read()
 
             # data_bar.update(5)
@@ -126,7 +127,7 @@ def data_import(project_id):
                 'action': 'import',
                 'format': 'csv',  # json csv
                 'type': 'flat',
-                'overwriteBehavior': 'overwrite',  # overwrite normal
+                'overwriteBehavior': 'normal',  # overwrite normal
                 'data': data,
                 'returnContent': 'count',  # count #ids
                 'returnFormat': 'json'
@@ -190,7 +191,7 @@ def data_import(project_id):
 
 
 # stop logging
-logging.shutdown()
+# logging.shutdown()
 
 if __name__ == '__main__':
     data_import('M19')
