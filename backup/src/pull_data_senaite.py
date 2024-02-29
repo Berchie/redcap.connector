@@ -1,4 +1,5 @@
 # import modules
+from dotenv import dotenv_values
 from src.functions import read_json, write_json
 from src.extract_redcap_data import *
 import os
@@ -10,7 +11,6 @@ import time
 import yaml
 import sys
 import click
-from dotenv import dotenv_values
 from .importdata import data_import
 from tqdm import tqdm, trange
 
