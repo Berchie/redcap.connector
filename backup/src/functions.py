@@ -224,6 +224,7 @@ def sort_analysis(analysis):
 
 def check_internet_connection(redcap_url):
     try:
+        pass
         # connect to a URL
         url(redcap_url, timeout=30)
         logger.info('Internet or REDCap Server connection is available')

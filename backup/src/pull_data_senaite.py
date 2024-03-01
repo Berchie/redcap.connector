@@ -1,4 +1,5 @@
 # import modules
+from dotenv import dotenv_values
 from src.functions import read_json, write_json
 from src.extract_redcap_data import *
 import os
@@ -10,9 +11,9 @@ import time
 import yaml
 import sys
 import click
-from dotenv import dotenv_values
 from .importdata import data_import
 from tqdm import tqdm, trange
+
 
 # add the path of the new different folder (the folder from where we want to import the modules)
 sys.path.insert(0, './src')
@@ -95,50 +96,11 @@ def getSampleType():
         logger.exception(f"An exception occurred - {err}", er, exc_info=True)
 
 
-# all event names in the Laboratory Result REDCap database
-# we can use in the dropdown menu (GUI) or on the command line option
-# for now I will use the sample id to identify the events***
-
-
-# get the redcap events
-def project_events():
-    events = getEvents()
-
-    project_event_names = []
-
-    for event in events:
-        project_event_names.append(event['event_name'])
-
-    return project_event_names
-
-
-# get the project redcap arm number
-def project_event_arm(project):
-    armnumber = getRedcapArms()
-    print(armnumber)
-    for a in armnumber:
-        if a['name'] == project:
-            arm = a['arm_num']
-            return arm
-
-
-# get the project redcap event names
-def project_event_name(event, arm_number):
-    events = getEvents()
-
-    for x in events:
-        if x["event_name"] == event and x['arm_num'] == arm_number:
-            event_name = x['unique_event_name']
-            return event_name
-
-
 # keys or items to extract from respond data from senaite analyses
 # "getClientSampleID" or "ClientSampleID", "getClientID", "getDateSampled" (work on the date "2024-01-12T13:56:00+00:00" to get "2024-01-12 13:56" for mbc )
 #  "getSampleTypeTitle" or "SampleTypeTitle" (for comparison), "DateSampled", "items" "children"
 #  "count"(number of found items), "pages" (number of total pages), "next" (URL to the next batch), "pagesize" (items per page)
 # parameters for get_analysis_result() => project_id, from_date to_date (date range to filter the json data),
-# use keyword get the variable name of the analysis
-# use unit to get the unit of the analysis
 
 @click.command()
 @click.option(
@@ -159,24 +121,33 @@ def get_analyses_result(project, period):
     mbc_fever_visits = ['F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12', 'F13', 'F14', 'F15']
 
     try:
-        # assign project name. This name will be used with
-        if project == 'P21':
-            project_name = 'PEDVAC'
-        else:
-            project_name = 'MBC'
 
         # get the project name and client or project id
         client_id = project
         client_title = getClients()
         client_title = client_title[project]
-        project_arm = project_event_arm(project_name)
 
         next_batch = None
 
+        # with click.progressbar(
+        #         label='Getting Analysis from SENAITE',
+        #         length=100,
+        #         show_eta=True,
+        #         fill_char=u'█',
+        #         width=70
+        # ) as request_progressbar:
         items_resp = requests.get(config["BASE_URL"] + "/search", params={"catalog": "senaite_catalog_sample", "getClientTitle": client_title,
                                                                           "sort_on": "getDateSampled", "sort_order": "asc", "review_state": "published",
-                                                                          "recent_modified": period, "children": "true"}, cookies={config["COOKIE_NAME"]: config["COOKIE_VALUE"]},
-                                  stream=True)
+                                                                          "recent_modified": period, "children": "true"}, cookies={config["COOKIE_NAME"]: config["COOKIE_VALUE"]})
+        # request_progressbar.update(0)
+        # time.sleep(1.01)
+        # request_progressbar.update(25)
+        # time.sleep(1.25)
+        # request_progressbar.update(25)
+        # time.sleep(2)
+        # request_progressbar.update(25)
+        # time.sleep(3)
+        # request_progressbar.update(25)
 
         resp_pages = int(items_resp.json()["pages"])
         # next_batch = items_resp.json()['next']  # url for the next batch of records
@@ -228,9 +199,17 @@ def get_analyses_result(project, period):
 
                         # print(r_data_dict_items[i]["getClientSampleID"])
 
+                        redcap_variables = {}
+
                         if client_id == 'M19':
                             mbc_visit_type = re.sub(r'--?', '-', str(r_data_dict_items[i].get("getClientSampleID")))[10:]
                             # mbc_visit_type = str(r_data_dict_items[i]["getClientSampleID"])[10:]
+                            if mbc_visit_type in mbc_t6_t12:
+                                redcap_variables = fbc_keys['M19_FBC_TV']
+                            elif mbc_visit_type in mbc_fever_visits:
+                                redcap_variables = fbc_keys['M19_FBC_FV']
+                        elif client_id == 'P21':
+                            redcap_variables = fbc_keys['PEDVAC']
 
                         # redcap record id
                         client_sample_id = str(r_data_dict_items[i]["getClientSampleID"])
@@ -240,33 +219,33 @@ def get_analyses_result(project, period):
                         if client_sample_id:
                             if client_id == 'M19':
                                 if len(client_sample_id) > 11 and not len(client_sample_id) >= 14:
-                                    analyses_data['l_barcode'] = client_sample_id
+                                    analyses_data[redcap_variables["id"]] = client_sample_id.replace(client_sample_id[10:], 'T0--1')
 
                                     # slice the study id to get event name to search for the redcap event name
-                                    analyses_data["redcap_event_name"] = project_event_name(str(r_data_dict_items[i]["getClientSampleID"])[10:], project_arm)
+                                    analyses_data[redcap_variables["Event_Name"]] = redcap_event(str(r_data_dict_items[i]["getClientSampleID"])[10:], project)
 
-                                    # add the redcap complete form status for identification instruments
-                                    # 0 --> Incomplete, 1 --> Unverified,  2 --> Complete
-                                    analyses_data["identification_complete"] = str(2)
-
-                                    # date and time of FBC performed or capture to the SENAITE
-                                    result_capture_date = str(r_data_dict_items[i]['children'][0]['ResultCaptureDate'])[:16].replace("T", " ")
-                                    analyses_data['h_datetime'] = result_capture_date
+                                    # date and time of FBC performed
+                                    analyses_data[redcap_variables['DateSampled']] = str(r_data_dict_items[i]['getDateSampled'])[:16].replace("T", " ")
                                 else:
                                     pass
 
+                            # elif client_id == 'P21':
+                            #     analyses_data[redcap_variables["id"]] = client_sample_id
+                        #
+                        #     # slice the study id to get event name to search for the redcap event name
+                        #     analyses_data[redcap_variables["Event_Name"]] = 'laboratory_arm_1'
+                        #
+                        #     # date and time of FBC performed
+                        #     analyses_data[redcap_variables['DateSampled']] = str(r_data_dict_items[i]['getDateSampled'])[:10]
+                        #     analyses_data[redcap_variables['TimeSampled']] = str(r_data_dict_items[i]['getDateSampled'])[11:16]
                             elif client_id == 'P21':
-                                analyses_data['l_barcode'] = client_sample_id
+                                analyses_data[redcap_variables["id"]] = client_sample_id
                                 # slice the study id to get event name to search for the redcap event name
-                                analyses_data["redcap_event_name"] = project_event_name('Laboratory', project_arm)
+                                analyses_data[redcap_variables["Event_Name"]] = 'laboratory_arm_1'
 
-                                # add the redcap complete form status for identification instruments
-                                # 0 --> Incomplete, 1 --> Unverified,  2 --> Complete
-                                analyses_data["identification_complete"] = str(2)
-
-                                # date and time of FBC performed 'ResultCaptureDate'
-                                result_capture_date = str(r_data_dict_items[i]['children'][0]['ResultCaptureDate'])[:16].replace("T", " ")
-                                analyses_data['h_datetime'] = result_capture_date
+                                # date and time of FBC performed
+                                analyses_data[redcap_variables['DateSampled']] = str(r_data_dict_items[i]['getDateSampled'])[:10]
+                                analyses_data[redcap_variables['TimeSampled']] = str(r_data_dict_items[i]['getDateSampled'])[11:16]
 
                         children_data = r_data_dict_items[i]['children']
 
@@ -274,26 +253,24 @@ def get_analyses_result(project, period):
                         for child in range(r_data_dict_items[i]["children_count"] - 2):
 
                             # check if the analysis title or name is found in the redcap_variables dictionary
-                            # if children_data[child]["title"] in redcap_variables:
-                            # if true, get the key value of the analysis title from the redcap_variables json file
-                            # and use it as the key for the Result value e.g {"lf_fbchgb_q":"9.5"}
-                            if r_data_dict_items[i]["children"][child]["Result"] == '----':
-                                result = 0.0
-                            else:
-                                result = r_data_dict_items[i]["children"][child]["Result"]
-                            analyses_data.update({str(children_data[child]["Keyword"]).lower(): result})
-
-                            # add the unit of the analysis
-                            unit_variable_name = f'{str(children_data[child]["Keyword"]).lower()}_unit'
-                            analyses_data.update({unit_variable_name: str(children_data[child]["Unit"])})
-
-                        # add the redcap complete form status for haematology instrument
-                        # 0 --> Incomplete, 1 --> Unverified,  2 --> Complete
-                        analyses_data["haematology_complete"] = str(2)
+                            if children_data[child]["title"] in redcap_variables:
+                                # if true, get the key value of the analysis title from the redcap_variables json file
+                                # and use it as the key for the Result value e.g {"lf_fbchgb_q":"9.5"}
+                                if r_data_dict_items[i]["children"][child]["Result"] == '----':
+                                    result = 0.0
+                                else:
+                                    result = float(r_data_dict_items[i]["children"][child]["Result"])
+                                analyses_data.update({redcap_variables[children_data[child]["title"]]: result})
 
                         # update the data list variable with the analyses_data
                         if analyses_data:
                             data.append(analyses_data.copy())
+
+                        # change the id to 2nd entry id for only MBC(M19) Project or double entry project database
+                        if client_id == 'M19':
+                            if len(client_sample_id) > 11 and not len(client_sample_id) >= 14:
+                                analyses_data[redcap_variables["id"]] = client_sample_id.replace(client_sample_id[10:], 'T0--2')
+                                data.append(analyses_data.copy())
 
                     analyses_data.clear()  # clear the analysis_data dictionary
                 # time.sleep(0.002)
