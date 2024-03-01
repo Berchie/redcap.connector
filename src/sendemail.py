@@ -26,7 +26,7 @@ def email_notification(msg, record_id):
     records = ''
 
     for sample_id in record_id:
-        records += sample_id + '\n'
+        records += sample_id + '<br>'
 
     smtp_server = env_config['SMTP_SERVER']
     port = int(env_config['PORT'])
