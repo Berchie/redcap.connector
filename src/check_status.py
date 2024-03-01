@@ -9,7 +9,7 @@ from pathlib import Path
 
 # import the customise logger YAML dictionary configuration file
 # logging any error or any exception to a log file
-with open('./config_log.yaml', 'r') as f:
+with open(f'{os.path.abspath(".")}/config_log.yaml', 'r') as f:
     config = yaml.safe_load(f.read())
     logging.config.dictConfig(config)
 
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 # def redcap_connector_notification(message) -> any:
 #     try:
 #         notify2.init('REDCap Connector')
-#         n = notify2.Notification('REDCap Connector Notification', message)
+#         n = notify2.Notification('REDCap Connector Notification', message, "./asset/redcap_logo")
 #         n.set_urgency(level='URGENCY_CRITICAL')
 #         n.show()
 #     except Exception:
@@ -39,7 +39,7 @@ def status(days):
     # m19_csv = 'import_m19_data.csv'
     # p21_csv = 'import_p21_data.csv'
     try:
-        search_dir = f'{os.path.abspath(os.curdir)}/data'
+        search_dir = f'{os.path.abspath(os.curdir)}/data/daily_result'
         successfulCount = 0
         noImportCount = 0
         errorCount = 0
@@ -120,7 +120,7 @@ def status(days):
             # redcap_connector_notification(message=message)
 
         else:
-            if 0 < successfulCount < 5:
+            if 0 < successfulCount < 8:
                 if 'M19' not in sucessfulProject:
                     print(f'No transfer of MBC lab results from the SENAITE to REDCap was not done on the {check_date}')
 
