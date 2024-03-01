@@ -1,8 +1,7 @@
 # import modules
-import click
 from dotenv import dotenv_values
-from .functions import read_json, write_json
-from .extract_redcap_data import *
+from src.functions import read_json, write_json
+from src.extract_redcap_data import *
 import os
 import re
 import requests
@@ -11,7 +10,9 @@ import logging.config
 import time
 import yaml
 import sys
+import click
 from .importdata import data_import
+from tqdm import tqdm, trange
 
 
 # add the path of the new different folder (the folder from where we want to import the modules)
@@ -63,7 +64,8 @@ def getClients():
         client_data = {}
 
         if resq.status_code == 200 and resq.json()["items"]:
-            for item in resq.json()["items"]:
+            for item in tqdm(resq.json()["items"], desc='Processing Clients from SENAITE'):
+                time.sleep(0.1)
                 client_data[item["getClientID"]] = item["title"]
 
         # print(client_data)
@@ -127,17 +129,39 @@ def get_analyses_result(project, period):
 
         next_batch = None
 
+        # with click.progressbar(
+        #         label='Getting Analysis from SENAITE',
+        #         length=100,
+        #         show_eta=True,
+        #         fill_char=u'█',
+        #         width=70
+        # ) as request_progressbar:
         items_resp = requests.get(config["BASE_URL"] + "/search", params={"catalog": "senaite_catalog_sample", "getClientTitle": client_title,
                                                                           "sort_on": "getDateSampled", "sort_order": "asc", "review_state": "published",
                                                                           "recent_modified": period, "children": "true"}, cookies={config["COOKIE_NAME"]: config["COOKIE_VALUE"]})
+        # request_progressbar.update(0)
+        # time.sleep(1.01)
+        # request_progressbar.update(25)
+        # time.sleep(1.25)
+        # request_progressbar.update(25)
+        # time.sleep(2)
+        # request_progressbar.update(25)
+        # time.sleep(3)
+        # request_progressbar.update(25)
 
         resp_pages = int(items_resp.json()["pages"])
         # next_batch = items_resp.json()['next']  # url for the next batch of records
         http_status_code = items_resp.status_code
         # print(resp_pages)
 
-        for batch in range(resp_pages):
+        # tqm progressbar
+        for batch in trange(resp_pages, desc=f'Processing Analysis Results in {resp_pages} Batch(es)'):
 
+            time.sleep(0.01)
+
+            # click progressbar
+            # with click.progressbar(range(resp_pages), label=f'Processing Analysis Results in {resp_pages} Batch(es)',fill_char=u'█', width=100) as bar:
+            #     for batch in bar:
             if batch > 0:
 
                 next_batch_resp = requests.get(next_batch, cookies={config["COOKIE_NAME"]: config["COOKIE_VALUE"]})
@@ -151,7 +175,7 @@ def get_analyses_result(project, period):
                 # returns respond data as a JSON object
                 r_data = json.dumps(items_resp.json())
 
-            # cast the response json data python object dictionary
+                # cast the response json data python object dictionary
             r_data_dict = json.loads(r_data)
 
             # next_batch = r_data_dict['next']  # url for the next batch of records
@@ -163,8 +187,13 @@ def get_analyses_result(project, period):
 
                 r_data_dict_items = r_data_dict['items']
 
-                for i in range(len(r_data_dict_items)):
+                for i in trange(len(r_data_dict_items), desc=f'Analysis Result Batch {batch + 1}', leave=False):
 
+                    time.sleep(0.002)
+
+                    # click progressbar 2
+                    # with click.progressbar(range(len(r_data_dict_items)),label=f'Analysis Result Batch {batch}', fill_char=u'⣿',width=100, empty_char="") as pbar:
+                    #    for i in pbar:
                     # check if the sample type is EDTA blood
                     if r_data_dict_items[i]["getSampleTypeTitle"] == 'EDTA Blood':
 
@@ -197,19 +226,20 @@ def get_analyses_result(project, period):
 
                                     # date and time of FBC performed
                                     analyses_data[redcap_variables['DateSampled']] = str(r_data_dict_items[i]['getDateSampled'])[:16].replace("T", " ")
+                                else:
+                                    pass
 
                             # elif client_id == 'P21':
                             #     analyses_data[redcap_variables["id"]] = client_sample_id
-                            #
-                            #     # slice the study id to get event name to search for the redcap event name
-                            #     analyses_data[redcap_variables["Event_Name"]] = 'laboratory_arm_1'
-                            #
-                            #     # date and time of FBC performed
-                            #     analyses_data[redcap_variables['DateSampled']] = str(r_data_dict_items[i]['getDateSampled'])[:10]
-                            #     analyses_data[redcap_variables['TimeSampled']] = str(r_data_dict_items[i]['getDateSampled'])[11:16]
+                        #
+                        #     # slice the study id to get event name to search for the redcap event name
+                        #     analyses_data[redcap_variables["Event_Name"]] = 'laboratory_arm_1'
+                        #
+                        #     # date and time of FBC performed
+                        #     analyses_data[redcap_variables['DateSampled']] = str(r_data_dict_items[i]['getDateSampled'])[:10]
+                        #     analyses_data[redcap_variables['TimeSampled']] = str(r_data_dict_items[i]['getDateSampled'])[11:16]
                             elif client_id == 'P21':
                                 analyses_data[redcap_variables["id"]] = client_sample_id
-
                                 # slice the study id to get event name to search for the redcap event name
                                 analyses_data[redcap_variables["Event_Name"]] = 'laboratory_arm_1'
 
@@ -217,20 +247,20 @@ def get_analyses_result(project, period):
                                 analyses_data[redcap_variables['DateSampled']] = str(r_data_dict_items[i]['getDateSampled'])[:10]
                                 analyses_data[redcap_variables['TimeSampled']] = str(r_data_dict_items[i]['getDateSampled'])[11:16]
 
-                            children_data = r_data_dict_items[i]['children']
+                        children_data = r_data_dict_items[i]['children']
 
-                            # loop through the children object to get values or results of the analysis
-                            for child in range(r_data_dict_items[i]["children_count"] - 2):
+                        # loop through the children object to get values or results of the analysis
+                        for child in range(r_data_dict_items[i]["children_count"] - 2):
 
-                                # check if the analysis title or name is found in the redcap_variables dictionary
-                                if children_data[child]["title"] in redcap_variables:
-                                    # if true, get the key value of the analysis title from the redcap_variables json file
-                                    # and use it as the key for the Result value e.g {"lf_fbchgb_q":"9.5"}
-                                    if r_data_dict_items[i]["children"][child]["Result"] == '----':
-                                        result = 0.0
-                                    else:
-                                        result = float(r_data_dict_items[i]["children"][child]["Result"])
-                                    analyses_data.update({redcap_variables[children_data[child]["title"]]: result})
+                            # check if the analysis title or name is found in the redcap_variables dictionary
+                            if children_data[child]["title"] in redcap_variables:
+                                # if true, get the key value of the analysis title from the redcap_variables json file
+                                # and use it as the key for the Result value e.g {"lf_fbchgb_q":"9.5"}
+                                if r_data_dict_items[i]["children"][child]["Result"] == '----':
+                                    result = 0.0
+                                else:
+                                    result = float(r_data_dict_items[i]["children"][child]["Result"])
+                                analyses_data.update({redcap_variables[children_data[child]["title"]]: result})
 
                         # update the data list variable with the analyses_data
                         if analyses_data:
@@ -242,7 +272,8 @@ def get_analyses_result(project, period):
                                 analyses_data[redcap_variables["id"]] = client_sample_id.replace(client_sample_id[10:], 'T0--2')
                                 data.append(analyses_data.copy())
 
-                        analyses_data.clear()  # clear the analysis_data dictionary
+                    analyses_data.clear()  # clear the analysis_data dictionary
+                # time.sleep(0.002)
 
             else:
                 logger.info(f"SENAITE: No {project} lab records was found!")
@@ -253,12 +284,11 @@ def get_analyses_result(project, period):
         # print or return data or write to json file
         if data:
             write_json(data)
-        
+
         # importing the data or results into REDCap project database
         data_import(project)
-        
+
         return data
-        
 
     except ConnectionError as cr:
         logger.error(f"An error occurred while connecting to SENAITE LIMS server. {cr}", exc_info=True)
