@@ -7,7 +7,7 @@ sys.path.insert(0, f'{os.path.abspath(os.curdir)}/src')
 
 setup(
     name='redcap-connector',
-    version='1.0.0.dev0',
+    version='1.1.0',
     author='Berchie Agyemang Nti',
     author_email='berchie@bnitm.de',
     packages=find_packages(),
