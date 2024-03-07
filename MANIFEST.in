@@ -3,9 +3,9 @@
 # `-> adds all files inside a directory
 # uncomment directory that you want to include in the package
 #graft redcapconnector/config
-#graft redcapconnector/data
-#graft redcapconnector/data/csv
-#graft redcapconnector/data/daily_result
+graft redcapconnector/data
+graft redcapconnector/data/csv
+graft redcapconnector/data/daily_result
 #graft redcapconnector/log
 
 # `-> matches file paths relative to the root of the project
