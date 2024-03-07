@@ -8,7 +8,7 @@ import click
 
 # import the customize logger YAML dictionary configuration file
 # logging any error or any exception to a log file
-with open(f'{os.path.abspath(os.curdir)}/config_log.yaml', 'r') as f:
+with open(f'{os.path.dirname(__file__)}/config/config_log.yaml', 'r') as f:
     config = yaml.safe_load(f.read())
     logging.config.dictConfig(config)
 
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 def senaite_connect():
     try:
         # load the .env values
-        env_config = dotenv_values(f"{os.path.abspath(os.curdir)}/.env")
+        env_config = dotenv_values(f"{os.path.abspath('..')}/.env")
 
         reqs = requests.post(env_config["BASE_URL"] + "/login", params={"__ac_name": env_config['SENAITE_USERNAME'],
                                                                         "__ac_password": env_config['SEANITE_PASSWORD']})
@@ -41,7 +41,7 @@ def senaite_connect():
             replace_cookie_value = cookie.replace(";", "=").split("=")[1]
 
             # open the file in a read mode
-            env_file = open(f"{os.path.abspath(os.curdir)}/.env", "r")
+            env_file = open(f"{os.path.abspath('..')}/.env", "r")
 
             # Reading the content of the file using the read() function them in a new variable
             data = env_file.read()
@@ -53,7 +53,7 @@ def senaite_connect():
             env_file.close()
 
             # open file in the write mode
-            fw = open(f"{os.path.abspath(os.curdir)}/.env", "w")
+            fw = open(f"{os.path.abspath('..')}/.env", "w")
             # Writing the replaced data in our text (.env) file
             fw.write(data)
 
@@ -72,3 +72,5 @@ logging.shutdown()
 
 if __name__ == '__main__':
     senaite_connect()
+    # print(f"{os.path.dirname('..')}/.env")
+    # print(f"{os.path.abspath('..')}/.env")

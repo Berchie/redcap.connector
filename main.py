@@ -11,13 +11,9 @@
 
 
 import click
-import os
-import sys
-import json
-from .senaite_connect import senaite_connect
-from .pull_data_senaite import get_analyses_result
-from .importdata import data_import
-from .check_status import status
+import redcapconnector.senaite_connect as senaite_connect
+import redcapconnector.pull_data_senaite as get_result
+import redcapconnector.check_status as cs
 
 
 # add the path of the new different folder (the folder from where we want to import the modules)
@@ -37,7 +33,7 @@ def cli() -> None:
     of the results.
 
     \b
-    redcap-connector commands -
+    redcapconnector commands -
     senaite-connect  -> login to senaite api
     get-results [OPTIONS] -> retrieve the analyses results from senaite lims via api
     status [OPTIONS] -> check the transfer of analyses results from senaite limns to REDCap was done or successful
@@ -47,16 +43,11 @@ def cli() -> None:
                     -> [--days, -d ] number of day(s) back to check the status of the transfer of analysis results
            ]
     """
-    #data-import [OPTIONS] -> import the analyses results into REDCap database
-    # _stream = open(document)
-    # _dict = json.load(_stream)
-    # _stream.close()
-    # ctx.obj = _dict
 
 
-cli.add_command(senaite_connect)
-cli.add_command(get_analyses_result)
-cli.add_command(status)
+cli.add_command(senaite_connect.senaite_connect)
+cli.add_command(get_result.get_analyses_result)
+cli.add_command(cs.status)
 
 
 if __name__ == '__main__':

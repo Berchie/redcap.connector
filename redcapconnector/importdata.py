@@ -3,22 +3,22 @@ import re
 import sys
 from pathlib import Path
 from time import localtime, strftime
-from src.functions import check_internet_connection, write_result_csv
+from redcapconnector.functions import check_internet_connection, write_result_csv
 from dotenv import dotenv_values
 import requests
 import json
 import logging.config
 import yaml
 import csv
-from src.sendemail import email_notification
+from redcapconnector.sendemail import email_notification
 
 
 # add the path of the new different folder (the folder from where we want to import the modules)
-sys.path.insert(0, './src')
+# sys.path.insert(0, './src')
 
 # import the customise logger YAML dictionary configuration file
 # logging any error or any exception to a log file
-with open(f'{os.path.abspath(".")}/config_log.yaml', 'r') as f:
+with open(f'{os.path.dirname(__file__)}/config/config_log.yaml', 'r') as f:
     yaml_config = yaml.safe_load(f.read())
     logging.config.dictConfig(yaml_config)
 
@@ -27,10 +27,10 @@ logger = logging.getLogger(__name__)
 
 # writing the imported results to CSV file
 def result_csv():
-    csv_file = f'{os.path.abspath(".")}/data/csv/haematology.csv'
+    csv_file = f'{os.path.abspath("..")}/data/csv/haematology.csv'
 
     # open or read the json file
-    with open(f'{os.path.abspath(".")}/data/import_data.json') as json_file:
+    with open(f'{os.path.abspath("..")}/data/import_data.json') as json_file:
         json_results = json.load(json_file)
 
     # open the csv file
@@ -64,10 +64,10 @@ def result_csv():
 
 # convert json data to CSV file for the daily run
 def json_csv():
-    csv_file = f'{os.path.abspath(".")}/data/daily_result/{strftime("%Y%m%d", localtime())}_haematology.csv'
+    csv_file = f'{os.path.abspath("..")}/data/daily_result/{strftime("%Y%m%d", localtime())}_haematology.csv'
 
     # open or read the json file
-    with open(f'{os.path.abspath(".")}/data/import_data.json') as json_file:
+    with open(f'{os.path.abspath("..")}/data/import_data.json') as json_file:
         json_results = json.load(json_file)
 
     # open the csv file
@@ -104,11 +104,11 @@ def data_import(project_id):
     # m19_csv_file = 'import_m19_data.csv'
     # p21_csv_file = 'import_p21_data.csv'
     # record = f'{os.path.abspath("..")}/data/import_data.json'
-    record = './data/import_data.json'
+    record = '../data/import_data.json'
 
     try:
         # load the .env values
-        env_config = dotenv_values(f"{os.path.abspath('.')}/.env")
+        env_config = dotenv_values(f"{os.path.abspath('../src')}/.env")
 
         # read the file import_json file
         if os.path.getsize(record) != 0:

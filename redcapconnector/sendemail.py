@@ -11,7 +11,7 @@ from dotenv import dotenv_values
 
 # import the customise logger YAML dictionary configuration file
 # logging any error or any exception to a log file
-with open(f'{os.path.abspath(".")}/config_log.yaml', 'r') as f:
+with open(f'{os.path.dirname(__file__)}/config/config_log.yaml', 'r') as f:
     yaml_config = yaml.safe_load(f.read())
     logging.config.dictConfig(yaml_config)
 
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 # load the .env values
-env_config = dotenv_values(f"{os.path.abspath('.')}/.env")
+env_config = dotenv_values(f"{os.path.abspath('..')}/.env")
 
 
 def email_notification(msg, record_id):
@@ -33,12 +33,13 @@ def email_notification(msg, record_id):
     sender_email = env_config['SENDER_EMAIL']
     password = env_config['PASSWORD']
     receiver_email = env_config['RECEIVER_EMAIL']
+    cc_email = env_config['CC_EMAIL']
 
     message = MIMEMultipart('alternative')
     message['Subject'] = f'{datetime.date.today()} - New Records Imported into Laboratory Result REDCap Database'
     message['From'] = sender_email
     message['To'] = receiver_email
-    message['Cc'] = sender_email
+    message['Cc'] = cc_email
 
     # Create the plain-text and HTML version of your message
     message_text = f"""\
@@ -56,7 +57,7 @@ def email_notification(msg, record_id):
     <html>
         <body>
             <p>Hello,<br><br>
-               <b>{msg}</b><br>
+               <b>{msg}</b><br><br>
                Below are the sample ids of the imported records:<br><br>
                {records}<br><br><br>
                REDCap Connector
