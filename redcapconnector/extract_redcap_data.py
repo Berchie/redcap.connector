@@ -7,8 +7,8 @@ import yaml
 
 # import the customise logger YAML dictionary configuration file
 # logging any error or any exception to a log file
-with open(f'{os.path.abspath(os.curdir)}/config_log.yaml', 'r') as f:
-#with open('../config_log.yaml', 'r') as f:
+with open(f'{os.path.dirname(__file__)}/config/config_log.yaml', 'r') as f:
+    # with open('../config_log.yaml', 'r') as f:
     config = yaml.safe_load(f.read())
     logging.config.dictConfig(config)
 
@@ -19,7 +19,7 @@ def redcap_event(event, project_id):
     api_token = None
     try:
         # load the .env values
-        env_config = dotenv_values(f"{os.path.abspath(os.curdir)}/.env")
+        env_config = dotenv_values(f"{os.path.abspath('..')}/.env")
 
         if project_id == 'M19':
             api_token = env_config['M19_API_TOKEN']
@@ -53,7 +53,7 @@ def redcap_event(event, project_id):
 def redcap_mbc_record_id(studyID):
     try:
         # load the .env values
-        env_config = dotenv_values(f"{os.path.abspath(os.curdir)}/.env")
+        env_config = dotenv_values(f"{os.path.abspath('..')}/.env")
 
         data = {
             'token': env_config['API_TOKEN'],
@@ -90,7 +90,7 @@ def redcap_mbc_record_id(studyID):
 def getEvents():
     try:
         # load the .env values
-        env_config = dotenv_values(f"{os.path.abspath(os.curdir)}/.env")
+        env_config = dotenv_values(f"{os.path.abspath('..')}/.env")
 
         # env_config = dotenv_values("../.env")
 
@@ -120,7 +120,7 @@ def getEvents():
 def getRedcapArms():
     try:
         # load the .env values
-        env_config = dotenv_values(f"{os.path.abspath(os.curdir)}/.env")
+        env_config = dotenv_values(f"{os.path.abspath('..')}/.env")
 
         # env_config = dotenv_values("../.env")
 
