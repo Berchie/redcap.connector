@@ -16,7 +16,7 @@ handlers:
     class: logging.handlers.RotatingFileHandler
     formatter: precise
     level: DEBUG
-    filename: './log/redcap_connector.log'
+    filename: './redcapconnector/log/redcap_connector.log'
     maxBytes: 10240
     # backupCount: 3
 loggers:
