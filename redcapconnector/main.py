@@ -1,19 +1,8 @@
-# redcap-connect commands -
-#   senaite-connect  -> login to senaite api
-#   get-results [OPTIONS] -> retrieve the analyses results from senaite lims via api
-#   data-import [OPTIONS] -> import the analyses results into REDCap database
-#   status [OPTIONS] -> check the transfer of analyses results from senaite limns to REDCap was done or successful
-#          [OPTIONS - [--project, -p, 'M19' => MBC, 'P21' => PEDVAC] name of the project,
-#                   - [--period, -r, 'today', 'yesterday', 'this-week', 'this-month', 'this-year']
-#                       period or date the sample or analysis was published,
-#                    - [--days, -d ] number of day(s) back to check the status of the transfer of analysis results
-#                   ]
-
-
 import click
 import redcapconnector.senaite_connect as senaite_connect
 import redcapconnector.pull_data_senaite as get_result
 import redcapconnector.check_status as cs
+import export_csv as ec
 
 
 # add the path of the new different folder (the folder from where we want to import the modules)
@@ -45,11 +34,11 @@ def cli() -> None:
     """
 
 
+
 cli.add_command(senaite_connect.senaite_connect)
 cli.add_command(get_result.get_analyses_result)
 cli.add_command(cs.status)
-
+cli.add_command(ec.download_csv)
 
 if __name__ == '__main__':
     cli()
-

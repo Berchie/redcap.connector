@@ -6,10 +6,21 @@ setup(
     author='Berchie Agyemang',
     author_email='berchie@bnitm.de',
     description='Middleware for transferring analysis results from LIMS to REDCap',
-    python_require='>=3.10',
-    packages=find_packages(include=['redcapconnector', 'redcapconnector.*'],exclude=['src','src/*']),
+    python_requires='>=3.10',
+    packages=find_packages(
+        include=[
+            'redcapconnector',
+            'redcapconnector.*',
+            'redcapconnector/config',
+            'redcapconnector/data',
+            'redcapconnector/data/csv',
+            'redcapconnector/data/daily_result',
+            'redcapconnector/log'
+        ],
+        exclude=['src', 'src/*']
+    ),
     py_modules=[
-        'main',
+        'redcapconnector.main',
         'redcapconnector.check_status',
         'redcapconnector.extract_redcap_data',
         'redcapconnector.functions',
@@ -30,7 +41,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'redcap-connector=main:cli'
+            'redcap-connector=redcapconnector.main:cli'
         ]
     }
 

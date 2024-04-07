@@ -18,15 +18,24 @@ from tqdm import tqdm, trange
 # sys.path.insert(0, './src')
 
 # load the .env values
-config = dotenv_values(f"{os.path.abspath('..')}/.env")
+config = dotenv_values("../.env")
 
 # import the customise logger YAML dictionary configuration file
 # logging any error or any exception to a log file
-with open(f'{os.path.dirname(__file__)}/config/config_log.yaml', 'r') as f:
+with open(f'{os.getcwd()}/redcapconnector/config/config_log.yaml', 'r') as f:
     yaml_config = yaml.safe_load(f.read())
     logging.config.dictConfig(yaml_config)
 
 logger = logging.getLogger(__name__)
+
+
+# load .env variables
+dotenv_path = os.path.abspath(f"{os.environ['HOME']}/.env")
+if os.path.abspath(f"{os.environ['HOME']}/.env"):
+    load_dotenv(dotenv_path=dotenv_path)
+else:
+    raise logging.exception('Could not found the application environment variables!')
+
 
 # create variables
 clients = {}
@@ -35,12 +44,12 @@ analyses_data = {}
 sampleTypes = []
 
 # read the json file
-fbc_keys = read_json(f'{os.path.abspath('..')}/config/redcap_variables.json')
+fbc_keys = read_json(f'{os.getcwd()}/recapconnector/config/redcap_variables.json')
 
 # clear the content in the import_data.json file
 try:
-    if os.path.exists(f"{os.path.abspath('..')}/data/import_data.json"):
-        with open(f"{os.path.abspath('..')}/data/import_data.json", "r+") as importfile:
+    if os.path.exists(f'{os.getcwd()}/recapconnector/data/import_data.json'):
+        with open(f'{os.getcwd()}/recapconnector/data/import_data.json', 'r+') as importfile:
             # check if the file is not empty
             if importfile.read() is not None:
                 # clear the file content
@@ -53,10 +62,10 @@ except Exception as er:
 
 # define function for each active connection to senaite
 # getClients() is to get the clients in senaite lims
-def getClients():
+def get_clients():
     try:
         # connection to the senaite via the senaite api "title"
-        resq = requests.get(config["BASE_URL"] + "/client", cookies={config["COOKIE_NAME"]: config["COOKIE_VALUE"]})
+        resq = requests.get(os.environ["BASE_URL"] + "/client", cookies={os.environ["COOKIE_NAME"]: os.environ["COOKIE_VALUE"]})
 
         # print(json.dumps(resq.json(), indent=2))
 
@@ -75,10 +84,10 @@ def getClients():
         logger.exception(f"Exception occurred - {err}", exc_info=True)
 
 
-def getSampleType():
+def get_sample_type():
     try:
         # connection to the senaite via the senaite api
-        res_sample = requests.get(config["BASE_URL"] + "/SampleType", cookies={config["COOKIE_NAME"]: config["COOKIE_VALUE"]})
+        res_sample = requests.get(os.environ["BASE_URL"] + "/SampleType", cookies={os.environ["COOKIE_NAME"]: os.environ["COOKIE_VALUE"]})
         # print(json.dumps(resq.json(), indent=2))
 
         samples = []
@@ -166,16 +175,16 @@ def get_analyses_result(project, period):
 
         # get the project name and client or project id
         client_id = project
-        client_title = getClients()
+        client_title = get_clients()
         client_title = client_title[project]
         project_arm = project_event_arm(project_name)
 
         next_batch = None
 
-        items_resp = requests.get(config["BASE_URL"] + "/search", params={"catalog": "senaite_catalog_sample", "getClientTitle": client_title,
+        items_resp = requests.get(os.environ["BASE_URL"] + "/search", params={"catalog": "senaite_catalog_sample", "getClientTitle": client_title,
                                                                           "sort_on": "getDateSampled", "sort_order": "asc", "review_state": "published",
                                                                           "recent_modified": period, "children": "true"},
-                                  cookies={config["COOKIE_NAME"]: config["COOKIE_VALUE"]}, stream=True)
+                                  cookies={os.environ["COOKIE_NAME"]: os.environ["COOKIE_VALUE"]}, stream=True)
 
         resp_pages = int(items_resp.json()["pages"])
         # next_batch = items_resp.json()['next']  # url for the next batch of records
@@ -192,7 +201,7 @@ def get_analyses_result(project, period):
             #     for batch in bar:
             if batch > 0:
 
-                next_batch_resp = requests.get(next_batch, cookies={config["COOKIE_NAME"]: config["COOKIE_VALUE"]})
+                next_batch_resp = requests.get(next_batch, cookies={os.environ["COOKIE_NAME"]: os.environ["COOKIE_VALUE"]})
 
                 # returns respond data as a JSON object
                 r_data = json.dumps(next_batch_resp.json())

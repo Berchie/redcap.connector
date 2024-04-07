@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 from time import localtime, strftime
 from redcapconnector.functions import check_internet_connection, write_result_csv
-from dotenv import dotenv_values
+from dotenv import dotenv_values, load_dotenv
 import requests
 import json
 import logging.config
@@ -16,21 +16,28 @@ from redcapconnector.sendemail import email_notification
 # add the path of the new different folder (the folder from where we want to import the modules)
 # sys.path.insert(0, './src')
 
+
 # import the customise logger YAML dictionary configuration file
 # logging any error or any exception to a log file
-with open(f'{os.path.dirname(__file__)}/config/config_log.yaml', 'r') as f:
+with open(f'{os.getcwd()}/redcapconnector/config/config_log.yaml', 'r') as f:
     yaml_config = yaml.safe_load(f.read())
     logging.config.dictConfig(yaml_config)
 
 logger = logging.getLogger(__name__)
 
+# load .env variables
+dotenv_path = os.path.abspath(f"{os.environ['HOME']}/.env")
+if os.path.abspath(f"{os.environ['HOME']}/.env"):
+    load_dotenv(dotenv_path=dotenv_path)
+else:
+    raise logging.exception('Could not found the application environment variables!')
 
 # writing the imported results to CSV file
 def result_csv():
-    csv_file = f'{os.path.abspath("..")}/data/csv/haematology.csv'
+    csv_file = f'{os.getcwd()}/redcapconnector/data/csv/haematology.csv'
 
     # open or read the json file
-    with open(f'{os.path.abspath("..")}/data/import_data.json') as json_file:
+    with open(f'{os.getcwd()}/redcapconnector/data/import_data.json') as json_file:
         json_results = json.load(json_file)
 
     # open the csv file
@@ -64,10 +71,10 @@ def result_csv():
 
 # convert json data to CSV file for the daily run
 def json_csv():
-    csv_file = f'{os.path.abspath("..")}/data/daily_result/{strftime("%Y%m%d", localtime())}_haematology.csv'
+    csv_file = f'{os.getcwd()}/redcapconnector/data/daily_result/{strftime("%Y%m%d", localtime())}_haematology.csv'
 
     # open or read the json file
-    with open(f'{os.path.abspath("..")}/data/import_data.json') as json_file:
+    with open(f'{os.getcwd()}/redcapconnector/data/import_data.json') as json_file:
         json_results = json.load(json_file)
 
     # open the csv file
@@ -104,11 +111,11 @@ def data_import(project_id):
     # m19_csv_file = 'import_m19_data.csv'
     # p21_csv_file = 'import_p21_data.csv'
     # record = f'{os.path.abspath("..")}/data/import_data.json'
-    record = '../data/import_data.json'
+    record = f'{os.getcwd()}/redcapconnector/data/import_data.json'
 
     try:
         # load the .env values
-        env_config = dotenv_values(f"{os.path.abspath('../src')}/.env")
+        env_config = dotenv_values("../.env")
 
         # read the file import_json file
         if os.path.getsize(record) != 0:
@@ -118,7 +125,7 @@ def data_import(project_id):
             data = json.dumps(import_record)
 
             # API TOKEN for the REDCap database
-            api_token = env_config['LAB_API_TOKEN']
+            api_token = os.environ['LAB_API_TOKEN']
 
             fields = {
                 'token': api_token,
@@ -136,7 +143,7 @@ def data_import(project_id):
             # check for internet is available or REDCap server is online(available)
             if check_internet_connection("https://redcap.bibbox.bnitm.de/"):
                 # import records into the REDCap database
-                r = requests.post(env_config['LAB_API_URL'], data=fields)
+                r = requests.post(os.environ['LAB_API_URL'], data=fields)
                 # print(f'HTTP Status: {str(r.status_code)}')
                 res = r.json()
 

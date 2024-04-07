@@ -1,5 +1,5 @@
 import os
-from dotenv import dotenv_values
+from dotenv import dotenv_values, load_dotenv
 import requests
 import json
 import logging.config
@@ -7,24 +7,31 @@ import yaml
 
 # import the customise logger YAML dictionary configuration file
 # logging any error or any exception to a log file
-with open(f'{os.path.dirname(__file__)}/config/config_log.yaml', 'r') as f:
+with open(f'{os.getcwd()}/redcapconnector/config/config_log.yaml', 'r') as f:
     # with open('../config_log.yaml', 'r') as f:
     config = yaml.safe_load(f.read())
     logging.config.dictConfig(config)
 
 logger = logging.getLogger(__name__)
 
+# load .env variables
+dotenv_path = os.path.abspath(f"{os.environ['HOME']}/.env")
+if os.path.abspath(f"{os.environ['HOME']}/.env"):
+    load_dotenv(dotenv_path=dotenv_path)
+else:
+    raise logging.exception('Could not found the application environment variables!')
+
 
 def redcap_event(event, project_id):
     api_token = None
     try:
         # load the .env values
-        env_config = dotenv_values(f"{os.path.abspath('..')}/.env")
+        env_config = dotenv_values("../.env")
 
         if project_id == 'M19':
-            api_token = env_config['M19_API_TOKEN']
+            api_token = os.environ['M19_API_TOKEN']
         elif project_id == 'P21':
-            api_token = env_config['P21_API_TOKEN']
+            api_token = os.environ['P21_API_TOKEN']
 
         data = {
             'token': api_token,
@@ -53,10 +60,10 @@ def redcap_event(event, project_id):
 def redcap_mbc_record_id(studyID):
     try:
         # load the .env values
-        env_config = dotenv_values(f"{os.path.abspath('..')}/.env")
+        env_config = dotenv_values("../.env")
 
         data = {
-            'token': env_config['API_TOKEN'],
+            'token': os.environ['API_TOKEN'],
             'content': 'record',
             'action': 'export',
             'format': 'json',
@@ -90,11 +97,11 @@ def redcap_mbc_record_id(studyID):
 def getEvents():
     try:
         # load the .env values
-        env_config = dotenv_values(f"{os.path.abspath('..')}/.env")
+        env_config = dotenv_values("../.env")
 
         # env_config = dotenv_values("../.env")
 
-        api_token = env_config['LAB_API_TOKEN']
+        api_token = os.environ['LAB_API_TOKEN']
 
         data = {
             'token': api_token,
@@ -120,11 +127,11 @@ def getEvents():
 def getRedcapArms():
     try:
         # load the .env values
-        env_config = dotenv_values(f"{os.path.abspath('..')}/.env")
+        env_config = dotenv_values("../.env")
 
         # env_config = dotenv_values("../.env")
 
-        api_token = env_config['LAB_API_TOKEN']
+        api_token = os.environ['LAB_API_TOKEN']
 
         data = {
             'token': api_token,
@@ -132,7 +139,7 @@ def getRedcapArms():
             'format': 'json',
             'returnFormat': 'json'
         }
-        r = requests.post(env_config['LAB_API_URL'], data=data)
+        r = requests.post(os.environ['LAB_API_URL'], data=data)
         # print('HTTP Status: ' + str(r.status_code))
         # print(json.dumps(r.json(), indent=2))
 

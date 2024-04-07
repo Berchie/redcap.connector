@@ -18,3 +18,5 @@ out
 gen
 /.python-version
 /.venv/
+import os
+os.environ['PYTHONPATH'] = os.environ.get('PYTHONPATH', '') + ':' + os.getcwd()

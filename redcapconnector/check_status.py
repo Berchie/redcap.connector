@@ -9,7 +9,7 @@ from pathlib import Path
 
 # import the customise logger YAML dictionary configuration file
 # logging any error or any exception to a log file
-with open(f'{os.path.dirname(__file__)}/config/config_log.yaml', 'r') as f:     # using os.path.dirname(__file__) to Accessing Data Files at Runtime
+with open(f'{os.getcwd()}/redcapconnector/config/config_log.yaml', 'r') as f:     # using os.path.dirname(__file__) to Accessing Data Files at Runtime
     config = yaml.safe_load(f.read())
     logging.config.dictConfig(config)
 
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 def redcap_connector_notification(message) -> any:
     try:
         notify2.init('REDCap Connector')
-        n = notify2.Notification('REDCap Connector Notification', message, "../asset/redcap_logo.png")
+        n = notify2.Notification('REDCap Connector Notification', message, f'{os.getcwd()}/redcapconnector/asset/redcap_logo.png')
         n.set_urgency(level=2)
         n.show()
     except Exception as e:
@@ -40,7 +40,7 @@ def status(days):
     # m19_csv = 'import_m19_data.csv'
     # p21_csv = 'import_p21_data.csv'
     try:
-        search_dir = f'{os.path.dirname(__file__)}/data/daily_result'
+        search_dir = f'{os.getcwd()}/redcapconnector/data/daily_result'
         successfulCount = 0
         noImportCount = 0
         errorCount = 0
@@ -48,7 +48,7 @@ def status(days):
         no_import_project = []
         no_senaite_record = []
 
-        with open(f'{os.path.dirname(__file__)}/log/redcap_connector.log') as log_file:
+        with open(f'{os.getcwd()}/redcapconnector/log/redcap_connector.log') as log_file:
             statement = log_file.readlines()
             #  print(statement)
             check_date = (datetime.date.today() - datetime.timedelta(days=days)).strftime('%d-%m-%Y')
