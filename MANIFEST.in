@@ -15,5 +15,6 @@ include redcapconnector/data/*.json
 include redcapconnector/log/redcap_connector.log
 include redcapconnector/config/config_log.yaml
 include redcapconnector/config/redcap_variables.json
+include redcapconnector/config/cookie.ini
 include redcapconnector/asset/redcap_logo.ico
 include redcapconnector/asset/redcap_logo.ico

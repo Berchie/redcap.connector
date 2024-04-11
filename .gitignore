@@ -9,6 +9,8 @@ src/.DS_Store
 .DS_Store
 *.csv
 redcap_connector.egg-info/
+build
+dist
 
 
 # IntelliJ project files
@@ -18,5 +20,3 @@ out
 gen
 /.python-version
 /.venv/
-import os
-os.environ['PYTHONPATH'] = os.environ.get('PYTHONPATH', '') + ':' + os.getcwd()

@@ -3,17 +3,23 @@ import logging.config
 import os
 import smtplib
 import ssl
+import sys
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import yaml
 from dotenv import dotenv_values, load_dotenv
+from redcapconnector.setup_logging import setup_logging
 
 
 # import the customise logger YAML dictionary configuration file
 # logging any error or any exception to a log file
-with open(f'{os.getcwd()}/redcapconnector/config/config_log.yaml', 'r') as f:
-    yaml_config = yaml.safe_load(f.read())
-    logging.config.dictConfig(yaml_config)
+# with open(os.path.join(os.path.dirname(__file__), 'config', 'config_log.yaml'), 'r') as f:
+#     yaml_config = yaml.safe_load(f.read())
+#     logging.config.dictConfig(yaml_config)
+
+
+# setting up the logging
+setup_logging(os.path.join(os.path.dirname(__file__), "log", "redcap_connector.log"))
 
 logger = logging.getLogger(__name__)
 

@@ -9,19 +9,19 @@ import requests
 import json
 import logging.config
 import yaml
+import logging
 import csv
 from redcapconnector.sendemail import email_notification
-
-
-# add the path of the new different folder (the folder from where we want to import the modules)
-# sys.path.insert(0, './src')
-
+from redcapconnector.setup_logging import setup_logging
 
 # import the customise logger YAML dictionary configuration file
 # logging any error or any exception to a log file
-with open(f'{os.getcwd()}/redcapconnector/config/config_log.yaml', 'r') as f:
-    yaml_config = yaml.safe_load(f.read())
-    logging.config.dictConfig(yaml_config)
+# with open(f'{sys.path[4]}/redcapconnector/config/config_log.yaml', 'r') as f:
+#     yaml_config = yaml.safe_load(f.read())
+#     logging.config.dictConfig(yaml_config)
+
+# setting up the logging
+setup_logging(os.path.join(os.path.dirname(__file__), "log", "redcap_connector.log"))
 
 logger = logging.getLogger(__name__)
 
@@ -32,12 +32,13 @@ if os.path.abspath(f"{os.environ['HOME']}/.env"):
 else:
     raise logging.exception('Could not found the application environment variables!')
 
+
 # writing the imported results to CSV file
 def result_csv():
-    csv_file = f'{os.getcwd()}/redcapconnector/data/csv/haematology.csv'
+    csv_file = os.path.join(os.path.dirname(__file__), "data", "csv", "haematology.csv")
 
     # open or read the json file
-    with open(f'{os.getcwd()}/redcapconnector/data/import_data.json') as json_file:
+    with open(os.path.join(os.path.dirname(__file__), "data", "import_data.json")) as json_file:
         json_results = json.load(json_file)
 
     # open the csv file
@@ -71,10 +72,10 @@ def result_csv():
 
 # convert json data to CSV file for the daily run
 def json_csv():
-    csv_file = f'{os.getcwd()}/redcapconnector/data/daily_result/{strftime("%Y%m%d", localtime())}_haematology.csv'
+    csv_file = os.path.join(os.path.dirname(__file__), "data", "daily_result", f"{strftime("%Y%m%d", localtime())}_haematology.csv")
 
     # open or read the json file
-    with open(f'{os.getcwd()}/redcapconnector/data/import_data.json') as json_file:
+    with open(os.path.join(os.path.dirname(__file__), "data", "import_data.json")) as json_file:
         json_results = json.load(json_file)
 
     # open the csv file
@@ -107,11 +108,10 @@ def json_csv():
 
 
 def data_import(project_id):
-
     # m19_csv_file = 'import_m19_data.csv'
     # p21_csv_file = 'import_p21_data.csv'
     # record = f'{os.path.abspath("..")}/data/import_data.json'
-    record = f'{os.getcwd()}/redcapconnector/data/import_data.json'
+    record = os.path.join(os.path.dirname(__file__), "data", "import_data.json")
 
     try:
         # load the .env values
@@ -169,7 +169,7 @@ def data_import(project_id):
                     print(f'HTTP Status:{r.status_code} - {error_msg}')
 
         else:
-            print(f'No {project_id} data to import.')
+            logger.info(f'No {project_id} data to import.')
             # click.echo(f'No {project_id} data to import.')
 
         # when record successful imported write it to csv(import_data_[date&time])
@@ -186,4 +186,5 @@ def data_import(project_id):
 # logging.shutdown()
 
 if __name__ == '__main__':
-    data_import('M19')
+    # data_import('M19')
+    logger.info('import log test')

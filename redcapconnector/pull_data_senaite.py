@@ -1,4 +1,5 @@
-# import modules
+import configparser
+
 from redcapconnector.functions import read_json, write_json
 from redcapconnector.extract_redcap_data import *
 import os
@@ -13,21 +14,21 @@ import click
 from dotenv import dotenv_values
 from redcapconnector.importdata import data_import
 from tqdm import tqdm, trange
-
-# add the path of the new different folder (the folder from where we want to import the modules)
-# sys.path.insert(0, './src')
+from redcapconnector.setup_logging import setup_logging
 
 # load the .env values
 config = dotenv_values("../.env")
 
 # import the customise logger YAML dictionary configuration file
 # logging any error or any exception to a log file
-with open(f'{os.getcwd()}/redcapconnector/config/config_log.yaml', 'r') as f:
-    yaml_config = yaml.safe_load(f.read())
-    logging.config.dictConfig(yaml_config)
+# with open(os.path.join(os.path.dirname(__file__), 'config', 'config_log.yaml'), 'r') as f:
+#     yaml_config = yaml.safe_load(f.read())
+#     logging.config.dictConfig(yaml_config)
+
+# setting up the logging
+setup_logging(os.path.join(os.path.dirname(__file__), "log", "redcap_connector.log"))
 
 logger = logging.getLogger(__name__)
-
 
 # load .env variables
 dotenv_path = os.path.abspath(f"{os.environ['HOME']}/.env")
@@ -37,6 +38,11 @@ else:
     raise logging.exception('Could not found the application environment variables!')
 
 
+# load the cookie.ini file values
+cookie_config = configparser.ConfigParser()
+cookie_config.read(os.path.join(os.path.dirname(__file__), "config", "cookie.ini"))
+
+
 # create variables
 clients = {}
 data = []  # this variable is to hold the all the compile lab results from senaite to be import into REDCap
@@ -44,12 +50,12 @@ analyses_data = {}
 sampleTypes = []
 
 # read the json file
-fbc_keys = read_json(f'{os.getcwd()}/recapconnector/config/redcap_variables.json')
+fbc_keys = read_json(os.path.join(os.path.dirname(__file__), 'config', 'redcap_variables.json'))
 
 # clear the content in the import_data.json file
 try:
-    if os.path.exists(f'{os.getcwd()}/recapconnector/data/import_data.json'):
-        with open(f'{os.getcwd()}/recapconnector/data/import_data.json', 'r+') as importfile:
+    if os.path.exists(os.path.join(os.path.dirname(__file__), "data", "import_data.json")):
+        with open(os.path.join(os.path.dirname(__file__), "data", "import_data.json"), 'r+') as importfile:
             # check if the file is not empty
             if importfile.read() is not None:
                 # clear the file content
@@ -65,7 +71,7 @@ except Exception as er:
 def get_clients():
     try:
         # connection to the senaite via the senaite api "title"
-        resq = requests.get(os.environ["BASE_URL"] + "/client", cookies={os.environ["COOKIE_NAME"]: os.environ["COOKIE_VALUE"]})
+        resq = requests.get(os.environ["BASE_URL"] + "/client", cookies={cookie_config["Cookie"]["name"]: cookie_config["Cookie"]["value"]})
 
         # print(json.dumps(resq.json(), indent=2))
 
@@ -87,7 +93,7 @@ def get_clients():
 def get_sample_type():
     try:
         # connection to the senaite via the senaite api
-        res_sample = requests.get(os.environ["BASE_URL"] + "/SampleType", cookies={os.environ["COOKIE_NAME"]: os.environ["COOKIE_VALUE"]})
+        res_sample = requests.get(os.environ["BASE_URL"] + "/SampleType", cookies={cookie_config["Cookie"]["name"]: cookie_config["Cookie"]["value"]})
         # print(json.dumps(resq.json(), indent=2))
 
         samples = []
@@ -111,7 +117,7 @@ def get_sample_type():
 
 # get the redcap events
 def project_events():
-    events = getEvents()
+    events = get_events()
 
     project_event_names = []
 
@@ -123,9 +129,9 @@ def project_events():
 
 # get the project redcap arm number
 def project_event_arm(project):
-    armnumber = getRedcapArms()
+    arm_number = get_redcap_arms()
 
-    for a in armnumber:
+    for a in arm_number:
         if a['name'] == project:
             arm = a['arm_num']
             return arm
@@ -133,7 +139,7 @@ def project_event_arm(project):
 
 # get the project redcap event names
 def project_event_name(event, arm_number):
-    events = getEvents()
+    events = get_events()
 
     for x in events:
         if x["event_name"] == event and x['arm_num'] == arm_number:
@@ -162,7 +168,7 @@ def project_event_name(event, arm_number):
     show_default=True,
     help='period or date the sample or analysis was published'
 )
-def get_analyses_result(project, period):
+def transfer_result(project, period):
     mbc_t6_t12 = ['T6', 'T7', 'T8', 'T9', 'T10', 'T11']
     mbc_fever_visits = ['F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12', 'F13', 'F14', 'F15']
 
@@ -182,9 +188,9 @@ def get_analyses_result(project, period):
         next_batch = None
 
         items_resp = requests.get(os.environ["BASE_URL"] + "/search", params={"catalog": "senaite_catalog_sample", "getClientTitle": client_title,
-                                                                          "sort_on": "getDateSampled", "sort_order": "asc", "review_state": "published",
-                                                                          "recent_modified": period, "children": "true"},
-                                  cookies={os.environ["COOKIE_NAME"]: os.environ["COOKIE_VALUE"]}, stream=True)
+                                                                              "sort_on": "getDateSampled", "sort_order": "asc", "review_state": "published",
+                                                                              "recent_modified": period, "children": "true"},
+                                  cookies={cookie_config["Cookie"]["name"]: cookie_config["Cookie"]["value"]}, stream=True)
 
         resp_pages = int(items_resp.json()["pages"])
         # next_batch = items_resp.json()['next']  # url for the next batch of records
@@ -201,7 +207,7 @@ def get_analyses_result(project, period):
             #     for batch in bar:
             if batch > 0:
 
-                next_batch_resp = requests.get(next_batch, cookies={os.environ["COOKIE_NAME"]: os.environ["COOKIE_VALUE"]})
+                next_batch_resp = requests.get(next_batch, cookies={cookie_config["Cookie"]["name"]: cookie_config["Cookie"]["value"]})
 
                 # returns respond data as a JSON object
                 r_data = json.dumps(next_batch_resp.json())
@@ -246,7 +252,10 @@ def get_analyses_result(project, period):
                         if client_sample_id:
                             if client_id == 'M19':
                                 if len(client_sample_id) > 11 and not len(client_sample_id) >= 14:
-                                    analyses_data['l_barcode'] = client_sample_id
+
+                                    # replace the last characters of the client sample id (record id used by REDCap) with 'T0'
+                                    record_id = client_sample_id.replace(client_sample_id[10:],"T0")
+                                    analyses_data['l_barcode'] = record_id
 
                                     # slice the study id to get event name to search for the redcap event name
                                     analyses_data["redcap_event_name"] = project_event_name(str(r_data_dict_items[i]["getClientSampleID"])[10:], project_arm)
@@ -336,7 +345,7 @@ logging.shutdown()
 
 if __name__ == '__main__':
     time_start_ = time.perf_counter()
-    fbc = get_analyses_result('M19', 'this-week')
+    fbc = transfer_result('M19', 'this-week')
     print(json.dumps(fbc, indent=4))
     time_end_ = time.perf_counter()
     print(f'process time: {(time_end_ - time_start_)} seconds')

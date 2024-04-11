@@ -1,18 +1,26 @@
 import os
+import sys
 from dotenv import dotenv_values, load_dotenv
 import requests
 import json
 import logging.config
 import yaml
+from redcapconnector.setup_logging import setup_logging
+
 
 # import the customise logger YAML dictionary configuration file
 # logging any error or any exception to a log file
-with open(f'{os.getcwd()}/redcapconnector/config/config_log.yaml', 'r') as f:
-    # with open('../config_log.yaml', 'r') as f:
-    config = yaml.safe_load(f.read())
-    logging.config.dictConfig(config)
+# with open(f'{sys.path[4]}/redcapconnector/config/config_log.yaml', 'r') as f:
+#     # with open('../config_log.yaml', 'r') as f:
+#     config = yaml.safe_load(f.read())
+#     logging.config.dictConfig(config)
+
+
+# setting up the logging
+setup_logging(os.path.join(os.path.dirname(__file__), "log", "redcap_connector.log"))
 
 logger = logging.getLogger(__name__)
+
 
 # load .env variables
 dotenv_path = os.path.abspath(f"{os.environ['HOME']}/.env")
@@ -57,7 +65,7 @@ def redcap_event(event, project_id):
         logger.error(f"Exception Occurred: {e}")
 
 
-def redcap_mbc_record_id(studyID):
+def redcap_mbc_record_id(study_id):
     try:
         # load the .env values
         env_config = dotenv_values("../.env")
@@ -69,7 +77,7 @@ def redcap_mbc_record_id(studyID):
             'format': 'json',
             'type': 'flat',
             'csvDelimiter': '',
-            'records': studyID,
+            'records': study_id,
             'fields': '',
             'forms': '',
             'events': '',
@@ -94,7 +102,7 @@ def redcap_mbc_record_id(studyID):
         logging.error(f"Connection Error Occurred: {error}")
 
 
-def getEvents():
+def get_events():
     try:
         # load the .env values
         env_config = dotenv_values("../.env")
@@ -110,7 +118,7 @@ def getEvents():
             'arms': '',  # change the key:value ('arms':'') to pull all events in the database (arms[0]:'2')
             'returnFormat': 'json'
         }
-        r = requests.post(env_config['LAB_API_URL'], data=data)
+        r = requests.post(os.environ['LAB_API_URL'], data=data)
         # print('HTTP Status: ' + str(r.status_code))
         # print(json.dumps(r.json(), indent=2))
 
@@ -124,7 +132,7 @@ def getEvents():
         logger.error(f"Exception Occurred: {e}")
 
 
-def getRedcapArms():
+def get_redcap_arms():
     try:
         # load the .env values
         env_config = dotenv_values("../.env")
@@ -159,8 +167,8 @@ logging.shutdown()
 if __name__ == '__main__':
     # redcap_event("T6", 'M19')
     # redcap_mbc_record_id("M19-20001-T0")
-    data1 = getEvents()
-    data2 = getRedcapArms()
+    data1 = get_events()
+    data2 = get_redcap_arms()
 
     print(json.dumps(data1, indent=4))
     print(data2)

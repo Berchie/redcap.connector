@@ -2,7 +2,7 @@ import click
 import redcapconnector.senaite_connect as senaite_connect
 import redcapconnector.pull_data_senaite as get_result
 import redcapconnector.check_status as cs
-import export_csv as ec
+import redcapconnector.export_csv as ec
 
 
 # add the path of the new different folder (the folder from where we want to import the modules)
@@ -34,11 +34,10 @@ def cli() -> None:
     """
 
 
-
 cli.add_command(senaite_connect.senaite_connect)
-cli.add_command(get_result.get_analyses_result)
+cli.add_command(get_result.transfer_result)
 cli.add_command(cs.status)
-cli.add_command(ec.download_csv)
+cli.add_command(ec.export_csv)
 
 if __name__ == '__main__':
     cli()

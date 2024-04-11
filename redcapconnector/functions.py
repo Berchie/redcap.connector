@@ -8,16 +8,19 @@ import sys
 from urllib.error import *
 from urllib.request import urlopen as url
 from time import localtime, strftime
-
+from redcapconnector.setup_logging import setup_logging
 # from pull_data_senaite import get_analyses_result
+
 
 # import the customise logger YAML dictionary configuration file
 # logging any error or any exception to a log file
-if os.path.exists(f'{os.getcwd()}/recapconnector/config/config_log.yaml'):
-    with open(f'{os.getcwd()}/recapconnector/config/config_log.yaml', 'r') as f:
-        config = yaml.safe_load(f.read())
-        logging.config.dictConfig(config)
+# if os.path.exists(f'{sys.path[4]}/recapconnector/config/config_log.yaml'):
+#     with open(f'{sys.path[4]}/recapconnector/config/config_log.yaml', 'r') as f:
+#         config = yaml.safe_load(f.read())
+#         logging.config.dictConfig(config)
 
+# setting up the logging
+setup_logging(os.path.join(os.path.dirname(__file__), "log", "redcap_connector.log"))
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +58,7 @@ def write_json(dictionary):
         # json_object = json.dumps(dictionary, indent=4)
 
         # writing to the import_data.json
-        with open(f"{os.getcwd()}/recapconnector/data/import_data.json", "a+") as importfile:
+        with open(os.path.join(os.path.dirname(__file__), "data", "import_data.json"), "a+") as importfile:
             # importfile.write(json_object)
             json.dump(dictionary, importfile, indent=4)
 
@@ -69,7 +72,7 @@ def write_json(dictionary):
 def write_result_csv(results, project_id):
     mbc_t6_t12 = ['T6', 'T7', 'T8', 'T9', 'T10', 'T11']
     mbc_fever_visits = ['F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12', 'F13', 'F14', 'F15']
-    csv_columns = read_json(f"{os.getcwd()}/recapconnector/config/redcap_variables.json")
+    csv_columns = read_json(os.path.join(os.path.dirname(__file__), "config", "redcap_variables.json"))
 
     # data from the json file
     # analysis_result = read_json(datafile)
@@ -98,7 +101,7 @@ def write_result_csv(results, project_id):
 
         os.chdir("../src")
         # print(os.path.abspath('..'))
-        file_path = f'{os.getcwd()}/recapconnector/data'
+        file_path = os.path.join(os.path.dirname(__file__), "data")
 
         # determine project analysis result
         # and it event or visit

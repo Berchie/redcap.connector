@@ -1,25 +1,39 @@
 import os
+import subprocess
+import sys
 from dotenv import dotenv_values, load_dotenv
 import requests
 import json
+import logging
 import logging.config
 import yaml
 import click
+import configparser
+from loguru import logger
+from redcapconnector.config.log_config import handlers
 
 # import the customize logger YAML dictionary configuration file
 # logging any error or any exception to a log file
-with open(f'{os.getcwd()}/redcapconnector/config/config_log.yaml', 'r') as f:
-    config = yaml.safe_load(f.read())
-    logging.config.dictConfig(config)
+# with open(f'{sys.path[4]}/redcapconnector/config/config_log.yaml', 'r') as f:
+# with open(os.path.join(os.path.dirname(__file__), 'config', 'config_log.yaml'), 'r') as f:
+#     config = yaml.safe_load(f.read())
+#     logging.config.dictConfig(config)
 
-logger = logging.getLogger(__name__)
+# setting up the logging
+log_file_path = os.path.join(os.path.dirname(__file__), "log", 'redcap_connector.log')
+logger.configure(
+    handlers=handlers,
+)
+
+# logger.remove(0)
+# logger.add(os.path.join(os.path.dirname(__file__), "log", 'redcap_connector.log'), format="{time:DD-MM-YYYY HH:mm:ss}   {name}     {level}: {message}")
 
 # load .env variables
 dotenv_path = os.path.abspath(f"{os.environ['HOME']}/.env")
 if os.path.abspath(f"{os.environ['HOME']}/.env"):
     load_dotenv(dotenv_path=dotenv_path)
 else:
-    raise logging.exception('Could not found the application environment variables!')
+    raise logger.exception('Could not found the application environment variables!')
 
 
 @click.command
@@ -39,50 +53,46 @@ def senaite_connect():
             # assigning cookies from the response header
             cookie = reqs.headers['Set-Cookie']
 
-            # search and replace the COOKIE_NAME & COOKIE_VALUE values
-            # in the .env file
-            search_cookie_name = os.environ['COOKIE_NAME']
+            # set a new the COOKIE NAME & COOKIE VALUE in ini file
             replace_cookie_name = cookie.replace(";", "=").split("=")[0]
 
-            search_cookie_value = os.environ['COOKIE_VALUE']
             replace_cookie_value = cookie.replace(";", "=").split("=")[1]
 
-            # os.environ['COOKIE_NAME'] = replace_cookie_name
-            # os.environ['COOKIE_VALUE'] = replace_cookie_value
+            # create instance of the configparser
+            config = configparser.ConfigParser()
 
-            # open the file in a read mode
-            with open(dotenv_path, 'r') as env_file:
-                # env_file = open(dotenv_path, "r")
+            config_file_path = os.path.join(os.path.dirname(__file__), 'config', 'cookie.ini')
 
-                # Reading the content of the file using the read() function them in a new variable
-                data = env_file.read()
+            # read the cookie.ini file
+            config.read(config_file_path)
 
-                # Searching and replacing the text using the replace() function
-                data = data.replace(search_cookie_name, replace_cookie_name)
-                data = data.replace(search_cookie_value, replace_cookie_value)
+            # escape the '%'
+            if '%' in replace_cookie_value:
+                replace_cookie_value = replace_cookie_value.replace("%", "%%")
 
-                # env_file.close()
+            # update the cookie.ini file
+            config.set('Cookie', 'name', replace_cookie_name)
+            config.set('Cookie', 'value', replace_cookie_value)
 
-            # open file in the write mode
-            with open(dotenv_path, 'w') as fw:
-                # fw = open(f"{os.path.abspath('..')}/.env", "w")
-                # Writing the replaced data in our text (.env) file
-                fw.write(data)
+            # write or update the cookie.ini Cookie section
+            with open(config_file_path, 'w') as configfile:
+                config.write(configfile)
 
-                # fw.close()
+            logger.success("Login into SENAITE successfully.")
 
     except ConnectionError as cr:
-        logging.error("Connection error while connecting to SENAITE LIMS.", exc_info=True)
+        logger.error("Connection error while connecting to SENAITE LIMS.", exc_info=True)
     except IOError as ioerror:
-        logger.error("An error occurred while reading the .evn file or write to the .env file", exc_info=True)
+        logger.error(f"An error occurred while reading the .evn file or write to the .env file. {ioerror}",)
     except Exception as err:
-        logging.exception("Exception occurred", exc_info=True)
+        logger.opt(exception=True).error(f"Exception occurred. {err}")
 
 
 # stop logging
-logging.shutdown()
+# logging.shutdown()
 
 if __name__ == '__main__':
     senaite_connect()
     # print(f"{os.path.dirname('..')}/.env")
     # print(f"{os.path.abspath('..')}/.env")
+    logger.error('senaite connect error')

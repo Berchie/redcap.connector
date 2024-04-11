@@ -2,15 +2,20 @@ import logging.config
 import os
 import shutil
 import sys
-
 import click
 import yaml
+from redcapconnector.setup_logging import setup_logging
+
 
 # import the customize logger YAML dictionary configuration file
 # logging any error or any exception to a log file
-with open(f'{sys.path[4]}/redcapconnector/config/config_log.yaml', 'r') as f:
-    config = yaml.safe_load(f.read())
-    logging.config.dictConfig(config)
+# with open(f'{sys.path[4]}/redcapconnector/config/config_log.yaml', 'r') as f:
+#     config = yaml.safe_load(f.read())
+#     logging.config.dictConfig(config)
+
+
+# setting up the logging
+setup_logging(os.path.join(os.path.dirname(__file__), "log", "redcap_connector.log"))
 
 logger = logging.getLogger(__name__)
 
@@ -22,11 +27,11 @@ logger = logging.getLogger(__name__)
     default=os.environ['HOME'],
     help=f"Path to store the CSV files (default:{os.environ['HOME']})"
 )
-def download_csv(destination):
+def export_csv(destination):
     try:
         # source [src] file or dir
         # src = f"{sys.path[4]}/data/csv/"
-        src_dir = os.path.join(sys.path[4], "redcapconnector", "data", "csv")
+        src_dir = os.path.join(os.path.dirname(__file__), "redcapconnector", "data", "csv")
         list_dir = os.listdir(src_dir)
 
         # destination [dst] file or dir
@@ -44,4 +49,4 @@ def download_csv(destination):
                 click.secho('No CSV file was found for export!', fg='blue')
 
     except Exception as e:
-        logger.exception("Error: ", e)
+        logger.exception("Exception occurred: %s", str(e))

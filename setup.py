@@ -38,10 +38,12 @@ setup(
         'python-dateutil>=2.9.0.post0',
         'PyYAML>=6.0.1',
         'tqdm>=4.66.2',
+        'loguru>=0.7.2',
+        'loguru-config>=0.1.0'
     ],
     entry_points={
         'console_scripts': [
-            'redcap-connector=redcapconnector.main:cli'
+            'redcon=redcapconnector.main:cli'
         ]
     }
 
