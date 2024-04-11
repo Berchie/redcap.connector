@@ -1,23 +1,10 @@
 import os
-import subprocess
-import sys
 from dotenv import dotenv_values, load_dotenv
 import requests
-import json
-import logging
-import logging.config
-import yaml
 import click
 import configparser
 from loguru import logger
 from redcapconnector.config.log_config import handlers
-
-# import the customize logger YAML dictionary configuration file
-# logging any error or any exception to a log file
-# with open(f'{sys.path[4]}/redcapconnector/config/config_log.yaml', 'r') as f:
-# with open(os.path.join(os.path.dirname(__file__), 'config', 'config_log.yaml'), 'r') as f:
-#     config = yaml.safe_load(f.read())
-#     logging.config.dictConfig(config)
 
 # setting up the logging
 log_file_path = os.path.join(os.path.dirname(__file__), "log", 'redcap_connector.log')
@@ -25,8 +12,6 @@ logger.configure(
     handlers=handlers,
 )
 
-# logger.remove(0)
-# logger.add(os.path.join(os.path.dirname(__file__), "log", 'redcap_connector.log'), format="{time:DD-MM-YYYY HH:mm:ss}   {name}     {level}: {message}")
 
 # load .env variables
 dotenv_path = os.path.abspath(f"{os.environ['HOME']}/.env")
@@ -36,7 +21,22 @@ else:
     raise logger.exception('Could not found the application environment variables!')
 
 
-@click.command
+example_context = """
+        \b
+        example 1: 
+        ------------
+            # login to SENAITE
+            redcon senaite-connect
+        
+        \b
+        example 2:
+        ------------
+            # help option for senaite-connect command
+            redcon senaite-connect -h
+"""
+
+
+@click.command(epilog=example_context)
 def senaite_connect():
     try:
         # load the .env values
@@ -81,9 +81,9 @@ def senaite_connect():
             logger.success("Login into SENAITE successfully.")
 
     except ConnectionError as cr:
-        logger.error("Connection error while connecting to SENAITE LIMS.", exc_info=True)
+        logger.error(f"Connection error while connecting to SENAITE LIMS. {cr}")
     except IOError as ioerror:
-        logger.error(f"An error occurred while reading the .evn file or write to the .env file. {ioerror}",)
+        logger.error(f"An error occurred while reading the .evn file or write to the .env file. {ioerror}", )
     except Exception as err:
         logger.opt(exception=True).error(f"Exception occurred. {err}")
 

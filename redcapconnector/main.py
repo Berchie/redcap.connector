@@ -5,11 +5,35 @@ import redcapconnector.check_status as cs
 import redcapconnector.export_csv as ec
 
 
-# add the path of the new different folder (the folder from where we want to import the modules)
-# sys.path.insert(0, './src')
+class bold_text:
+    BOLD = "\033[1m"
 
 
-@click.group('cli')
+CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
+
+cli_examples = """
+\b
+Examples:  
+  example 1:
+      login into SENAITE
+      $ redcon senaite-connect
+
+  example 2:
+      Transferring the results
+      $ redcon transfer-result -p M19 --period today
+
+  example 3:
+      check the status of yesterday's transfer
+      $ redcon status --days 1
+"""
+
+
+@click.group('cli', context_settings=CONTEXT_SETTINGS)
+@click.version_option(
+    '0.1.0',
+    '-v', '--version',
+    prog_name="redcap-connector"
+)
 def cli() -> None:
     """REDCap Connector
     
@@ -22,15 +46,39 @@ def cli() -> None:
     of the results.
 
     \b
-    redcapconnector commands -
+    redcon COMMAND [ARGS] [OPTIONS]
+
+    \b
+    ---------------------------------------------------
+    redcapconnector commands
+    ---------------------------------------------------
+    \b
     senaite-connect  -> login to senaite api
-    get-results [OPTIONS] -> retrieve the analyses results from senaite lims via api
-    status [OPTIONS] -> check the transfer of analyses results from senaite limns to REDCap was done or successful
-           [OPTIONS -> [--project, -p, 'M19' => MBC, 'P21' => PEDVAC] name of the project,
-                    -> [--period, -r, 'today', 'yesterday', 'this-week', 'this-month', 'this-year']
-                        period or date the sample or analysis was published,
-                    -> [--days, -d ] number of day(s) back to check the status of the transfer of analysis results
-           ]
+
+    \b
+    transfer-result [OPTIONS] -> retrieve the analyses results
+                                 from senaite lims via api
+
+    \b
+    status [OPTIONS] -> check the transfer of analyses results from
+                        senaite limns to REDCap was done or successful
+
+    \b
+    export_csv [OPTIONS] -> export the result csv file
+
+    \b
+    [ARGS]
+    ------------
+        --project, -p, ['M19' => MBC, 'P21' => PEDVAC]  => name of the project
+
+    \b
+    [OPTIONS]:
+    -------------
+        --period ['today', 'yesterday', 'this-week', 'this-month', 'this-year'] => period or date the sample or analysis was published,
+    \b
+        --days, -d => number of day(s) back to check the status of the transfer of analysis results,
+    \b
+        -o, --destination =>  Path to store the CSV files
     """
 
 
@@ -40,4 +88,4 @@ cli.add_command(cs.status)
 cli.add_command(ec.export_csv)
 
 if __name__ == '__main__':
-    cli()
+    cli(max_content_width=120, epilog=cli_examples)

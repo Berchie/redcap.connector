@@ -10,8 +10,7 @@ src/.DS_Store
 *.csv
 redcap_connector.egg-info/
 build
-dist
-
+.dist
 
 # IntelliJ project files
 .idea

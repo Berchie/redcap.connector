@@ -12,18 +12,13 @@ import yaml
 import logging
 import csv
 from redcapconnector.sendemail import email_notification
-from redcapconnector.setup_logging import setup_logging
-
-# import the customise logger YAML dictionary configuration file
-# logging any error or any exception to a log file
-# with open(f'{sys.path[4]}/redcapconnector/config/config_log.yaml', 'r') as f:
-#     yaml_config = yaml.safe_load(f.read())
-#     logging.config.dictConfig(yaml_config)
+from loguru import logger
+from redcapconnector.config.log_config import handlers
 
 # setting up the logging
-setup_logging(os.path.join(os.path.dirname(__file__), "log", "redcap_connector.log"))
-
-logger = logging.getLogger(__name__)
+logger.configure(
+    handlers=handlers,
+)
 
 # load .env variables
 dotenv_path = os.path.abspath(f"{os.environ['HOME']}/.env")
@@ -34,6 +29,7 @@ else:
 
 
 # writing the imported results to CSV file
+@logger.catch
 def result_csv():
     csv_file = os.path.join(os.path.dirname(__file__), "data", "csv", "haematology.csv")
 
@@ -71,6 +67,7 @@ def result_csv():
 
 
 # convert json data to CSV file for the daily run
+@logger.catch
 def json_csv():
     csv_file = os.path.join(os.path.dirname(__file__), "data", "daily_result", f"{strftime("%Y%m%d", localtime())}_haematology.csv")
 
@@ -150,7 +147,7 @@ def data_import(project_id):
                 count = len(res)
 
                 if r.status_code == 200:
-                    logging.info(f"{count} of {project_id} record(s) were imported successfully!!!")
+                    logger.success(f"{count} of {project_id} record(s) were imported successfully!!!")
 
                     import_success_msg = f"{count} of {project_id} record(s) were imported successfully!"
                     sample_ids = res
@@ -166,11 +163,10 @@ def data_import(project_id):
 
                 else:
                     error_msg = re.sub(r"[\\{}]", "", r.text)
-                    print(f'HTTP Status:{r.status_code} - {error_msg}')
+                    logger.error(f'HTTP Status:{r.status_code} - {error_msg}')
 
         else:
             logger.info(f'No {project_id} data to import.')
-            # click.echo(f'No {project_id} data to import.')
 
         # when record successful imported write it to csv(import_data_[date&time])
         # or json file(imported_fbc_data.json). use function for both.
@@ -181,9 +177,6 @@ def data_import(project_id):
     except Exception as error:
         logging.exception(f"Exception Occurred. {error}", exc_info=True)
 
-
-# stop logging
-# logging.shutdown()
 
 if __name__ == '__main__':
     # data_import('M19')

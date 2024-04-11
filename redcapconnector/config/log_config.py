@@ -10,8 +10,8 @@ handlers = [
         sink=log_file_path,
         format="{time:DD-MM-YYYY HH:mm:ss}   {name}     {level}: {message}",
         enqueue=True,
-        rotation="2 minutes",
-        retention="3 minutes"
+        rotation="10 MB",
+        retention="1 month"
     )
 ]
 

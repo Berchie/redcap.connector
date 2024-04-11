@@ -3,19 +3,10 @@ import re
 import datetime
 import sys
 import click
-import logging.config
-import yaml
 import notify2
 from pathlib import Path
 from loguru import logger
 from redcapconnector.config.log_config import handlers
-
-# import the customise logger YAML dictionary configuration file
-# logging any error or any exception to a log file
-# with open(os.path.join(os.path.dirname(__file__), 'config', 'config_log.yaml'), 'r') as f:
-#     config = yaml.safe_load(f.read())
-#     logging.config.dictConfig(config)
-
 
 # setting up the logging
 logger.configure(
@@ -34,7 +25,28 @@ def redcap_connector_notification(message) -> any:
         print(e)
 
 
-@click.command()
+status_example = """
+    \b
+    example 1:
+    ----------
+        # finding the 10-day transfer status
+        redcon status --days 10
+        
+    \b
+    example 2:
+    ----------
+        # finding yesterday's transfer status
+        redcon status --days 1
+        
+    \b
+    example 2:
+    ----------
+        # finding today's transfer status
+        redcon status --days 0
+"""
+
+
+@click.command(epilog=status_example)
 @click.option(
     '--days',
     type=int,

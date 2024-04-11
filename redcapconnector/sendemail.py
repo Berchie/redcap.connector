@@ -6,23 +6,15 @@ import ssl
 import sys
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-import yaml
 from dotenv import dotenv_values, load_dotenv
-from redcapconnector.setup_logging import setup_logging
-
-
-# import the customise logger YAML dictionary configuration file
-# logging any error or any exception to a log file
-# with open(os.path.join(os.path.dirname(__file__), 'config', 'config_log.yaml'), 'r') as f:
-#     yaml_config = yaml.safe_load(f.read())
-#     logging.config.dictConfig(yaml_config)
+from loguru import logger
+from redcapconnector.config.log_config import handlers
 
 
 # setting up the logging
-setup_logging(os.path.join(os.path.dirname(__file__), "log", "redcap_connector.log"))
-
-logger = logging.getLogger(__name__)
-
+logger.configure(
+    handlers=handlers,
+)
 
 # load the .env values(development)
 env_config = dotenv_values("../.env")
@@ -32,7 +24,7 @@ dotenv_path = os.path.abspath(f"{os.environ['HOME']}/.env")
 if os.path.abspath(f"{os.environ['HOME']}/.env"):
     load_dotenv(dotenv_path=dotenv_path)
 else:
-    raise logging.exception('Could not found the application environment variables!')
+    raise logger.exception('Could not found the application environment variables!')
 
 
 def email_notification(msg, record_id):
@@ -45,7 +37,7 @@ def email_notification(msg, record_id):
     port = int(os.environ['PORT'])
     sender_email = os.environ['SENDER_EMAIL']
     password = os.environ['PASSWORD']
-    receiver_email = [os.environ['RECEIVER_EMAIL'],  os.environ['CC_EMAIL']]
+    receiver_email = [os.environ['RECEIVER_EMAIL'], os.environ['CC_EMAIL']]
     # cc_email = env_config['CC_EMAIL']
 
     message = MIMEMultipart('alternative')
@@ -102,7 +94,8 @@ def email_notification(msg, record_id):
         server.sendmail(sender_email, receiver_email, message.as_string())
 
     except Exception as e:
-        logger.error(f'Error Occurred: {e}')
+        logger.exception(f'Error Occurred: {e}')
 
-    if __name__ == '__main__':
-        email_notification('test mic 1 2 1 2', [1, 2, 3, 4, 5])
+
+if __name__ == '__main__':
+    email_notification('test mic 1 2 1 2', [1, 2, 3, 4, 5])

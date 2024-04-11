@@ -14,21 +14,13 @@ import click
 from dotenv import dotenv_values
 from redcapconnector.importdata import data_import
 from tqdm import tqdm, trange
-from redcapconnector.setup_logging import setup_logging
-
-# load the .env values
-config = dotenv_values("../.env")
-
-# import the customise logger YAML dictionary configuration file
-# logging any error or any exception to a log file
-# with open(os.path.join(os.path.dirname(__file__), 'config', 'config_log.yaml'), 'r') as f:
-#     yaml_config = yaml.safe_load(f.read())
-#     logging.config.dictConfig(yaml_config)
+from loguru import logger
+from redcapconnector.config.log_config import handlers
 
 # setting up the logging
-setup_logging(os.path.join(os.path.dirname(__file__), "log", "redcap_connector.log"))
-
-logger = logging.getLogger(__name__)
+logger.configure(
+    handlers=handlers,
+)
 
 # load .env variables
 dotenv_path = os.path.abspath(f"{os.environ['HOME']}/.env")
@@ -37,11 +29,9 @@ if os.path.abspath(f"{os.environ['HOME']}/.env"):
 else:
     raise logging.exception('Could not found the application environment variables!')
 
-
 # load the cookie.ini file values
 cookie_config = configparser.ConfigParser()
 cookie_config.read(os.path.join(os.path.dirname(__file__), "config", "cookie.ini"))
-
 
 # create variables
 clients = {}
@@ -116,6 +106,7 @@ def get_sample_type():
 
 
 # get the redcap events
+@logger.catch
 def project_events():
     events = get_events()
 
@@ -128,6 +119,7 @@ def project_events():
 
 
 # get the project redcap arm number
+@logger.catch
 def project_event_arm(project):
     arm_number = get_redcap_arms()
 
@@ -138,6 +130,7 @@ def project_event_arm(project):
 
 
 # get the project redcap event names
+@logger.catch
 def project_event_name(event, arm_number):
     events = get_events()
 
@@ -154,7 +147,34 @@ def project_event_name(event, arm_number):
 # parameters for get_analysis_result() => project_id, from_date to_date (date range to filter the json data),
 # use keyword get the variable name of the analysis use unit to get the unit of the analysis
 
-@click.command()
+transfer_example_context = """
+    \b
+    example 1:
+    -------------
+        # transferring results without the period.[default period value: today]
+        redcon transfer-result -p M19
+    
+    \b
+    example 2:
+    -------------
+        # transferring result that was publish today
+        redcon transfer-result -p M19 --period today
+    
+     \b
+    example 3:
+    -------------
+        # transferring result that was publish three months ago or this month 
+        redcon transfer-result -p M19 --period this-month
+    
+     \b
+    example 4:
+    -------------
+        # help option for transfer-result command
+        redcon transfer-result -h
+"""
+
+
+@click.command(epilog=transfer_example_context)
 @click.option(
     '-p', '--project',
     type=click.Choice(['M19', 'P21']),
@@ -254,7 +274,7 @@ def transfer_result(project, period):
                                 if len(client_sample_id) > 11 and not len(client_sample_id) >= 14:
 
                                     # replace the last characters of the client sample id (record id used by REDCap) with 'T0'
-                                    record_id = client_sample_id.replace(client_sample_id[10:],"T0")
+                                    record_id = client_sample_id.replace(client_sample_id[10:], "T0")
                                     analyses_data['l_barcode'] = record_id
 
                                     # slice the study id to get event name to search for the redcap event name
@@ -339,9 +359,6 @@ def transfer_result(project, period):
     except Exception as error:
         logger.exception(f"Exception occurred. {error}", exc_info=True)
 
-
-# stop logging
-logging.shutdown()
 
 if __name__ == '__main__':
     time_start_ = time.perf_counter()
