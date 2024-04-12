@@ -114,6 +114,3 @@ def senaite_connect():
 
 if __name__ == '__main__':
     senaite_connect()
-    # print(f"{os.path.dirname('..')}/.env")
-    # print(f"{os.path.abspath('..')}/.env")
-    logger.error('senaite connect error')

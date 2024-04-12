@@ -11,6 +11,7 @@ setup(
         include=[
             'redcapconnector',
             'redcapconnector.*',
+            'redcapconnector/asset'
             'redcapconnector/config',
             'redcapconnector/data',
             'redcapconnector/data/csv',

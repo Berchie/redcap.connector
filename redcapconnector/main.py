@@ -5,27 +5,7 @@ import redcapconnector.check_status as cs
 import redcapconnector.export_csv as ec
 
 
-class bold_text:
-    BOLD = "\033[1m"
-
-
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
-
-cli_examples = """
-\b
-Examples:  
-  example 1:
-      login into SENAITE
-      $ redcon senaite-connect
-
-  example 2:
-      Transferring the results
-      $ redcon transfer-result -p M19 --period today
-
-  example 3:
-      check the status of yesterday's transfer
-      $ redcon status --days 1
-"""
 
 
 @click.group('cli', context_settings=CONTEXT_SETTINGS)
@@ -35,10 +15,10 @@ Examples:
     prog_name="redcap-connector"
 )
 def cli() -> None:
-    """REDCap Connector
+    """redcap-connector
     
     \b
-    REDCap Connector is a middleware that facilitates the seamless
+    redcap-connector is a middleware that facilitates the seamless
     integration of SENAITE and REDCap project databases, allowing 
     for the efficient transfer of analysis results. This software 
     acts as a bridge between the two platforms, streamlining the 
@@ -89,4 +69,4 @@ cli.add_command(ec.export_csv)
 
 if __name__ == '__main__':
     # max_content_width=120
-    cli(epilog=cli_examples)
+    cli()

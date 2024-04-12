@@ -147,7 +147,7 @@ def status(days):
                 else:
                     # print(f'Both MBC and PEDVAC lab results transferred from the SENAITE\n to REDCap was sucessful on the {check_date}')
 
-                    message = f'\n Both MBC and PEDVAC lab results transferred from\n the SENAITE to REDCap was sucessful on the {check_date}'
+                    message = f'\nBoth MBC and PEDVAC lab results transferred from\n the SENAITE to REDCap was sucessful on the {check_date}'
                     redcap_connector_notification(message=message)
 
             elif successful_count == 0:
