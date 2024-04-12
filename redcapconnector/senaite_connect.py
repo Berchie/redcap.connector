@@ -25,19 +25,40 @@ example_context = """
         \b
         example 1: 
         ------------
-            # login to SENAITE
+            login to SENAITE
             redcon senaite-connect
         
         \b
         example 2:
         ------------
-            # help option for senaite-connect command
-            redcon senaite-connect -h
+            help option for senaite-connect command
+            $ redcon senaite-connect -h
 """
 
 
-@click.command(epilog=example_context)
+@click.command(options_metavar='<options>')
 def senaite_connect():
+
+    # display info
+    """
+    \b
+    login to SENAITE LIMS.
+
+    \b
+    syntax:
+        redcon senaite-connect <options>[-h|--help]
+    \b
+    Examples:
+        \b
+        example 1:
+            login to SENAITE
+            $ redcon senaite-connect
+        \b
+        example 2:
+            help option for senaite-connect command
+            $ redcon senaite-connect -h
+    """
+
     try:
         # load the .env values
         env_config = dotenv_values("../.env")

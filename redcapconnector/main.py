@@ -44,41 +44,6 @@ def cli() -> None:
     acts as a bridge between the two platforms, streamlining the 
     process of data transfer and ensuring the accuracy and integrity 
     of the results.
-
-    \b
-    redcon COMMAND [ARGS] [OPTIONS]
-
-    \b
-    ---------------------------------------------------
-    redcapconnector commands
-    ---------------------------------------------------
-    \b
-    senaite-connect  -> login to senaite api
-
-    \b
-    transfer-result [OPTIONS] -> retrieve the analyses results
-                                 from senaite lims via api
-
-    \b
-    status [OPTIONS] -> check the transfer of analyses results from
-                        senaite limns to REDCap was done or successful
-
-    \b
-    export_csv [OPTIONS] -> export the result csv file
-
-    \b
-    [ARGS]
-    ------------
-        --project, -p, ['M19' => MBC, 'P21' => PEDVAC]  => name of the project
-
-    \b
-    [OPTIONS]:
-    -------------
-        --period ['today', 'yesterday', 'this-week', 'this-month', 'this-year'] => period or date the sample or analysis was published,
-    \b
-        --days, -d => number of day(s) back to check the status of the transfer of analysis results,
-    \b
-        -o, --destination =>  Path to store the CSV files
     """
 
 
@@ -87,5 +52,41 @@ cli.add_command(get_result.transfer_result)
 cli.add_command(cs.status)
 cli.add_command(ec.export_csv)
 
+# descriptive of the middleware that has been committed out
+# \b
+# syntax:
+#     redcon COMMAND [ARGS] [OPTIONS]
+#
+# \b
+# COMMAND:
+# -----------
+# \b
+# senaite-connect  -> login to SENAITE LIMS
+#
+# \b
+# transfer-result [OPTIONS] -> transfer analysis results from SENAITE LIMS to REDCap
+#
+# \b
+# status [OPTIONS] -> check whether transfer of analysis results from
+#                     SENAITE LIMS to REDCap was done or successful
+#
+# \b
+# export_csv [OPTIONS] -> export the CSV file containing the transferred results
+#
+# \b
+# [ARGS]
+# ------------
+#     dst =>  Path to store the CSV files
+#
+# \b
+# [OPTIONS]:
+# -------------
+#     --project, -p, ['M19' => MBC, 'P21' => PEDVAC]  => name of the project
+# \b
+#     --period ['today', 'yesterday', 'this-week', 'this-month', 'this-year'] => period or date the sample or analysis was published,
+# \b
+#     --days, -d => number of day(s) back to check the status of the transfer of analysis results,
+
 if __name__ == '__main__':
-    cli(max_content_width=120, epilog=cli_examples)
+    # max_content_width=120
+    cli(epilog=cli_examples)

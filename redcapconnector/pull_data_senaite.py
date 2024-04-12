@@ -174,7 +174,7 @@ transfer_example_context = """
 """
 
 
-@click.command(epilog=transfer_example_context)
+@click.command(options_metavar='<options>')
 @click.option(
     '-p', '--project',
     type=click.Choice(['M19', 'P21']),
@@ -186,9 +186,38 @@ transfer_example_context = """
     type=click.Choice(['today', 'yesterday', 'this-week', 'this-month', 'this-year']),
     default='today',
     show_default=True,
-    help='period or date the sample or analysis was published'
+    help='period or date the sample or analyses was published'
 )
 def transfer_result(project, period):
+
+    # display info
+    """
+    \b
+    transfer analysis results from SENAITE LIMS to REDCap
+
+    \b
+    syntax:
+        redcon transfer-result <options1>[-p|--project|-h|--help] <options2>[--period]
+    \b
+    Examples:
+        \b
+        example 1:
+            transferring results without the period.[default period value: today]
+            $ redcon transfer-result -p M19
+        \b
+        example 2:
+            transferring result that was published today
+            $ redcon transfer-result -p M19 --period today
+        \b
+        example 3:
+            transferring result that was published three months ago or this month
+            $ redcon transfer-result -p M19 --period this-month
+        \b
+        example 4:
+            help option for transfer-result command
+            $ redcon transfer-result -h
+    """
+
     mbc_t6_t12 = ['T6', 'T7', 'T8', 'T9', 'T10', 'T11']
     mbc_fever_visits = ['F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12', 'F13', 'F14', 'F15']
 

@@ -25,37 +25,40 @@ def redcap_connector_notification(message) -> any:
         print(e)
 
 
-status_example = """
-    \b
-    example 1:
-    ----------
-        # finding the 10-day transfer status
-        redcon status --days 10
-        
-    \b
-    example 2:
-    ----------
-        # finding yesterday's transfer status
-        redcon status --days 1
-        
-    \b
-    example 2:
-    ----------
-        # finding today's transfer status
-        redcon status --days 0
-"""
-
-
-@click.command(epilog=status_example)
+@click.command(options_metavar='<options>')
 @click.option(
     '--days',
     type=int,
     # required=True,
     default=1,
     show_default=True,
-    help="number of day(s) back to check the status of the transfer of analysis results"
+    help="number of day(s) back to check the status of the transfer of analysis results",
+    metavar='<int>'
 )
 def status(days):
+    # display info
+    """
+    \b
+    check whether transfer of analysis results from SENAITE LIMS to REDCap was done or successful.
+    \b
+    syntax:
+        redcon status <options> [--days|-h|--help] <int>
+    \b
+    Examples:
+    \b
+      example 1:
+        finding the 10-day transfer status
+        $ redcon status --days 10
+    \b
+      example 2:
+        finding yesterday's transfer status
+        $ redcon status --days 1
+    \b
+      example 3:
+        finding today's transfer status
+        $ redcon status --days 0
+    """
+
     # m19_csv = 'import_m19_data.csv'
     # p21_csv = 'import_p21_data.csv'
     try:
