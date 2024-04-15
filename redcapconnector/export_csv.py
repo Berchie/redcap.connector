@@ -67,8 +67,9 @@ def export_csv(dst):
                         src = os.path.join(os.path.dirname(__file__), "data", "csv", csv_file)
 
                         # copy file from src to dst
-                        cp_info = shutil.copy(src=src, dst=dst)
-                        logger.success(f'CSV file has successfully exported. The exported {csv_file} is located at {cp_info}')
+                        if os.path.isfile(src):
+                            cp_info = shutil.copy(src=src, dst=dst)
+                            logger.success(f'CSV file has successfully exported. The exported {csv_file} is located at {cp_info}')
 
                         f_count += 1
 
