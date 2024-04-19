@@ -8,28 +8,22 @@ import sys
 from urllib.error import *
 from urllib.request import urlopen as url
 from time import localtime, strftime
+from loguru import logger
+from redcapconnector.config.log_config import handlers
 
-# from pull_data_senaite import get_analyses_result
-
-# import the customise logger YAML dictionary configuration file
-# logging any error or any exception to a log file
-if os.path.exists(f'{os.path.dirname(__file__)}/config/config_log.yaml'):
-    with open(f'{os.path.dirname(__file__)}/config/config_log.yaml', 'r') as f:
-        config = yaml.safe_load(f.read())
-        logging.config.dictConfig(config)
-
-
-logger = logging.getLogger(__name__)
+# setting up the logging
+logger.configure(
+    handlers=handlers,
+)
 
 
 def is_not_empty_file(filepath):
     try:
         return os.path.isfile(filepath) and os.path.getsize(filepath) > 0
     except IOError as err:
-        print(f"An error occurred while locating the file - {err}")
-        logger.error("An error occurred while locating the file.", exc_info=True)
+        logger.error(f"An error occurred while locating the file: {err}", exc_info=True)
     except Exception as Argument:
-        logger.exception(f"An error occurred while locating the file - {Argument}", exc_info=True)
+        logger.exception(f"An error occurred while locating the file: {Argument}", exc_info=True)
 
 
 def read_json(file_path):
@@ -55,7 +49,7 @@ def write_json(dictionary):
         # json_object = json.dumps(dictionary, indent=4)
 
         # writing to the import_data.json
-        with open(f"{os.path.abspath('..')}/data/import_data.json", "a+") as importfile:
+        with open(os.path.join(os.path.dirname(__file__), "data", "import_data.json"), "a+") as importfile:
             # importfile.write(json_object)
             json.dump(dictionary, importfile, indent=4)
 
@@ -69,7 +63,7 @@ def write_json(dictionary):
 def write_result_csv(results, project_id):
     mbc_t6_t12 = ['T6', 'T7', 'T8', 'T9', 'T10', 'T11']
     mbc_fever_visits = ['F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12', 'F13', 'F14', 'F15']
-    csv_columns = read_json(f"{os.path.abspath('..')}/config/redcap_variables.json")
+    csv_columns = read_json(os.path.join(os.path.dirname(__file__), "config", "redcap_variables.json"))
 
     # data from the json file
     # analysis_result = read_json(datafile)
@@ -96,9 +90,7 @@ def write_result_csv(results, project_id):
     # csv_filename = ""
     try:
 
-        os.chdir("../src")
-        # print(os.path.abspath('..'))
-        file_path = f'{os.path.abspath('..')}/data'
+        file_path = os.path.join(os.path.dirname(__file__), "data")
 
         # determine project analysis result
         # and it event or visit
@@ -123,7 +115,8 @@ def write_result_csv(results, project_id):
                                     # for row in analysis_result[r]:
                                     lt_data = data_result  # typecast the string to dict
                                     # csv_writer.writerow(lt_data.values())  # use values of the dict
-                                    csv_writer.writerow([lt_data.get(col, 0) for col in mbc_t6_t12_columns])  # make a list value in the order of the dict columns and write them
+                                    csv_writer.writerow([lt_data.get(col, 0) for col in
+                                                         mbc_t6_t12_columns])  # make a list value in the order of the dict columns and write them
 
                             else:
 
@@ -132,7 +125,8 @@ def write_result_csv(results, project_id):
                                     cs_writer.writerow(mbc_t6_t12_columns)
                                     new_lt_data = data_result  # typecast the string to dict
                                     # cs_writer.writerow(lt_data)  # use the dict
-                                    cs_writer.writerow([new_lt_data.get(col, 0) for col in mbc_t6_t12_columns])  # make a list value in the order of the dict columns and write them
+                                    cs_writer.writerow([new_lt_data.get(col, 0) for col in
+                                                        mbc_t6_t12_columns])  # make a list value in the order of the dict columns and write them
 
                         elif str(data_result['redcap_event_name'])[0:3].rstrip('_').upper() in mbc_fever_visits:
 
@@ -147,7 +141,8 @@ def write_result_csv(results, project_id):
                                     writer = csv.writer(csvfile)
                                     lf_data = dict(data_result)  # typecast the string to dict
                                     # writer.writerow(lf_data.values())  # use values of the dict
-                                    writer.writerow([lf_data.get(col, 0) for col in mbc_fever_visits_columns])  # make a list value in the order of the dict columns and write them
+                                    writer.writerow([lf_data.get(col, 0) for col in
+                                                     mbc_fever_visits_columns])  # make a list value in the order of the dict columns and write them
 
                             else:
 
@@ -157,7 +152,8 @@ def write_result_csv(results, project_id):
                                     cs_writer.writerow(mbc_fever_visits_columns)
                                     new_data = data_result  # typecast the string to list
                                     # cs_writer.writerow(new_data)  # use the dict
-                                    cs_writer.writerow([new_data.get(col, 0) for col in mbc_fever_visits_columns])  # make a list value in the order of the dict columns and write them
+                                    cs_writer.writerow([new_data.get(col, 0) for col in
+                                                        mbc_fever_visits_columns])  # make a list value in the order of the dict columns and write them
                 else:
                     # pedvac columns
                     pedvac_columns = csv_columns["PEDVAC"].values()
@@ -171,7 +167,8 @@ def write_result_csv(results, project_id):
                             # for row in analysis_result[r]:
                             lab_data = data_result  # typecast the string to dict
                             # csv_writer.writerow(lt_data.values())  # use values of the dict
-                            pcsv_writer.writerow([lab_data.get(col, 0) for col in pedvac_columns])  # make a list value in the order of the dict columns and write them
+                            pcsv_writer.writerow(
+                                [lab_data.get(col, 0) for col in pedvac_columns])  # make a list value in the order of the dict columns and write them
 
                     else:
 
@@ -180,14 +177,15 @@ def write_result_csv(results, project_id):
                             pcs_writer.writerow(pedvac_columns)
                             lab_data = data_result  # typecast the string to dict
                             # cs_writer.writerow(lt_data)  # use the dict
-                            pcs_writer.writerow([lab_data.get(col, 0) for col in pedvac_columns])  # make a list value in the order of the dict columns and write them
+                            pcs_writer.writerow(
+                                [lab_data.get(col, 0) for col in pedvac_columns])  # make a list value in the order of the dict columns and write them
 
     except IOError as ioe:
         logger.debug(f"An error occurred while writing to the file. {ioe}", exc_info=True)
     except Exception as e:
         logger.exception(f'An error occurred while writing to the file. {e}', exc_info=True)
     else:
-        logger.info("Data successfully written to CSV file!!!")
+        logger.success("Data successfully written to CSV file!!!")
 
 
 # this function is to sort the analysis by their SortKey
@@ -266,9 +264,6 @@ def check_senaite_connection():
     # finally:
     #    s.close()
 
-
-# stop logging
-logging.shutdown()
 
 if __name__ == '__main__':
     data = [

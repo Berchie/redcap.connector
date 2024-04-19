@@ -2,14 +2,26 @@ from setuptools import setup, find_packages
 
 setup(
     name='redcap-connector',
-    version='1.2.0',
+    version='0.1.1',
     author='Berchie Agyemang',
     author_email='berchie@bnitm.de',
     description='Middleware for transferring analysis results from LIMS to REDCap',
-    python_require='>=3.10',
-    packages=find_packages(include=['redcapconnector', 'redcapconnector.*'],exclude=['src','src/*']),
+    python_requires='>=3.10',
+    packages=find_packages(
+        include=[
+            'redcapconnector',
+            'redcapconnector.*',
+            'redcapconnector/asset'
+            'redcapconnector/config',
+            'redcapconnector/data',
+            'redcapconnector/data/csv',
+            'redcapconnector/data/daily_result',
+            'redcapconnector/log'
+        ],
+        exclude=['src', 'src/*']
+    ),
     py_modules=[
-        'main',
+        'redcapconnector.main',
         'redcapconnector.check_status',
         'redcapconnector.extract_redcap_data',
         'redcapconnector.functions',
@@ -27,10 +39,12 @@ setup(
         'python-dateutil>=2.9.0.post0',
         'PyYAML>=6.0.1',
         'tqdm>=4.66.2',
+        'loguru>=0.7.2',
+        'loguru-config>=0.1.0'
     ],
     entry_points={
         'console_scripts': [
-            'redcap-connector=main:cli'
+            'redcon=redcapconnector.main:cli'
         ]
     }
 

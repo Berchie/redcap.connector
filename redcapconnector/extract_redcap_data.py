@@ -1,30 +1,34 @@
 import os
-from dotenv import dotenv_values
+import sys
+from dotenv import dotenv_values, load_dotenv
 import requests
 import json
-import logging.config
-import yaml
+from loguru import logger
+from redcapconnector.config.log_config import handlers
 
-# import the customise logger YAML dictionary configuration file
-# logging any error or any exception to a log file
-with open(f'{os.path.dirname(__file__)}/config/config_log.yaml', 'r') as f:
-    # with open('../config_log.yaml', 'r') as f:
-    config = yaml.safe_load(f.read())
-    logging.config.dictConfig(config)
+# setting up the logging
+logger.configure(
+    handlers=handlers,
+)
 
-logger = logging.getLogger(__name__)
+# load .env variables
+dotenv_path = os.path.abspath(f"{os.environ['HOME']}/.env")
+if os.path.abspath(f"{os.environ['HOME']}/.env"):
+    load_dotenv(dotenv_path=dotenv_path)
+else:
+    raise logger.exception('Could not found the application environment variables!')
 
 
 def redcap_event(event, project_id):
     api_token = None
     try:
         # load the .env values
-        env_config = dotenv_values(f"{os.path.abspath('..')}/.env")
+        env_config = dotenv_values("../.env")
 
         if project_id == 'M19':
-            api_token = env_config['M19_API_TOKEN']
+            api_token = os.environ['M19_API_TOKEN']
         elif project_id == 'P21':
-            api_token = env_config['P21_API_TOKEN']
+            api_token = os.environ['P21_API_TOKEN']
 
         data = {
             'token': api_token,
@@ -47,22 +51,22 @@ def redcap_event(event, project_id):
     except ConnectionError as cr:
         logger.error(f"Connection Error to REDCap database. Check your internet connection: {cr}")
     except Exception as e:
-        logger.error(f"Exception Occurred: {e}")
+        logger.exception(f"Exception Occurred: {e}")
 
 
-def redcap_mbc_record_id(studyID):
+def redcap_mbc_record_id(study_id):
     try:
         # load the .env values
-        env_config = dotenv_values(f"{os.path.abspath('..')}/.env")
+        env_config = dotenv_values("../.env")
 
         data = {
-            'token': env_config['API_TOKEN'],
+            'token': os.environ['API_TOKEN'],
             'content': 'record',
             'action': 'export',
             'format': 'json',
             'type': 'flat',
             'csvDelimiter': '',
-            'records': studyID,
+            'records': study_id,
             'fields': '',
             'forms': '',
             'events': '',
@@ -82,19 +86,19 @@ def redcap_mbc_record_id(studyID):
 
     except ConnectionError as cr:
         print("Connection Error to REDCap database. Check your internet connection")
-        logging.debug(f"Connection Error to REDCap database. Check your internet connection: {cr}")
+        logger.debug(f"Connection Error to REDCap database. Check your internet connection: {cr}")
     except Exception as error:
-        logging.error(f"Connection Error Occurred: {error}")
+        logger.exception(f"Connection Error Occurred: {error}")
 
 
-def getEvents():
+def get_events():
     try:
         # load the .env values
-        env_config = dotenv_values(f"{os.path.abspath('..')}/.env")
+        env_config = dotenv_values("../.env")
 
         # env_config = dotenv_values("../.env")
 
-        api_token = env_config['LAB_API_TOKEN']
+        api_token = os.environ['LAB_API_TOKEN']
 
         data = {
             'token': api_token,
@@ -103,7 +107,7 @@ def getEvents():
             'arms': '',  # change the key:value ('arms':'') to pull all events in the database (arms[0]:'2')
             'returnFormat': 'json'
         }
-        r = requests.post(env_config['LAB_API_URL'], data=data)
+        r = requests.post(os.environ['LAB_API_URL'], data=data)
         # print('HTTP Status: ' + str(r.status_code))
         # print(json.dumps(r.json(), indent=2))
 
@@ -114,17 +118,17 @@ def getEvents():
     except ConnectionError as cr:
         logger.error(f"Connection Error to REDCap database. Check your internet connection: {cr}")
     except Exception as e:
-        logger.error(f"Exception Occurred: {e}")
+        logger.exception(f"Exception Occurred: {e}")
 
 
-def getRedcapArms():
+def get_redcap_arms():
     try:
         # load the .env values
-        env_config = dotenv_values(f"{os.path.abspath('..')}/.env")
+        env_config = dotenv_values("../.env")
 
         # env_config = dotenv_values("../.env")
 
-        api_token = env_config['LAB_API_TOKEN']
+        api_token = os.environ['LAB_API_TOKEN']
 
         data = {
             'token': api_token,
@@ -132,7 +136,7 @@ def getRedcapArms():
             'format': 'json',
             'returnFormat': 'json'
         }
-        r = requests.post(env_config['LAB_API_URL'], data=data)
+        r = requests.post(os.environ['LAB_API_URL'], data=data)
         # print('HTTP Status: ' + str(r.status_code))
         # print(json.dumps(r.json(), indent=2))
 
@@ -143,17 +147,14 @@ def getRedcapArms():
     except ConnectionError as cr:
         logger.error(f"Connection Error to REDCap database. Check your internet connection: {cr}")
     except Exception as e:
-        logger.error(f"Exception Occurred: {e}")
+        logger.exception(f"Exception Occurred: {e}")
 
-
-# stop logging
-logging.shutdown()
 
 if __name__ == '__main__':
     # redcap_event("T6", 'M19')
     # redcap_mbc_record_id("M19-20001-T0")
-    data1 = getEvents()
-    data2 = getRedcapArms()
+    data1 = get_events()
+    data2 = get_redcap_arms()
 
     print(json.dumps(data1, indent=4))
     print(data2)

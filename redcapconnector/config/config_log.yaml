@@ -10,13 +10,13 @@ handlers:
   console:
     class: logging.StreamHandler
     formatter: brief
-    level: INFO
+    level: DEBUG
     stream: ext://sys.stdout
   file:
     class: logging.handlers.RotatingFileHandler
     formatter: precise
-    level: DEBUG
-    filename: './redcapconnector/log/redcap_connector.log'
+    level: INFO
+    filename: 'redcapconnector/log/redcap_connector.log'
     maxBytes: 10240
     # backupCount: 3
 loggers:

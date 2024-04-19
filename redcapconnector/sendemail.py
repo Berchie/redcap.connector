@@ -3,23 +3,28 @@ import logging.config
 import os
 import smtplib
 import ssl
+import sys
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-
-import yaml
-from dotenv import dotenv_values
-
-# import the customise logger YAML dictionary configuration file
-# logging any error or any exception to a log file
-with open(f'{os.path.dirname(__file__)}/config/config_log.yaml', 'r') as f:
-    yaml_config = yaml.safe_load(f.read())
-    logging.config.dictConfig(yaml_config)
-
-logger = logging.getLogger(__name__)
+from dotenv import dotenv_values, load_dotenv
+from loguru import logger
+from redcapconnector.config.log_config import handlers
 
 
-# load the .env values
-env_config = dotenv_values(f"{os.path.abspath('..')}/.env")
+# setting up the logging
+logger.configure(
+    handlers=handlers,
+)
+
+# load the .env values(development)
+env_config = dotenv_values("../.env")
+
+# load .env variables(prod)
+dotenv_path = os.path.abspath(f"{os.environ['HOME']}/.env")
+if os.path.abspath(f"{os.environ['HOME']}/.env"):
+    load_dotenv(dotenv_path=dotenv_path)
+else:
+    raise logger.exception('Could not found the application environment variables!')
 
 
 def email_notification(msg, record_id):
@@ -28,18 +33,18 @@ def email_notification(msg, record_id):
     for sample_id in record_id:
         records += sample_id + '<br>'
 
-    smtp_server = env_config['SMTP_SERVER']
-    port = int(env_config['PORT'])
-    sender_email = env_config['SENDER_EMAIL']
-    password = env_config['PASSWORD']
-    receiver_email = env_config['RECEIVER_EMAIL']
-    cc_email = env_config['CC_EMAIL']
+    smtp_server = os.environ['SMTP_SERVER']
+    port = int(os.environ['PORT'])
+    sender_email = os.environ['SENDER_EMAIL']
+    password = os.environ['PASSWORD']
+    receiver_email = [os.environ['RECEIVER_EMAIL'], os.environ['CC_EMAIL']]
+    # cc_email = env_config['CC_EMAIL']
 
     message = MIMEMultipart('alternative')
     message['Subject'] = f'{datetime.date.today()} - New Records Imported into Laboratory Result REDCap Database'
     message['From'] = sender_email
-    message['To'] = receiver_email
-    message['Cc'] = cc_email
+    message['To'] = ','.join(receiver_email)
+    # message['Cc'] = cc_email
 
     # Create the plain-text and HTML version of your message
     message_text = f"""\
@@ -89,7 +94,8 @@ def email_notification(msg, record_id):
         server.sendmail(sender_email, receiver_email, message.as_string())
 
     except Exception as e:
-        logger.error(f'Error Occurred: {e}')
+        logger.exception(f'Error Occurred: {e}')
 
-    if __name__ == '__main__':
-        email_notification('test mic 1 2 1 2', [1, 2, 3, 4, 5])
+
+if __name__ == '__main__':
+    email_notification('test mic 1 2 1 2', [1, 2, 3, 4, 5])
