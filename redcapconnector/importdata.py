@@ -104,7 +104,7 @@ def json_csv():
         csv_writer.writerow(result.values())
 
 
-def data_import(project_id):
+def data_import(project_id, record_ids):
     # m19_csv_file = 'import_m19_data.csv'
     # p21_csv_file = 'import_p21_data.csv'
     # record = f'{os.path.abspath("..")}/data/import_data.json'
@@ -153,7 +153,7 @@ def data_import(project_id):
                     sample_ids = res
 
                     # email notification
-                    email_notification(import_success_msg, sample_ids)
+                    email_notification(msg=import_success_msg, record_id=record_ids)
 
                     # convert json to CSV
                     json_csv()

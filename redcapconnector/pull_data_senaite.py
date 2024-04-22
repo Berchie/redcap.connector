@@ -221,6 +221,9 @@ def transfer_result(project, period):
     mbc_t6_t12 = ['T6', 'T7', 'T8', 'T9', 'T10', 'T11']
     mbc_fever_visits = ['F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12', 'F13', 'F14', 'F15']
 
+    # store the M19 or longitudinal project event record id. this id will be sent via email to DB manager
+    record_ids = []
+
     try:
         # assign project name. This name will be used with
         if project == 'P21':
@@ -302,6 +305,9 @@ def transfer_result(project, period):
                             if client_id == 'M19':
                                 if len(client_sample_id) > 11 and not len(client_sample_id) >= 14:
 
+                                    # add client_sample_id to the record_ids dictionary
+                                    record_ids.append(client_sample_id)
+
                                     # replace the last characters of the client sample id (record id used by REDCap) with 'T0'
                                     record_id = client_sample_id.replace(client_sample_id[10:], "T0")
                                     analyses_data['l_barcode'] = record_id
@@ -375,7 +381,7 @@ def transfer_result(project, period):
             write_json(data)
 
         # importing the data or results into REDCap project database
-        data_import(project)
+        data_import(project,record_ids=record_ids)
 
         return data
 

@@ -80,7 +80,7 @@ def status(days):
                 line_split = line.split()
                 # print(line_split)
                 if line_split:
-                    if line_split[0] == check_date and 'INFO:' in line_split and 'CHECK_STATUS:' not in line_split:
+                    if line_split[0] == check_date and 'SUCCESS:' in line_split and 'CHECK_STATUS:' not in line_split:
 
                         if line_split[4].isnumeric() and int(line_split[4]) > 0 and 'record(s) were imported successfully!!!' in line:
                             if line_split[6] == 'M19':
@@ -89,7 +89,7 @@ def status(days):
                             elif line_split[6] == 'P21':
                                 successful_count += 1
                                 successful_project.append('P21')
-                        elif line_split[4].isalpha() and len(re.findall('No|data|to|import', line, flags=re.IGNORECASE)) != 0:
+                        elif line_split[4].isalpha() and len(re.findall('No|data|to|import', line, flags=re.IGNORECASE)) != 0 and line_split[3] == 'INFO:':
                             no_import_count += 1
                             no_import_project.append(line_split[5])
 
