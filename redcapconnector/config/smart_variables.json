@@ -1,0 +1,76 @@
+{
+  "VISIT_DAYS":{
+    "D00": "day_0",
+    "D01": "day_1",
+    "D02": "day_2",
+    "D03": "day_3",
+    "D04": "day_4",
+    "D05": "day_5",
+    "D06": "day_6",
+    "D07": "day_7",
+    "D14": "day_14",
+    "D21": "day_21",
+    "D28": "day_28",
+    "D35": "day_35",
+    "D42": "day_42",
+    "U": "unscheduled"
+  },
+
+  "TIME": {
+    "H00": "hour_0",
+    "H08": "hour_8",
+    "H12": "hour_12",
+    "H24": "hour_24",
+    "H36": "hour_36",
+    "H48": "hour_48",
+    "H60": "hour_60",
+    "H72": "hour_72",
+    "ALH00": "al_hour_0",
+    "ALH08": "al_hour_8",
+    "ALH24": "al_hour_24",
+    "ALH36": "al_hour_36",
+    "ALH48": "al_hour_48",
+    "ALH60": "al_hour_60",
+    "ALH72": "al_hour_72"
+  },
+
+  "VISIT_NO_EDTA": {
+    "hour_8_day_0":"2",
+    "hour_24_day_1":"3",
+    "hour_36_day": "4",
+    "hour_48_day_2": "5",
+    "hour_60_day_2": "6",
+    "day_3":"7",
+    "day_7":"8",
+    "day_14":"9",
+    "day_21":"10",
+    "day_28":"11",
+    "day_35":"12",
+    "day_42":"13",
+    "U": "14"
+  },
+
+  "DATA_ACCESS_GROUP": {
+    "AG": "agogo",
+    "AF": "assin_fosu"
+  },
+
+  "FBC": {
+    "id": "id_um",
+    "Event_Name": "redcap_event_name",
+    "HGB": "hgb_edta",
+    "HCT": "hct_edta",
+    "LYMPH%": "lym_edta",
+    "MONO%": "mon_edta",
+    "NEUT%": "neu_edta",
+    "PLT": "plt_edta",
+    "RBC": "rbc_edta",
+    "WBC": "wbc_edta",
+    "EO%": "eosi_edta",
+    "BASO%": "bas_edta"
+  },
+
+  "BIOCHEMISTRY": {
+
+  }
+}

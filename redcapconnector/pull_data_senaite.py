@@ -270,7 +270,7 @@ def transfer_result(project, period):
                 # returns respond data as a JSON object
                 r_data = json.dumps(items_resp.json())
 
-                # cast the response json data python object dictionary
+            # cast the response json data to python object dictionary
             r_data_dict = json.loads(r_data)
 
             # next_batch = r_data_dict['next']  # url for the next batch of records
