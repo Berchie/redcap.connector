@@ -28,89 +28,16 @@ else:
     raise logging.exception('Could not found the application environment variables!')
 
 
-# writing the imported results to CSV file
+# writing the imported results to CSV file (SMART project)
 @logger.catch
-def result_csv():
-    csv_file = os.path.join(os.path.dirname(__file__), "data", "csv", "haematology.csv")
+def result_csv_smart(sample_type):
+    if sample_type == 'EDTA Blood':
+        csv_file = os.path.join(os.path.dirname(__file__), "data", "csv", "smart_haematology.csv")
+    else:
+        csv_file = os.path.join(os.path.dirname(__file__), "data", "csv", "smart_biochemistry.csv")
 
     # open or read the json file
-    with open(os.path.join(os.path.dirname(__file__), "data", "import_data.json")) as json_file:
-        json_results = json.load(json_file)
-
-    # open the csv file
-    if os.path.isfile(csv_file) and os.path.getsize(csv_file) > 0:
-        data_file = open(csv_file, 'a', newline='')
-    else:
-        data_file = open(csv_file, 'w', newline='')
-
-    # create the csv writer object
-    csv_writer = csv.writer(data_file)
-
-    # Counter variable used for writing
-    # headers to the CSV file
-    # if the CSV file exist and not empty set the counter to 1 to write the rows
-    if os.path.isfile(csv_file) and os.path.getsize(csv_file) > 0:
-        counter = 1
-    else:
-        counter = 0
-
-    for result in json_results:
-
-        if counter == 0:
-            # Writing headers of CSV file
-            header = result.keys()
-            csv_writer.writerow(header)
-            counter += 1
-
-        # writing data of the CSV file
-        csv_writer.writerow(result.values())
-
-
-# convert json data to CSV file for the daily run
-@logger.catch
-def json_csv():
-    csv_file = os.path.join(os.path.dirname(__file__), "data", "daily_result", f"{strftime("%Y%m%d", localtime())}_haematology.csv")
-
-    # open or read the json file
-    with open(os.path.join(os.path.dirname(__file__), "data", "import_data.json")) as json_file:
-        json_results = json.load(json_file)
-
-    # open the csv file
-    if os.path.isfile(csv_file) and os.path.getsize(csv_file) > 0:
-        data_file = open(csv_file, 'a', newline='')
-    else:
-        data_file = open(csv_file, 'w', newline='')
-
-    # create the csv writer object
-    csv_writer = csv.writer(data_file)
-
-    # Counter variable used for writing
-    # headers to the CSV file
-    # if the CSV file exist and not empty set the counter to 1 to write the rows
-    if os.path.isfile(csv_file) and os.path.getsize(csv_file) > 0:
-        counter = 1
-    else:
-        counter = 0
-
-    for result in json_results:
-
-        if counter == 0:
-            # Writing headers of CSV file
-            header = result.keys()
-            csv_writer.writerow(header)
-            counter += 1
-
-        # writing data of the CSV file
-        csv_writer.writerow(result.values())
-
-
-# writing the imported results to CSV file
-@logger.catch
-def result_csv():
-    csv_file = os.path.join(os.path.dirname(__file__), "data", "csv", "haematology.csv")
-
-    # open or read the json file
-    with open(os.path.join(os.path.dirname(__file__), "data", "import_data.json")) as json_file:
+    with open(os.path.join(os.path.dirname(__file__), "data", "smart_import_data.json")) as json_file:
         json_results = json.load(json_file)
 
     # open the csv file
@@ -144,11 +71,14 @@ def result_csv():
 
 # convert json data to CSV file for the daily run (SMART Project)
 @logger.catch
-def json_csv_smart():
-    csv_file = os.path.join(os.path.dirname(__file__), "data", "daily_result", f"{strftime("%Y%m%d", localtime())}_smart_haematology.csv")
+def json_csv_smart(smart_type):
+    if smart_type == 'EDTA Blood':
+        csv_file = os.path.join(os.path.dirname(__file__), "data", "daily_result", f"{strftime("%Y%m%d", localtime())}_smart_haematology.csv")
+    else:
+        csv_file = os.path.join(os.path.dirname(__file__), "data", "daily_result", f"{strftime("%Y%m%d", localtime())}_smart_biochemistry.csv")
 
     # open or read the json file
-    with open(os.path.join(os.path.dirname(__file__), "data", "import_data.json")) as json_file:
+    with open(os.path.join(os.path.dirname(__file__), "data", "smart_import_data.json")) as json_file:
         json_results = json.load(json_file)
 
     # open the csv file
@@ -180,11 +110,11 @@ def json_csv_smart():
         csv_writer.writerow(result.values())
 
 
-def data_import(project_id, record_ids):
+def data_import(sample):
     # m19_csv_file = 'import_m19_data.csv'
     # p21_csv_file = 'import_p21_data.csv'
     # record = f'{os.path.abspath("..")}/data/import_data.json'
-    record = os.path.join(os.path.dirname(__file__), "data", "import_data.json")
+    record = os.path.join(os.path.dirname(__file__), "data", "smart_import_data.json")
 
     try:
         # load the .env values
@@ -198,7 +128,7 @@ def data_import(project_id, record_ids):
             data = json.dumps(import_record)
 
             # API TOKEN for the REDCap database
-            api_token = os.environ['LAB_API_TOKEN']
+            api_token = os.environ['SMART_API_TOKEN']
 
             fields = {
                 'token': api_token,
@@ -214,35 +144,41 @@ def data_import(project_id, record_ids):
 
             # with click.progressbar(label='Importing data into the REDCap database', length=100, fill_char=u'█', empty_char='', width=100) as import_data_bar:
             # check for internet is available or REDCap server is online(available)
-            if check_internet_connection("https://redcap.bibbox.bnitm.de/"):
+            if check_internet_connection("https://redcap-kccr.bibbox.bnitm.de/"):
                 # import records into the REDCap database
-                r = requests.post(os.environ['LAB_API_URL'], data=fields)
+                r = requests.post(os.environ['SMART_API_URL'], data=fields)
                 # print(f'HTTP Status: {str(r.status_code)}')
                 res = r.json()
 
                 count = len(res)
 
                 if r.status_code == 200:
-                    logger.success(f"{count} of {project_id} record(s) were imported successfully!!!")
+                    if sample == 'EDTA Blood':
+                        logger.success(f"{count} of SMART's FBC record(s) were imported successfully!!!")
+                    else:
+                        logger.success(f"{count} of SMART's BioChemistry record(s) were imported successfully!")
 
-                    import_success_msg = f"{count} of {project_id} record(s) were imported successfully!"
-                    sample_ids = res
+                    # import_success_msg = f"{count} of SMART's BioChemistry record(s) were imported successfully!"
+                    # sample_ids = res
 
                     # email notification
-                    email_notification(msg=import_success_msg, record_id=record_ids)
+                    # email_notification(msg=import_success_msg, record_id=record_ids)
 
                     # convert json to CSV
-                    json_csv()
+                    json_csv_smart(sample)
 
                     # write the import data to CSV file
-                    result_csv()
+                    result_csv_smart(sample)
 
                 else:
                     error_msg = re.sub(r"[\\{}]", "", r.text)
                     logger.error(f'HTTP Status:{r.status_code} - {error_msg}')
 
         else:
-            logger.info(f'No {project_id} data to import.')
+            if sample == "EDTA Blood":
+                logger.info(f"No SMART's FBC results to import.")
+            else:
+                logger.info(f"No SMART's BioChemistry results to import.")
 
         # when record successful imported write it to csv(import_data_[date&time])
         # or json file(imported_fbc_data.json). use function for both.
@@ -255,5 +191,5 @@ def data_import(project_id, record_ids):
 
 
 if __name__ == '__main__':
-    # data_import('M19')
-    logger.info('import log test')
+    data_import("EDTA Blood")
+    # logger.info('import log test')

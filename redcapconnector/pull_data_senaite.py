@@ -189,7 +189,6 @@ transfer_example_context = """
     help='period or date the sample or analyses was published'
 )
 def transfer_result(project, period):
-
     # display info
     """
     \b
@@ -381,7 +380,7 @@ def transfer_result(project, period):
             write_json(data)
 
         # importing the data or results into REDCap project database
-        data_import(project,record_ids=record_ids)
+        data_import(project, record_ids=record_ids)
 
         return data
 
