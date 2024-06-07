@@ -48,9 +48,9 @@ def write_json(dictionary):
 
 
 @logger.catch
-def write_json_smart(dictionary):
+def write_json_smart(dictionary, json_file):
     # writing to the import_data.json
-    with open(os.path.join(os.path.dirname(__file__), "data", "smart_import_data.json"), "a+") as importfile:
+    with open(os.path.join(os.path.dirname(__file__), "data", json_file), "a+") as importfile:
         # importfile.write(json_object)
         json.dump(dictionary, importfile, indent=4)
 
