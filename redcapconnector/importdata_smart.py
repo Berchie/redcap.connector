@@ -144,7 +144,7 @@ def data_import(sample):
                 record = os.path.join(os.path.dirname(__file__), "data", "smart_sm_import_data.json")
 
                 # API TOKEN for the REDCap database
-                api_token = os.environ['SMART_SM_API_TOKEN']
+                api_token = os.environ.get("SMART_SM_API_TOKEN")
 
                 json_file = "smart_um_import_data.json"
 

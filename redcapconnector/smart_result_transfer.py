@@ -153,114 +153,117 @@ def extract_visit_day(sampleid):
 @logger.catch
 def extract_event_name(sampleid, visitday, visithr=''):
     id_arm = get_record_id(sampleid[0:11])
-    id_arm = id_arm[0]["redcap_event_name"][13:]
+    if id_arm:
+        id_arm = id_arm[0]["redcap_event_name"][13:]
 
-    visit_hour = ''
+        visit_hour = ''
 
-    if visithr != '':
-        if visithr[0:1] == "H":
-            if len(visithr) == 2 and visithr[0:1] == "H":
-                visit_hour = visithr[-1:]
-            elif len(visithr) == 3 and visithr[0:2] == "H0":
-                visit_hour = visithr[-1:]
+        if visithr != '':
+            if visithr[0:1] == "H":
+                if len(visithr) == 2 and visithr[0:1] == "H":
+                    visit_hour = visithr[-1:]
+                elif len(visithr) == 3 and visithr[0:2] == "H0":
+                    visit_hour = visithr[-1:]
+                else:
+                    visit_hour = visithr[-2:]
+            elif visithr[0:2] == "AL":
+                # ALH00 ALH0
+                if len(visithr[2:].strip()) == 2 and visithr[0:2] == "H":
+                    visit_hour = visithr[-1:]
+                elif len(visithr[2:].strip()) == 3 and visithr[0:2] == "H0":
+                    visit_hour = visithr[-1:]
+                else:
+                    visit_hour = visithr[-2:]
             else:
-                visit_hour = visithr[-2:]
-        elif visithr[0:2] == "AL":
-            # ALH00 ALH0
-            if len(visithr[2:].strip()) == 2 and visithr[0:2] == "H":
-                visit_hour = visithr[-1:]
-            elif len(visithr[2:].strip()) == 3 and visithr[0:2] == "H0":
-                visit_hour = visithr[-1:]
-            else:
-                visit_hour = visithr[-2:]
-        else:
-            visit_hour = ''
+                visit_hour = ''
 
-    visit_day = visitday
+        visit_day = visitday
 
-    events = get_event_name(sampleid[0:11])
+        events = get_event_name(sampleid[0:11])
 
-    for event in events:
-        evt_s = event.split('_')
-        match evt_s[0]:
-            case "hour":
-                evt_s_day = '_'.join((evt_s[2], evt_s[3]))
-                if len(evt_s[1]) == 1 and evt_s[1] == visit_hour and evt_s_day == visit_day and event[-5:] == id_arm:
-                    return event
-                elif len(evt_s[1]) == 2 and evt_s[1] == visit_hour and evt_s_day == visit_day and event[-5:] == id_arm:
-                    return event
-            case "al":
-                # al_hour_8_day_0_arm_3 al_hour_24_day_arm_3
-                evt_s_day = '_'.join((evt_s[3], evt_s[4]))
-                if len(evt_s[2]) == 1 and evt_s[2] == visit_hour and evt_s_day == visit_day and event[-5:] == id_arm:
-                    return event
-                elif len(evt_s[2]) == 2 and evt_s[2] == visit_hour and evt_s_day == visit_day and event[-5:] == id_arm:
-                    return event
-            case "day":
-                evt_s_day = '_'.join((evt_s[0], evt_s[1]))
-                if evt_s_day == visit_day and event[-5:] == id_arm:
-                    return event
-                elif evt_s_day == visit_day and event[-5:] == id_arm:
-                    return event
-            case _:
-                if evt_s[0] == visit_day and event[-5:] == id_arm:
-                    return event
+        for event in events:
+            evt_s = event.split('_')
+            match evt_s[0]:
+                case "hour":
+                    evt_s_day = '_'.join((evt_s[2], evt_s[3]))
+                    if len(evt_s[1]) == 1 and evt_s[1] == visit_hour and evt_s_day == visit_day and event[-5:] == id_arm:
+                        return event
+                    elif len(evt_s[1]) == 2 and evt_s[1] == visit_hour and evt_s_day == visit_day and event[-5:] == id_arm:
+                        return event
+                case "al":
+                    # al_hour_8_day_0_arm_3 al_hour_24_day_arm_3
+                    evt_s_day = '_'.join((evt_s[3], evt_s[4]))
+                    if len(evt_s[2]) == 1 and evt_s[2] == visit_hour and evt_s_day == visit_day and event[-5:] == id_arm:
+                        return event
+                    elif len(evt_s[2]) == 2 and evt_s[2] == visit_hour and evt_s_day == visit_day and event[-5:] == id_arm:
+                        return event
+                case "day":
+                    evt_s_day = '_'.join((evt_s[0], evt_s[1]))
+                    if evt_s_day == visit_day and event[-5:] == id_arm:
+                        return event
+                    elif evt_s_day == visit_day and event[-5:] == id_arm:
+                        return event
+                case _:
+                    if evt_s[0] == visit_day and event[-5:] == id_arm:
+                        return event
 
 
 @logger.catch
 def extract_edta_visit(sampleid, day, hour=''):
     id_arm = get_record_id(sampleid[0:11])
-    id_arm = id_arm[0]["redcap_event_name"][13:]
 
-    visit_hour = ''
+    if id_arm:  # if id_arm is not null then extract the redcap arm
+        id_arm = id_arm[0]["redcap_event_name"][13:]
 
-    if hour != '':
-        if hour[0:1] == "H":
-            if len(hour) == 2 and hour[0:1] == "H":
-                visit_hour = hour[-1:]
-            elif len(hour) == 3 and hour[0:2] == "H0":
-                visit_hour = hour[-1:]
+        visit_hour = ''
+
+        if hour != '':
+            if hour[0:1] == "H":
+                if len(hour) == 2 and hour[0:1] == "H":
+                    visit_hour = hour[-1:]
+                elif len(hour) == 3 and hour[0:2] == "H0":
+                    visit_hour = hour[-1:]
+                else:
+                    visit_hour = hour[-2:]
+            elif hour[0:2] == "AL":
+                # ALH00 ALH0
+                if len(hour[2:].strip()) == 2 and hour[0:2] == "H":
+                    visit_hour = hour[-1:]
+                elif len(hour[2:].strip()) == 3 and hour[0:2] == "H0":
+                    visit_hour = hour[-1:]
+                else:
+                    visit_hour = hour[-2:]
             else:
-                visit_hour = hour[-2:]
-        elif hour[0:2] == "AL":
-            # ALH00 ALH0
-            if len(hour[2:].strip()) == 2 and hour[0:2] == "H":
-                visit_hour = hour[-1:]
-            elif len(hour[2:].strip()) == 3 and hour[0:2] == "H0":
-                visit_hour = hour[-1:]
-            else:
-                visit_hour = hour[-2:]
-        else:
-            visit_hour = ''
+                visit_hour = ''
 
-    visit_day = day
+        visit_day = day
 
-    events = get_event_name(sampleid[0:11])
+        events = get_event_name(sampleid[0:11])
 
-    for event in events:
-        event_s = event.split('_')
-        # print(evt_s)
-        match event_s[0]:
-            case "hour":
-                event_s_hday = '_'.join((event_s[0], event_s[1], event_s[2], event_s[3]))
-                event_s_day = '_'.join((event_s[2], event_s[3]))
-                if event_s_hday in smart_variables["VISIT_NO_EDTA"]:
-                    if len(event_s[1]) == 1 and event_s[1] == visit_hour and event_s_day == visit_day and event[-5:] == id_arm:
-                        # print(evt[0:12])
-                        return smart_variables["VISIT_NO_EDTA"][event_s_hday]
-                    elif len(event_s[1]) == 2 and event_s[1] == visit_hour and event_s_day == visit_day and event[-5:] == id_arm:
-                        # print(evt[0:12])  # hour_8_day_0_arm_4
-                        return smart_variables["VISIT_NO_EDTA"][event_s_hday]
-            case "day":
-                event_s_day = '_'.join((event_s[0], event_s[1]))
-                if event_s_day in smart_variables["VISIT_NO_EDTA"]:
-                    if event_s_day == visit_day and event[-5:] == id_arm:
-                        return smart_variables["VISIT_NO_EDTA"][event_s_day]
-                    elif event_s_day == visit_day and event[-5:] == id_arm:
-                        return smart_variables["VISIT_NO_EDTA"][event_s_day]
-            case _:
-                if event_s[0] == visit_day and event[-5:] == id_arm:
-                    return smart_variables["VISIT_NO_EDTA"]["U"]
+        for event in events:
+            event_s = event.split('_')
+            # print(evt_s)
+            match event_s[0]:
+                case "hour":
+                    event_s_hday = '_'.join((event_s[0], event_s[1], event_s[2], event_s[3]))
+                    event_s_day = '_'.join((event_s[2], event_s[3]))
+                    if event_s_hday in smart_variables["VISIT_NO_EDTA"]:
+                        if len(event_s[1]) == 1 and event_s[1] == visit_hour and event_s_day == visit_day and event[-5:] == id_arm:
+                            # print(evt[0:12])
+                            return smart_variables["VISIT_NO_EDTA"][event_s_hday]
+                        elif len(event_s[1]) == 2 and event_s[1] == visit_hour and event_s_day == visit_day and event[-5:] == id_arm:
+                            # print(evt[0:12])  # hour_8_day_0_arm_4
+                            return smart_variables["VISIT_NO_EDTA"][event_s_hday]
+                case "day":
+                    event_s_day = '_'.join((event_s[0], event_s[1]))
+                    if event_s_day in smart_variables["VISIT_NO_EDTA"]:
+                        if event_s_day == visit_day and event[-5:] == id_arm:
+                            return smart_variables["VISIT_NO_EDTA"][event_s_day]
+                        elif event_s_day == visit_day and event[-5:] == id_arm:
+                            return smart_variables["VISIT_NO_EDTA"][event_s_day]
+                case _:
+                    if event_s[0] == visit_day and event[-5:] == id_arm:
+                        return smart_variables["VISIT_NO_EDTA"]["U"]
 
 
 @logger.catch
@@ -293,10 +296,12 @@ def transfer_smart_result(period, sample_type):
         next_batch = ''
         case_type = ''
 
-        items_resp = requests.get(os.environ["BASE_URL"] + "/search", params={"catalog": "senaite_catalog_sample", "getClientTitle": "SMART",
-                                                                              "sort_on": "getDateSampled", "getSampleTypeTitle": sample_type,
-                                                                              "sort_order": "asc", "review_state": "published",
-                                                                              "recent_modified": period, "children": "true"},
+        # items_resp = requests.get(os.environ["BASE_URL"] + "/search", params={"catalog": "senaite_catalog_sample", "getClientTitle": "SMART",
+        items_resp = requests.get("http://172.21.0.1:8091/agogo-test/@@API/senaite/v1/search",
+                                  params={"catalog": "senaite_catalog_sample", "getClientTitle": "SMART",
+                                          "sort_on": "getDateSampled", "getSampleTypeTitle": sample_type,
+                                          "sort_order": "asc", "review_state": "published",
+                                          "recent_modified": period, "children": "true"},
                                   cookies={cookie_config["Cookie"]["name"]: cookie_config["Cookie"]["value"]}, stream=True)
 
         next_pages = int(items_resp.json()["pages"])
@@ -333,7 +338,10 @@ def transfer_smart_result(period, sample_type):
 
                     # get the redcap record id for 1st data entry
                     record_ids = get_record_id(client_sample_id[0:11])
-                    record_id = record_ids[0]['id_um']
+                    record_id = ''
+                    if record_ids:
+                        record_id = record_ids[0]['id_um']
+
                     vhour = res_data_dict_items[item]["getClientReference"]
                     vday = ''
 
@@ -355,14 +363,14 @@ def transfer_smart_result(period, sample_type):
                             if vhour == '':
                                 if len(client_sample_id.strip()) == 11:
                                     cid = "-".join([client_sample_id, 'D00'])
-                                    day = extract_visit_day(cid)
+                                    vday = extract_visit_day(cid)
                                     vhour = "H00"
-                                    smart_analysis_data.update({"redcap_event_name": extract_event_name(cid, day, vhour)})
+                                    smart_analysis_data.update({"redcap_event_name": extract_event_name(cid, vday, vhour)})
                                 elif 11 < len(client_sample_id.strip()) <= 15:
                                     vday = extract_visit_day(client_sample_id)
                                     if vday == 'day_3':
                                         vhour = 'H72'
-                                        smart_analysis_data.update({"redcap_event_name": extract_event_name(client_sample_id, vday, vhour)})
+                                    smart_analysis_data.update({"redcap_event_name": extract_event_name(client_sample_id, vday, vhour)})
                                     # else:
                                     #     vhr = 'H00'
                                     #     smart_analysis_data.update({"redcap_event_name": extract_event_name(client_sample_id, vday, vhr)})
@@ -376,7 +384,7 @@ def transfer_smart_result(period, sample_type):
                             smart_analysis_data.update({"redcap_data_access_group": smart_variables["DATA_ACCESS_GROUP"][pid[9:11]]})
 
                             # edta/biochemistry visit
-                            print(vhour)
+                            # print(vhour)
                             if case_type == "UM":
                                 smart_analysis_data.update({"visit_no_edta": extract_edta_visit(client_sample_id, vday, vhour)})
                             else:
@@ -386,7 +394,7 @@ def transfer_smart_result(period, sample_type):
                             analysis_counts = res_data_dict_items[item]["children"]
 
                             # loop through the children object to get values or results of the analysis
-                            for analysis_count in range(len(analysis_counts) - 2):
+                            for analysis_count in range(len(analysis_counts)-1):
                                 # check if the analysis title or name is found in the redcap_variables dictionary
                                 # if children_data[child]["title"] in redcap_variables:
                                 # if true, get the key value of the analysis title from the redcap_variables json file
@@ -425,16 +433,15 @@ def transfer_smart_result(period, sample_type):
                                             smart_analysis_data.update({smart_analysis_data["BIOCHEMISTRY"][chem_title]: heparin_result})
 
                         # append analysis counts data list
-                        if smart_analysis_data:
+                        if smart_analysis_data and record_ids:
                             if case_type == "UM":
                                 um_data.append(smart_analysis_data.copy())
 
                                 # update the record id for the 2nd data entry
                                 # and update the list
                                 record_id_2de = record_ids[1]['id_um']
-                                smart_analysis_data["id_um"]: record_id_2de
+                                smart_analysis_data.update({"id_um": record_id_2de})
                                 um_data.append(smart_analysis_data.copy())
-
                             else:
                                 # SM
                                 sm_data.append(smart_analysis_data.copy())
@@ -454,8 +461,13 @@ def transfer_smart_result(period, sample_type):
             next_batch = res_data_dict["next"]
 
         # write to json file
+        sm_json_file = os.path.join(os.path.dirname(__file__), "data", "smart_sm_import_data.json")
+        um_json_file = os.path.join(os.path.dirname(__file__), "data", "smart_um_import_data.json")
         if um_data:
-            write_json_smart(um_data)
+            write_json_smart(um_data, um_json_file)
+
+        if sm_data:
+            write_json_smart(sm_data, sm_json_file)
 
         # importing the data or results into REDCap project database
         # data_import(sample_type)
@@ -468,104 +480,4 @@ def transfer_smart_result(period, sample_type):
 
 
 if __name__ == '__main__':
-
-    # fbc_keys = smart_variables["FBC"].keys()
-    # print(fbc_keys)
-
-    transfer_smart_result("this-month", "EDTA Blood")
-
-    # print(extract_edta_chem_visit("S24-1003-AG-D01", "day_1", "H36"))
-    # print('day_14_arm_3'[0:6])
-
-    # visithr = "H24"
-    #
-    # if visithr != '':
-    #     if visithr[0:1] == "H":
-    #         if len(visithr) == 2 and visithr[0:1] == "H":
-    #             visit_hour = visithr[-1:]
-    #         elif len(visithr) == 3 and visithr[0:2] == "H0":
-    #             visit_hour = visithr[-1:]
-    #         else:
-    #             visit_hour = visithr[-2:]
-    #     elif visithr[0:2] == "AL":
-    #         # ALH00 ALH0
-    #         if len(visithr[2:].strip()) == 2 and visithr[0:2] == "H":
-    #             visit_hour = visithr[-1:]
-    #         elif len(visithr[2:].strip()) == 3 and visithr[0:2] == "H0":
-    #             visit_hour = visithr[-1:]
-    #         else:
-    #             visit_hour = visithr[-2:]
-    #     else:
-    #         visit_hour = ''
-    #
-    # print(visit_hour)
-    #
-    # day_visit = extract_visit_day("S24-1003-AG-D01")
-    # print(f"Day: {day_visit}")
-    # edta_chem_v = extract_edta_chem_visit("S24-1003-AG-D01", day_visit, "H24")
-    # print(f"edta visit no: {edta_chem_v}")
-    #
-    # edta_chem_v = extract_event_name("S24-1003-AG-D01", day_visit, "H24")
-    # print(f"edta visit no: {edta_chem_v}")
-
-    # sample_label = 'S24-2001-AG-D04'
-    # print(sample_label[0:11])  # get the pid
-    # print(sample_label[0:5])  # extract dag (AG/AF)
-    # print(smart_variables["DATA_ACCESS_GROUP"][sample_label[9:11]])  # get the full name of the dag
-    #
-    # print("-".join(["S24-1001-AG", 'D00']))
-    #
-    # get_group_name()
-    # sid_arm = get_record_id('S24-1003-AG')
-    # sid_arm = sid_arm[0]["redcap_event_name"][13:]
-    # print(sid_arm)
-    # xday = extract_visit_day("S24-2002-AG-D00")
-    # print(xday)
-
-    # visit_hour = '0'
-    # visit_day = 'day_0'
-    # events = get_event_name()
-    # for evt in events:
-    #     evt_s = evt.split('_')
-    #     # print(evt_s)
-    #     match evt_s[0]:
-    #         case "hour":
-    #             event_s_hday = '_'.join((evt_s[0], evt_s[1], evt_s[2], evt_s[3]))
-    #             event_s_day = '_'.join((evt_s[2], evt_s[3]))
-    #             # print(event_s_day)
-    #             if event_s_hday in smart_variables["VISIT_NO_EDTA"]:
-    #                 if len(evt_s[1]) == 1 and evt_s[1] == visit_hour and event_s_day == visit_day and evt[-5:] == sid_arm:
-    #                     print(evt[0:12])
-    #                     print(smart_variables["VISIT_NO_EDTA"][event_s_hday])
-    #                 elif len(evt_s[1]) == 2 and evt_s[1] == visit_hour and event_s_day == visit_day and evt[-5:] == sid_arm:
-    #                     print(evt[0:13])  # hour_8_day_0_arm_4
-    #                     print(smart_variables["VISIT_NO_EDTA"][event_s_hday])
-    #         case "day":
-    #             event_s_day = '_'.join((evt_s[0], evt_s[1]))
-    #             if event_s_day in smart_variables["VISIT_NO_EDTA"]:
-    #                 if event_s_day == visit_day and evt[-5:] == sid_arm:
-    #                     print(evt)
-    #                     print(smart_variables["VISIT_NO_EDTA"][event_s_day])
-    #
-    #                 elif event_s_day == visit_day and evt[-5:] == sid_arm:
-    #                     print(evt)
-    #                     print(smart_variables["VISIT_NO_EDTA"][event_s_day])
-    #         case _:
-    #             if evt_s[0] == visit_day and evt[-5:] == sid_arm:
-    #                 print(evt)
-    #                 print(smart_variables["VISIT_NO_EDTA"]["U"])
-
-    # sampleid = "S24-1014-AG-D0"
-    # print(sampleid)
-    # visit = sampleid[-3:]
-    # if visit[0:1] == ' ' or visit[0:1] == '-':
-    #     if len(visit.strip('-')) == 2 or len(visit.strip(' ')) == 2:
-    #         visit = visit.strip('-') or visit.strip(' ')
-    #         # visit = visit.strip(' ')
-    #         visit_day = f"{visit.strip()[0:1]}0{visit[-1:]}"
-    #         print(visit_day)
-    #         print(smart_variables["VISIT_DAYS"][visit_day])
-    #     else:
-    #         visit_day = f"{visit.strip()[1:2]}0{visit[-1:]}"
-    #         print(visit_day)
-    #         print(smart_variables["VISIT_DAYS"][visit_day])
+    transfer_smart_result("this-year", "EDTA Blood")
