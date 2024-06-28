@@ -115,5 +115,28 @@
     "CERA": "c12_2_if_done",
     "GLUC": "c13_2_if_done",
     "LACT": "c14_2_if_done"
+  },
+
+    "FBC_RM": {
+    "id": "id_um",
+    "Event_Name": "redcap_event_name",
+    "HGB": "hgb_rm",
+    "HCT": "hct_rm",
+    "LYMPH%": "lym_rm",
+    "MONO%": "mon_rm",
+    "NEUT%": "neu_rm",
+    "PLT": "plt_rm",
+    "RBC": "rbc_rm",
+    "WBC": "wbc_rm",
+    "EO%": "eosi_rm",
+    "BASO%": "bas_rm"
+  },
+
+    "VISIT_NO_FBC_RM": {
+    "D7": "1",
+    "D07": "1",
+    "D14": "2",
+    "D21": "3",
+    "D28": "4"
   }
 }
