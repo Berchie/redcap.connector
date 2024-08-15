@@ -1,11 +1,10 @@
 import os
 import configparser
 import re
-from pprint import pprint
-
 import requests
 import json
 import logging.config
+import click
 from dotenv import dotenv_values, load_dotenv
 from loguru import logger
 from redcapconnector.config.log_config import handlers
@@ -382,8 +381,49 @@ def extract_rm_edta_visit(sample_id):
 
     return visit
 
-
+@click.command(options_metavar='<options>')
+@click.option(
+    '--period',
+    type=click.Choice(['today', 'yesterday', 'this-week', 'this-month', 'this-year']),
+    default='today',
+    show_default=True,
+    help='period or date the sample or analyses was published'
+)
+@click.option(
+    '-s','--sample_type',
+    type=click.Choice(['EDTA Blood', 'Heparin Blood']),
+    required=True,
+    help='sample type'
+)
 def transfer_smart_result(period, sample_type):
+    # display info
+    """
+    \b
+    transferring of SMART analysis results from SENAITE LIMS to REDCap
+
+    \b
+    syntax:
+        redcon transfer-smart-result <options1>[-period|-h|--help] <options2>[-s|--sample_type]
+    \b
+    Examples:
+        \b
+        example 1:
+            transferring results without the period.[default period value: today]
+            $ redcon transfer-smart-result -s EDTA Blood
+        \b
+        example 2:
+            transferring result that was published today
+            $ redcon transfer-result --period today -s EDTA Blood
+        \b
+        example 3:
+            transferring result that was published three months ago or this month
+            $ redcon transfer-smart-result --period this-month -s EDTA Blood
+        \b
+        example 4:
+            help option for transfer-smart-result command
+            $ redcon transfer-result -h
+    """
+
     try:
         smart_analysis_data = {}
         um_data = []
@@ -561,7 +601,7 @@ def transfer_smart_result(period, sample_type):
                                 else:
                                     # sample type -> Heparin Blood
 
-                                    if analysis_counts[analysis_count]["Result"] == "----":
+                                    if analysis_counts[analysis_count].get("Result","----") == "----":
                                         heparin_result = 00.00
                                     else:
                                         heparin_result = float(analysis_counts[analysis_count]["Result"])
@@ -663,14 +703,14 @@ def transfer_smart_result(period, sample_type):
             write_json_smart(rm_data, rm_json_file)
 
         # importing the data or results into REDCap project database
-        # data_import(sample_type)
+        data_import(sample_type)
 
-        dum_data = json.dumps(um_data, indent=4)
-        dsm_data = json.dumps(sm_data, indent=4)
-        drm_data = json.dumps(rm_data, indent=4)
-        print(dum_data)
-        print(dsm_data)
-        print(drm_data)
+        # dum_data = json.dumps(um_data, indent=4)
+        # dsm_data = json.dumps(sm_data, indent=4)
+        # drm_data = json.dumps(rm_data, indent=4)
+        # print(dum_data)
+        # print(dsm_data)
+        # print(drm_data)
 
     except ConnectionError as cer:
         logger.error(f"Connection Error to SENAITE LIMS. {cer.errno}:{cer.strerror}")

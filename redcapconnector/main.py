@@ -3,7 +3,7 @@ import redcapconnector.senaite_connect as senaite_connect
 import redcapconnector.pull_data_senaite as get_result
 import redcapconnector.check_status as cs
 import redcapconnector.export_csv as ec
-
+import redcapconnector.smart_result_transfer as srt
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
@@ -29,6 +29,7 @@ def cli() -> None:
 
 cli.add_command(senaite_connect.senaite_connect)
 cli.add_command(get_result.transfer_result)
+cli.add_command(srt.transfer_smart_result)
 cli.add_command(cs.status)
 cli.add_command(ec.export_csv)
 
