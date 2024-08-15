@@ -37,18 +37,39 @@
   "VISIT_NO_EDTA": {
     "hour_0_day_0":"1",
     "hour_8_day_0":"2",
-    "hour_24_day_1":"3",
-    "hour_36_day_1": "4",
-    "hour_48_day_2": "5",
-    "hour_60_day_2": "6",
-    "hour_72_day_3":"7",
-    "day_7":"8",
-    "day_14":"9",
-    "day_21":"10",
-    "day_28":"11",
-    "day_35":"12",
-    "day_42":"13",
-    "U": "14"
+    "hour_12_day_0": "3",
+    "hour_24_day_1":"4",
+    "hour_36_day_1": "5",
+    "hour_48_day_2": "6",
+    "hour_60_day_2": "7",
+    "hour_72_day_3":"8",
+    "day_3":"8",
+    "day_7":"9",
+    "day_14":"10",
+    "day_21":"11",
+    "day_28":"12",
+    "day_35":"13",
+    "day_42":"14",
+    "U": "15"
+  },
+
+    "UM_VISIT_NO_EDTA": {
+    "hour_0_day_0":"1",
+    "hour_8_day_0":"2",
+    "hour_12_day_0": "3",
+    "hour_24_day_1":"4",
+    "hour_36_day_1": "5",
+    "hour_48_day_2": "6",
+    "hour_60_day_2": "8",
+    "hour_72_day_3":"9",
+    "day_3":"8",
+    "day_7":"10",
+    "day_14":"11",
+    "day_21":"12",
+    "day_28":"13",
+    "day_35":"14",
+    "day_42":"15",
+    "U": "16"
   },
 
   "VISIT_NO_HEPARIN": {
@@ -89,7 +110,7 @@
   "BIOCHEMISTRY": {
     "VSIST_NO": "visit_no_sid",
     "BIL-T":"c03_1_bilt",
-    "BILD":"c04_1_bild",
+    "BIL-D":"c04_1_bild",
     "ALB":"alb_heparin",
     "ALT":"alt_heparin",
     "AST/GOT":"c07_heparin",
@@ -104,7 +125,7 @@
 
   "BIOCHEMISTRY_VALUE": {
     "BIL-T": "c03_2_if_done",
-    "BILD": "c04_1",
+    "BIL-D": "c04_1",
     "ALB": "c05_2_if_done",
     "ALT": "c05_2_if_done_2",
     "AST/GOT": "c07_2_if_done",
@@ -117,7 +138,7 @@
     "LACT": "c14_2_if_done"
   },
 
-    "FBC_RM": {
+  "FBC_RM": {
     "id": "id_um",
     "Event_Name": "redcap_event_name",
     "HGB": "hgb_rm",
@@ -132,7 +153,7 @@
     "BASO%": "bas_rm"
   },
 
-    "VISIT_NO_FBC_RM": {
+  "VISIT_NO_FBC_RM": {
     "D7": "1",
     "D07": "1",
     "D14": "2",

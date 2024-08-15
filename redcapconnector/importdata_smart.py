@@ -44,7 +44,7 @@ def result_csv_smart(sample_type, jsonfile, case_type):
         csv_file = os.path.join(os.path.dirname(__file__), "data", "csv", f"smart_{case}_biochemistry.csv")
 
     # open or read the json file
-    with open(os.path.join(os.path.dirname(__file__), "data", jsonfile)) as json_file:
+    with open(os.path.join(os.path.dirname(__file__), "data", jsonfile), 'r') as json_file:
         json_results = json.load(json_file)
 
         # open the csv file
@@ -112,7 +112,7 @@ def json_csv_smart(smart_type, jsonfile, case_type):
         csv_file = os.path.join(os.path.dirname(__file__), "data", "daily_result", f"{strftime("%Y%m%d", localtime())}_smart_{case}_biochemistry.csv")
 
     # open or read the json file
-    with open(os.path.join(os.path.dirname(__file__), "data", jsonfile)) as json_file:
+    with open(os.path.join(os.path.dirname(__file__), "data", jsonfile), 'r') as json_file:
         json_results = json.load(json_file)
 
         # open the csv file
@@ -168,6 +168,7 @@ def data_import(sample):
     # m19_csv_file = 'import_m19_data.csv'
     # p21_csv_file = 'import_p21_data.csv'
     # record = f'{os.path.abspath("..")}/data/import_data.json'
+    case_title = ""
 
     # create for loop import the two json files
     try:
@@ -213,22 +214,39 @@ def data_import(sample):
                 # API TOKEN for the REDCap database
                 # api_token = os.environ['SMART_API_TOKEN']
 
-                fields = {
-                    'token': api_token,
-                    'content': 'record',
-                    'action': 'import',
-                    'format': 'json',  # json csv
-                    'type': 'flat',
-                    'overwriteBehavior': 'normal',  # overwrite normal
-                    'data': data,
-                    'returnContent': 'ids',  # count #ids
-                    'returnFormat': 'json'
-                }
+                if case == "RM":
+                    rm_data = {
+                        'token': '935BB33DD80F87535B923024CA5E0782',
+                        'content': 'record',
+                        'action': 'import',
+                        'format': 'json',
+                        'type': 'flat',
+                        'overwriteBehavior': 'overwrite',
+                        'forceAutoNumber': 'false',
+                        'data': data,
+                        'returnContent': 'count',
+                        'returnFormat': 'json'
+                    }
+                else:
+                    fields = {
+                        'token': api_token,
+                        'content': 'record',
+                        'action': 'import',
+                        'format': 'json',  # json csv
+                        'type': 'flat',
+                        'overwriteBehavior': 'normal',  # overwrite normal
+                        'data': data,
+                        'returnContent': 'ids',  # count #ids
+                        'returnFormat': 'json'
+                    }
 
                 # check for internet is available or REDCap server is online(available)
                 if check_internet_connection("https://redcap-kccr.bibbox.bnitm.de/"):
                     # import records into the REDCap database
-                    r = requests.post(os.environ['SMART_API_URL'], data=fields)
+                    if case == "RM":
+                        r = requests.post(os.environ['SMART_API_URL'], data=rm_data, timeout=15)
+                    else:
+                        r = requests.post(os.environ['SMART_API_URL'], data=fields, timeout=15)
                     # print(f'HTTP Status: {str(r.status_code)}')
                     res = r.json()
 
@@ -236,9 +254,9 @@ def data_import(sample):
 
                     if r.status_code == 200:
                         if sample == 'EDTA Blood':
-                            logger.success(f"{count} of SMART's FBC record(s) were imported successfully!!!")
+                            logger.success(f"{count} of SMART {case}'s FBC record(s) were imported successfully!!!")
                         else:
-                            logger.success(f"{count} of SMART's BioChemistry record(s) were imported successfully!")
+                            logger.success(f"{count} of SMART {case}'s BioChemistry record(s) were imported successfully!")
 
                         # import_success_msg = f"{count} of SMART's BioChemistry record(s) were imported successfully!"
                         # sample_ids = res
@@ -258,9 +276,9 @@ def data_import(sample):
 
             else:
                 if sample == "EDTA Blood":
-                    logger.info(f"No SMART {case_type}'s  FBC results to import.")
+                    logger.info(f"No SMART {case}'s  FBC results to import.")
                 else:
-                    logger.info(f"No SMART {case_type}'s BioChemistry results to import.")
+                    logger.info(f"No SMART {case}'s BioChemistry results to import.")
 
             # when record successful imported write it to csv(import_data_[date&time])
             # or json file(imported_fbc_data.json). use function for both.

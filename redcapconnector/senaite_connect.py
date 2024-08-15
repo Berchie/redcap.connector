@@ -12,14 +12,12 @@ logger.configure(
     handlers=handlers,
 )
 
-
 # load .env variables
 dotenv_path = os.path.abspath(f"{os.environ['HOME']}/.env")
 if os.path.abspath(f"{os.environ['HOME']}/.env"):
     load_dotenv(dotenv_path=dotenv_path)
 else:
     raise logger.exception('Could not found the application environment variables!')
-
 
 example_context = """
         \b
@@ -38,7 +36,6 @@ example_context = """
 
 @click.command(options_metavar='<options>')
 def senaite_connect():
-
     # display info
     """
     \b
