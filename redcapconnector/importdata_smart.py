@@ -48,52 +48,180 @@ def result_csv_smart(sample_type, jsonfile, case_type):
         json_results = json.load(json_file)
 
         # open the csv file
-        if os.path.isfile(csv_file) and os.path.getsize(csv_file) > 0:
-            with open(csv_file, 'a', newline='', encoding='utf-8-sig') as data_file:
-                csv_writer = csv.DictWriter(data_file, json_results[0].keys())
-                # csv_writer.writeheader()
+        if sample_type == "EDTA Blood":
+            if os.path.isfile(csv_file) and os.path.getsize(csv_file) > 0:
+                with open(csv_file, 'a', newline='', encoding='utf-8-sig') as data_file:
+                    csv_writer = csv.DictWriter(data_file, json_results[0].keys())
+                    # csv_writer.writeheader()
 
-                for row in json_results:
-                    new_row = {
-                        "id_um": row["id_um"],
-                        "redcap_event_name": row["redcap_event_name"],
-                        "redcap_data_access_group": row["redcap_data_access_group"],
-                        "visit_no_edta": row["visit_no_edta"],
-                        "hgb_edta": row["hgb_edta"],
-                        "mon_edta": row["mon_edta"],
-                        "bas_edta": row["bas_edta"],
-                        "rbc_edta": row["rbc_edta"],
-                        "lym_edta": row["lym_edta"],
-                        "hct_edta": row["hct_edta"],
-                        "eosi_edta": row["eosi_edta"],
-                        "wbc_edta": row["wbc_edta"],
-                        "neu_edta": row["neu_edta"],
-                        "plt_edta": row["plt_edta"]
-                    }
-                    csv_writer.writerow(new_row)
+                    for row in json_results:
+                        new_row = {
+                            "id_um": row["id_um"],
+                            "redcap_event_name": row["redcap_event_name"],
+                            "redcap_data_access_group": row["redcap_data_access_group"],
+                            "visit_no_edta": row["visit_no_edta"],
+                            "hgb_edta": row["hgb_edta"],
+                            "mon_edta": row["mon_edta"],
+                            "bas_edta": row["bas_edta"],
+                            "rbc_edta": row["rbc_edta"],
+                            "lym_edta": row["lym_edta"],
+                            "hct_edta": row["hct_edta"],
+                            "eosi_edta": row["eosi_edta"],
+                            "wbc_edta": row["wbc_edta"],
+                            "neu_edta": row["neu_edta"],
+                            "plt_edta": row["plt_edta"]
+                        }
+                        csv_writer.writerow(new_row)
+            else:
+                with open(csv_file, 'a', newline='', encoding='utf-8-sig') as data_file:
+                    csv_writer = csv.DictWriter(data_file, json_results[0].keys())
+                    csv_writer.writeheader()
+
+                    for row in json_results:
+                        new_row = {
+                            "id_um": row["id_um"],
+                            "redcap_event_name": row["redcap_event_name"],
+                            "redcap_data_access_group": row["redcap_data_access_group"],
+                            "visit_no_edta": row["visit_no_edta"],
+                            "hgb_edta": row["hgb_edta"],
+                            "mon_edta": row["mon_edta"],
+                            "bas_edta": row["bas_edta"],
+                            "rbc_edta": row["rbc_edta"],
+                            "lym_edta": row["lym_edta"],
+                            "hct_edta": row["hct_edta"],
+                            "eosi_edta": row["eosi_edta"],
+                            "wbc_edta": row["wbc_edta"],
+                            "neu_edta": row["neu_edta"],
+                            "plt_edta": row["plt_edta"]
+                        }
+                        csv_writer.writerow(new_row)
         else:
-            with open(csv_file, 'a', newline='', encoding='utf-8-sig') as data_file:
-                csv_writer = csv.DictWriter(data_file, json_results[0].keys())
-                csv_writer.writeheader()
+            if os.path.isfile(csv_file) and os.path.getsize(csv_file) > 0:
+                with open(csv_file, 'a', newline='', encoding='utf-8-sig') as data_file:
+                    csv_writer = csv.DictWriter(data_file, json_results[0].keys())
+                    # csv_writer.writeheader()
 
-                for row in json_results:
-                    new_row = {
-                        "id_um": row["id_um"],
-                        "redcap_event_name": row["redcap_event_name"],
-                        "redcap_data_access_group": row["redcap_data_access_group"],
-                        "visit_no_edta": row["visit_no_edta"],
-                        "hgb_edta": row["hgb_edta"],
-                        "mon_edta": row["mon_edta"],
-                        "bas_edta": row["bas_edta"],
-                        "rbc_edta": row["rbc_edta"],
-                        "lym_edta": row["lym_edta"],
-                        "hct_edta": row["hct_edta"],
-                        "eosi_edta": row["eosi_edta"],
-                        "wbc_edta": row["wbc_edta"],
-                        "neu_edta": row["neu_edta"],
-                        "plt_edta": row["plt_edta"]
-                    }
-                    csv_writer.writerow(new_row)
+                    for row in json_results:
+                        if case_type == "UM":
+                            new_row = {
+                                "id_um": row["id_um"],
+                                "redcap_event_name": row["redcap_event_name"],
+                                "redcap_data_access_group": row["redcap_data_access_group"],
+                                "visit_no_sid": row["visit_no_sid"],
+                                "sptaken_heparin": row["sptaken_heparin"],
+                                "pro_heparin": row["pro_heparin"],
+                                "c10_2_if_done": row["c10_2_if_done"],
+                                "ggt_heparin": row["ggt_heparin"],
+                                "c09_2_if_done": row["c09_2_if_done"],
+                                "c07_heparin": row["c07_heparin"],
+                                "c07_2_if_done": row["c07_2_if_done"],
+                                "alb_heparin": row["alb_heparin"],
+                                "c05_2_if_done": row["c05_2_if_done"],
+                                "alp_heparin": row["alp_heparin"],
+                                "c08_2_if_done": row["c08_2_if_done"],
+                                "c04_1_bild": row["c04_1_bild"],
+                                "c04_1": row["c04_1"],
+                                "alt_heparin": row["alt_heparin"],
+                                "c05_2_if_done_2": row["c05_2_if_done_2"],
+                                "c03_1_bilt": row["c03_1_bilt"],
+                                "c03_2_if_done": row["c03_2_if_done"],
+                            }
+                        elif case_type == "SM":
+                            new_row = {
+                                "id_um": row["id_um"],
+                                "redcap_event_name": row["redcap_event_name"],
+                                "redcap_data_access_group": row["redcap_data_access_group"],
+                                "visit_no_sid": row["visit_no_sid"],
+                                "sptaken_heparin": row["sptaken_heparin"],
+                                # "pro_heparin": row["pro_heparin"],
+                                # "c10_2_if_done": row["c10_2_if_done"],
+                                # "c07_heparin": row["c07_heparin"],
+                                # "c07_2_if_done": row["c07_2_if_done"],
+                                # "ggt_heparin": row["ggt_heparin"],   # NO REGENT FOR THIS ANALYSIS
+                                # "c09_2_if_done": row["c09_2_if_done"],
+                                # "alb_heparin": row["alb_heparin"],
+                                # "c05_2_if_done": row["c05_2_if_done"],
+                                # "alp_heparin": row["alp_heparin"],
+                                # "c08_2_if_done": row["c08_2_if_done"],
+                                # "c04_1_bild": row["c04_1_bild"],
+                                # "c04_1": row["c04_1"],
+                                # "alt_heparin": row["alt_heparin"],
+                                # "c05_2_if_done_2": row["c05_2_if_done_2"],
+                                # "c03_1_bilt": row["c03_1_bilt"],
+                                # "c03_2_if_done": row["c03_2_if_done"],
+                                "lact_heparin": row["lact_heparin"],
+                                "c14_2_if_done": row["c14_2_if_done"],
+                                "gluc_heparin": row["gluc_heparin"],
+                                "c13_2_if_done": row["c13_2_if_done"],
+                                "urea_heparin": row["urea_heparin"],
+                                "c11_2_if_done": row["c11_2_if_done"],
+                                "crea_heparin": row["crea_heparin"],
+                                "c12_2_if_done": row["c12_2_if_done"]
+                            }
+                        csv_writer.writerow(new_row)
+            else:
+                with open(csv_file, 'a', newline='', encoding='utf-8-sig') as data_file:
+                    csv_writer = csv.DictWriter(data_file, json_results[0].keys())
+                    csv_writer.writeheader()
+
+                    for row in json_results:
+                        if case_type == "UM":
+                            new_row = {
+                                "id_um": row["id_um"],
+                                "redcap_event_name": row["redcap_event_name"],
+                                "redcap_data_access_group": row["redcap_data_access_group"],
+                                "visit_no_sid": row["visit_no_sid"],
+                                "sptaken_heparin": row["sptaken_heparin"],
+                                "pro_heparin": row["pro_heparin"],
+                                "c10_2_if_done": row["c10_2_if_done"],
+                                "ggt_heparin": row["ggt_heparin"],
+                                "c09_2_if_done": row["c09_2_if_done"],
+                                "c07_heparin": row["c07_heparin"],
+                                "c07_2_if_done": row["c07_2_if_done"],
+                                "alb_heparin": row["alb_heparin"],
+                                "c05_2_if_done": row["c05_2_if_done"],
+                                "alp_heparin": row["alp_heparin"],
+                                "c08_2_if_done": row["c08_2_if_done"],
+                                "c04_1_bild": row["c04_1_bild"],
+                                "c04_1": row["c04_1"],
+                                "alt_heparin": row["alt_heparin"],
+                                "c05_2_if_done_2": row["c05_2_if_done_2"],
+                                "c03_1_bilt": row["c03_1_bilt"],
+                                "c03_2_if_done": row["c03_2_if_done"],
+                            }
+                        elif case_type == "SM":
+                            new_row = {
+                                "id_um": row["id_um"],
+                                "redcap_event_name": row["redcap_event_name"],
+                                "redcap_data_access_group": row["redcap_data_access_group"],
+                                "visit_no_sid": row["visit_no_sid"],
+                                "sptaken_heparin": row["sptaken_heparin"],
+                                # "pro_heparin": row["pro_heparin"],
+                                # "c10_2_if_done": row["c10_2_if_done"],
+                                # "c07_heparin": row["c07_heparin"],
+                                # "c07_2_if_done": row["c07_2_if_done"],
+                                # "ggt_heparin": row["ggt_heparin"],   # NO REGENT FOR THIS ANALYSIS
+                                # "c09_2_if_done": row["c09_2_if_done"],
+                                # "alb_heparin": row["alb_heparin"],
+                                # "c05_2_if_done": row["c05_2_if_done"],
+                                # "alp_heparin": row["alp_heparin"],
+                                # "c08_2_if_done": row["c08_2_if_done"],
+                                # "c04_1_bild": row["c04_1_bild"],
+                                # "c04_1": row["c04_1"],
+                                # "alt_heparin": row["alt_heparin"],
+                                # "c05_2_if_done_2": row["c05_2_if_done_2"],
+                                # "c03_1_bilt": row["c03_1_bilt"],
+                                # "c03_2_if_done": row["c03_2_if_done"],
+                                "lact_heparin": row["lact_heparin"],
+                                "c14_2_if_done": row["c14_2_if_done"],
+                                "gluc_heparin": row["gluc_heparin"],
+                                "c13_2_if_done": row["c13_2_if_done"],
+                                "urea_heparin": row["urea_heparin"],
+                                "c11_2_if_done": row["c11_2_if_done"],
+                                "crea_heparin": row["crea_heparin"],
+                                "c12_2_if_done": row["c12_2_if_done"]
+                            }
+                        csv_writer.writerow(new_row)
 
 
 # convert json data to CSV file for the daily run (SMART Project)
@@ -116,52 +244,180 @@ def json_csv_smart(smart_type, jsonfile, case_type):
         json_results = json.load(json_file)
 
         # open the csv file
-        if os.path.isfile(csv_file) and os.path.getsize(csv_file) > 0:
-            with open(csv_file, 'a', newline='', encoding='utf-8-sig') as data_file:
-                csv_writer = csv.DictWriter(data_file, json_results[0].keys())
-                # csv_writer.writeheader()
+        if smart_type=="EDTA Blood":
+            if os.path.isfile(csv_file) and os.path.getsize(csv_file) > 0:
+                with open(csv_file, 'a', newline='', encoding='utf-8-sig') as data_file:
+                    csv_writer = csv.DictWriter(data_file, json_results[0].keys())
+                    # csv_writer.writeheader()
 
-                for row in json_results:
-                    new_row = {
-                        "id_um": row["id_um"],
-                        "redcap_event_name": row["redcap_event_name"],
-                        "redcap_data_access_group": row["redcap_data_access_group"],
-                        "visit_no_edta": row["visit_no_edta"],
-                        "hgb_edta": row["hgb_edta"],
-                        "mon_edta": row["mon_edta"],
-                        "bas_edta": row["bas_edta"],
-                        "rbc_edta": row["rbc_edta"],
-                        "lym_edta": row["lym_edta"],
-                        "hct_edta": row["hct_edta"],
-                        "eosi_edta": row["eosi_edta"],
-                        "wbc_edta": row["wbc_edta"],
-                        "neu_edta": row["neu_edta"],
-                        "plt_edta": row["plt_edta"]
-                    }
-                    csv_writer.writerow(new_row)
+                    for row in json_results:
+                        new_row = {
+                            "id_um": row["id_um"],
+                            "redcap_event_name": row["redcap_event_name"],
+                            "redcap_data_access_group": row["redcap_data_access_group"],
+                            "visit_no_edta": row["visit_no_edta"],
+                            "hgb_edta": row["hgb_edta"],
+                            "mon_edta": row["mon_edta"],
+                            "bas_edta": row["bas_edta"],
+                            "rbc_edta": row["rbc_edta"],
+                            "lym_edta": row["lym_edta"],
+                            "hct_edta": row["hct_edta"],
+                            "eosi_edta": row["eosi_edta"],
+                            "wbc_edta": row["wbc_edta"],
+                            "neu_edta": row["neu_edta"],
+                            "plt_edta": row["plt_edta"]
+                        }
+                        csv_writer.writerow(new_row)
+            else:
+                with open(csv_file, 'a', newline='', encoding='utf-8-sig') as data_file:
+                    csv_writer = csv.DictWriter(data_file, json_results[0].keys())
+                    csv_writer.writeheader()
+
+                    for row in json_results:
+                        new_row = {
+                            "id_um": row["id_um"],
+                            "redcap_event_name": row["redcap_event_name"],
+                            "redcap_data_access_group": row["redcap_data_access_group"],
+                            "visit_no_edta": row["visit_no_edta"],
+                            "hgb_edta": row["hgb_edta"],
+                            "mon_edta": row["mon_edta"],
+                            "bas_edta": row["bas_edta"],
+                            "rbc_edta": row["rbc_edta"],
+                            "lym_edta": row["lym_edta"],
+                            "hct_edta": row["hct_edta"],
+                            "eosi_edta": row["eosi_edta"],
+                            "wbc_edta": row["wbc_edta"],
+                            "neu_edta": row["neu_edta"],
+                            "plt_edta": row["plt_edta"]
+                        }
+                        csv_writer.writerow(new_row)
         else:
-            with open(csv_file, 'a', newline='', encoding='utf-8-sig') as data_file:
-                csv_writer = csv.DictWriter(data_file, json_results[0].keys())
-                csv_writer.writeheader()
+            if os.path.isfile(csv_file) and os.path.getsize(csv_file) > 0:
+                with open(csv_file, 'a', newline='', encoding='utf-8-sig') as data_file:
+                    csv_writer = csv.DictWriter(data_file, json_results[0].keys())
+                    # csv_writer.writeheader()
 
-                for row in json_results:
-                    new_row = {
-                        "id_um": row["id_um"],
-                        "redcap_event_name": row["redcap_event_name"],
-                        "redcap_data_access_group": row["redcap_data_access_group"],
-                        "visit_no_edta": row["visit_no_edta"],
-                        "hgb_edta": row["hgb_edta"],
-                        "mon_edta": row["mon_edta"],
-                        "bas_edta": row["bas_edta"],
-                        "rbc_edta": row["rbc_edta"],
-                        "lym_edta": row["lym_edta"],
-                        "hct_edta": row["hct_edta"],
-                        "eosi_edta": row["eosi_edta"],
-                        "wbc_edta": row["wbc_edta"],
-                        "neu_edta": row["neu_edta"],
-                        "plt_edta": row["plt_edta"]
-                    }
-                    csv_writer.writerow(new_row)
+                    for row in json_results:
+                        if case_type == "UM":
+                            new_row = {
+                                 "id_um": row["id_um"],
+                                "redcap_event_name": row["redcap_event_name"],
+                                "redcap_data_access_group": row["redcap_data_access_group"],
+                                "visit_no_sid": row["visit_no_sid"],
+                                "sptaken_heparin": row["sptaken_heparin"],
+                                "pro_heparin": row["pro_heparin"],
+                                "c10_2_if_done": row["c10_2_if_done"],
+                                "ggt_heparin": row["ggt_heparin"],
+                                "c09_2_if_done": row["c09_2_if_done"],
+                                "c07_heparin": row["c07_heparin"],
+                                "c07_2_if_done": row["c07_2_if_done"],
+                                "alb_heparin": row["alb_heparin"],
+                                "c05_2_if_done": row["c05_2_if_done"],
+                                "alp_heparin": row["alp_heparin"],
+                                "c08_2_if_done": row["c08_2_if_done"],
+                                "c04_1_bild": row["c04_1_bild"],
+                                "c04_1": row["c04_1"],
+                                "alt_heparin": row["alt_heparin"],
+                                "c05_2_if_done_2": row["c05_2_if_done_2"],
+                                "c03_1_bilt": row["c03_1_bilt"],
+                                "c03_2_if_done": row["c03_2_if_done"],
+                            }
+                        elif case_type == "SM":
+                            new_row = {
+                                "id_um": row["id_um"],
+                                "redcap_event_name": row["redcap_event_name"],
+                                "redcap_data_access_group": row["redcap_data_access_group"],
+                                "visit_no_sid": row["visit_no_sid"],
+                                "sptaken_heparin": row["sptaken_heparin"],
+                                # "pro_heparin": row["pro_heparin"],
+                                # "c10_2_if_done": row["c10_2_if_done"],
+                                # "c07_heparin": row["c07_heparin"],
+                                # "c07_2_if_done": row["c07_2_if_done"],
+                                # "ggt_heparin": row["ggt_heparin"],   # NO REGENT FOR THIS ANALYSIS
+                                # "c09_2_if_done": row["c09_2_if_done"],
+                                # "alb_heparin": row["alb_heparin"],
+                                # "c05_2_if_done": row["c05_2_if_done"],
+                                # "alp_heparin": row["alp_heparin"],
+                                # "c08_2_if_done": row["c08_2_if_done"],
+                                # "c04_1_bild": row["c04_1_bild"],
+                                # "c04_1": row["c04_1"],
+                                # "alt_heparin": row["alt_heparin"],
+                                # "c05_2_if_done_2": row["c05_2_if_done_2"],
+                                # "c03_1_bilt": row["c03_1_bilt"],
+                                # "c03_2_if_done": row["c03_2_if_done"],
+                                "lact_heparin": row["lact_heparin"],
+                                "c14_2_if_done": row["c14_2_if_done"],
+                                "gluc_heparin": row["gluc_heparin"],
+                                "c13_2_if_done": row["c13_2_if_done"],
+                                "urea_heparin": row["urea_heparin"],
+                                "c11_2_if_done": row["c11_2_if_done"],
+                                "crea_heparin": row["crea_heparin"],
+                                "c12_2_if_done": row["c12_2_if_done"]
+                            }
+                        csv_writer.writerow(new_row)
+            else:
+                with open(csv_file, 'a', newline='', encoding='utf-8-sig') as data_file:
+                    csv_writer = csv.DictWriter(data_file, json_results[0].keys())
+                    csv_writer.writeheader()
+
+                    for row in json_results:
+                        if case_type == "UM":
+                            new_row = {
+                                 "id_um": row["id_um"],
+                                "redcap_event_name": row["redcap_event_name"],
+                                "redcap_data_access_group": row["redcap_data_access_group"],
+                                "visit_no_sid": row["visit_no_sid"],
+                                "sptaken_heparin": row["sptaken_heparin"],
+                                "pro_heparin": row["pro_heparin"],
+                                "c10_2_if_done": row["c10_2_if_done"],
+                                "ggt_heparin": row["ggt_heparin"],
+                                "c09_2_if_done": row["c09_2_if_done"],
+                                "c07_heparin": row["c07_heparin"],
+                                "c07_2_if_done": row["c07_2_if_done"],
+                                "alb_heparin": row["alb_heparin"],
+                                "c05_2_if_done": row["c05_2_if_done"],
+                                "alp_heparin": row["alp_heparin"],
+                                "c08_2_if_done": row["c08_2_if_done"],
+                                "c04_1_bild": row["c04_1_bild"],
+                                "c04_1": row["c04_1"],
+                                "alt_heparin": row["alt_heparin"],
+                                "c05_2_if_done_2": row["c05_2_if_done_2"],
+                                "c03_1_bilt": row["c03_1_bilt"],
+                                "c03_2_if_done": row["c03_2_if_done"],
+                            }
+                        elif case_type == "SM":
+                            new_row = {
+                                "id_um": row["id_um"],
+                                "redcap_event_name": row["redcap_event_name"],
+                                "redcap_data_access_group": row["redcap_data_access_group"],
+                                "visit_no_sid": row["visit_no_sid"],
+                                "sptaken_heparin": row["sptaken_heparin"],
+                                # "pro_heparin": row["pro_heparin"],
+                                # "c10_2_if_done": row["c10_2_if_done"],
+                                # "c07_heparin": row["c07_heparin"],
+                                # "c07_2_if_done": row["c07_2_if_done"],
+                                # "ggt_heparin": row["ggt_heparin"],   # NO REGENT FOR THIS ANALYSIS
+                                # "c09_2_if_done": row["c09_2_if_done"],
+                                # "alb_heparin": row["alb_heparin"],
+                                # "c05_2_if_done": row["c05_2_if_done"],
+                                # "alp_heparin": row["alp_heparin"],
+                                # "c08_2_if_done": row["c08_2_if_done"],
+                                # "c04_1_bild": row["c04_1_bild"],
+                                # "c04_1": row["c04_1"],
+                                # "alt_heparin": row["alt_heparin"],
+                                # "c05_2_if_done_2": row["c05_2_if_done_2"],
+                                # "c03_1_bilt": row["c03_1_bilt"],
+                                # "c03_2_if_done": row["c03_2_if_done"],
+                                "lact_heparin": row["lact_heparin"],
+                                "c14_2_if_done": row["c14_2_if_done"],
+                                "gluc_heparin": row["gluc_heparin"],
+                                "c13_2_if_done": row["c13_2_if_done"],
+                                "urea_heparin": row["urea_heparin"],
+                                "c11_2_if_done": row["c11_2_if_done"],
+                                "crea_heparin": row["crea_heparin"],
+                                "c12_2_if_done": row["c12_2_if_done"]
+                            }
+                        csv_writer.writerow(new_row)
 
 
 def data_import(sample):
@@ -190,7 +446,7 @@ def data_import(sample):
                 # API TOKEN for the REDCap database
                 api_token = os.environ['SMART_SM_API_TOKEN']
 
-                json_file = "smart_um_import_data.json"
+                json_file = "smart_rm_import_data.json"
 
             else:
                 # SM
@@ -199,7 +455,7 @@ def data_import(sample):
                 # API TOKEN for the REDCap database
                 api_token = os.environ.get("SMART_SM_API_TOKEN")
 
-                json_file = "smart_um_import_data.json"
+                json_file = "smart_sm_import_data.json"
 
             # load the .env values
             env_config = dotenv_values("../.env")
@@ -291,5 +547,5 @@ def data_import(sample):
 
 
 if __name__ == '__main__':
-    data_import("EDTA Blood")
+    data_import("Heparin")
     # logger.info('import log test')

@@ -346,13 +346,16 @@ def extract_heparin_visit(sample_id):
         visit = smart_variables["VISIT_NO_HEPARIN"]["D00"]
     elif 12 < len(sample_id) <= 15:
         visit_code = sample_id[-3:]
-        print(visit_code)
+        # print(visit_code)
 
         if visit_code[0:1] == '-' or visit_code[0:1] == ' ':
             visit_code = visit_code[1:].strip()
-            print(visit_code)
+            # print(visit_code)
 
-        visit_keys = smart_variables["VISIT_NO_HEPARIN"].keys()
+        if sample_id[:5] == "S24-1":
+            visit_keys = smart_variables["VISIT_NO_HEPARIN"].keys()
+        elif sample_id[:5] == "S24-2":
+            visit_keys = smart_variables["VISIT_NO_HEPARIN_SM"].keys()
 
         if visit_code in visit_keys:
             visit = smart_variables["VISIT_NO_HEPARIN"][visit_code]
@@ -368,11 +371,11 @@ def extract_rm_edta_visit(sample_id):
         visit = smart_variables["VISIT_NO_FBC_RM"]["D07"]
     elif 12 < len(sample_id) <= 15:
         visit_code = sample_id[-3:]
-        print(visit_code)
+        # print(visit_code)
 
         if visit_code[0:1] == '-' or visit_code[0:1] == ' ':
             visit_code = visit_code[1:].strip()
-            print(visit_code)
+            # print(visit_code)
 
         visit_keys = smart_variables["VISIT_NO_FBC_RM"].keys()
 
@@ -381,20 +384,20 @@ def extract_rm_edta_visit(sample_id):
 
     return visit
 
-@click.command(options_metavar='<options>')
-@click.option(
-    '--period',
-    type=click.Choice(['today', 'yesterday', 'this-week', 'this-month', 'this-year']),
-    default='today',
-    show_default=True,
-    help='period or date the sample or analyses was published'
-)
-@click.option(
-    '-s','--sample_type',
-    type=click.Choice(['EDTA Blood', 'Heparin Blood']),
-    required=True,
-    help='sample type'
-)
+# @click.command(options_metavar='<options>')
+# @click.option(
+#     '--period',
+#     type=click.Choice(['today', 'yesterday', 'this-week', 'this-month', 'this-year']),
+#     default='today',
+#     show_default=True,
+#     help='period or date the sample or analyses was published'
+# )
+# @click.option(
+#     '-s','--sample_type',
+#     type=click.Choice(['EDTA Blood', 'Heparin']),
+#     required=True,
+#     help='sample type'
+# )
 def transfer_smart_result(period, sample_type):
     # display info
     """
@@ -544,13 +547,13 @@ def transfer_smart_result(period, sample_type):
                                     smart_analysis_data.update({"c01_date_and_time_of_fbc": res_data_dict_items[item]["getClientOrderNumber"]})
                                 else:
                                     # heparin
-                                    smart_analysis_data.update({"visit_no_sid": extract_heparin_visit(client_sample_id, vday, vhour)})
+                                    smart_analysis_data.update({"visit_no_sid": extract_heparin_visit(client_sample_id)})
 
-                                    smart_analysis_data.update({"fblood_edta": "1"})
+                                    smart_analysis_data.update({"sptaken_heparin": "1"})
 
                             elif case_type == "SM":
                                 if sample_type == "EDTA Blood":
-                                    smart_analysis_data.update({"visit_no_edta": extract_edta_visit(client_sample_id, vday, vhour)})
+                                    smart_analysis_data.update({"visit_no_edta": extract_edta_visit(client_sample_id)})
 
                                     smart_analysis_data.update({"fblood_edta": "1"})
 
@@ -559,7 +562,7 @@ def transfer_smart_result(period, sample_type):
                                     # heparin
                                     smart_analysis_data.update({"visit_no_sid": extract_heparin_visit(client_sample_id)})
 
-                                    smart_analysis_data.update({"fblood_edta": "1"})
+                                    smart_analysis_data.update({"sptaken_heparin": "1"})
 
                             else:
                                 # "RM"
@@ -600,23 +603,22 @@ def transfer_smart_result(period, sample_type):
 
                                 else:
                                     # sample type -> Heparin Blood
-
                                     if analysis_counts[analysis_count].get("Result","----") == "----":
                                         heparin_result = 00.00
                                     else:
                                         heparin_result = float(analysis_counts[analysis_count]["Result"])
 
                                     # analysis count/results
-                                    chem_keys = smart_analysis_data["BIOCHEMISTRY"].keys()
-                                    chem_count_keys = sample_type["BIOCHEMISTRY_VALUE"].keys()
+                                    chem_keys = smart_variables["BIOCHEMISTRY"].keys()
+                                    chem_count_keys = smart_variables["BIOCHEMISTRY_VALUE"].keys()
                                     chem_title = re.sub(r'[\[\]]', '', str([analysis_counts[analysis_count]["title"]])).strip("'")
 
                                     if analysis_counts[analysis_count]["Result"]:
                                         if chem_title in chem_keys:
-                                            smart_analysis_data.update({smart_analysis_data["BIOCHEMISTRY"][chem_title]: "1"})
+                                            smart_analysis_data.update({smart_variables["BIOCHEMISTRY"][chem_title]: "1"})
 
                                         if chem_title in chem_count_keys:
-                                            smart_analysis_data.update({smart_analysis_data["BIOCHEMISTRY_VALUE"][chem_title]: heparin_result})
+                                            smart_analysis_data.update({smart_variables["BIOCHEMISTRY_VALUE"][chem_title]: heparin_result})
 
                         # append analysis counts data list
                         if smart_analysis_data and record_ids:
@@ -703,13 +705,13 @@ def transfer_smart_result(period, sample_type):
             write_json_smart(rm_data, rm_json_file)
 
         # importing the data or results into REDCap project database
-        data_import(sample_type)
+        # data_import(sample_type)
 
-        # dum_data = json.dumps(um_data, indent=4)
-        # dsm_data = json.dumps(sm_data, indent=4)
+        dum_data = json.dumps(um_data, indent=4)
+        dsm_data = json.dumps(sm_data, indent=4)
         # drm_data = json.dumps(rm_data, indent=4)
-        # print(dum_data)
-        # print(dsm_data)
+        print(dum_data)
+        print(dsm_data)
         # print(drm_data)
 
     except ConnectionError as cer:
@@ -717,4 +719,4 @@ def transfer_smart_result(period, sample_type):
 
 
 if __name__ == '__main__':
-    transfer_smart_result("this-month", "EDTA Blood")
+    transfer_smart_result("yesterday", "Heparin")
