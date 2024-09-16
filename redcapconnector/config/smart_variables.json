@@ -53,23 +53,23 @@
     "U": "15"
   },
 
-    "UM_VISIT_NO_EDTA": {
+  "UM_VISIT_NO_EDTA": {
     "hour_0_day_0":"1",
     "hour_8_day_0":"2",
     "hour_12_day_0": "3",
     "hour_24_day_1":"4",
     "hour_36_day_1": "5",
     "hour_48_day_2": "6",
-    "hour_60_day_2": "8",
-    "hour_72_day_3":"9",
+    "hour_60_day_2": "7",
+    "hour_72_day_3":"8",
     "day_3":"8",
-    "day_7":"10",
-    "day_14":"11",
-    "day_21":"12",
-    "day_28":"13",
-    "day_35":"14",
-    "day_42":"15",
-    "U": "16"
+    "day_7":"9",
+    "day_14":"10",
+    "day_21":"11",
+    "day_28":"12",
+    "day_35":"13",
+    "day_42":"14",
+    "U": "15"
   },
 
   "VISIT_NO_HEPARIN": {
@@ -85,6 +85,17 @@
     "D35": "7",
     "D42": "8",
     "U": "9"
+  },
+
+  "VISIT_NO_HEPARIN_SM": {
+    "D0": "1",
+    "D00": "1",
+    "D3": "2",
+    "D03": "2",
+    "D7": "3",
+    "D07": "3",
+    "D21": "4",
+    "U": "5"
   },
 
   "DATA_ACCESS_GROUP": {
@@ -107,35 +118,42 @@
     "BASO%": "bas_edta"
   },
 
-  "BIOCHEMISTRY": {
+  "BIOCHEMISTRY_UM": {
     "VSIST_NO": "visit_no_sid",
-    "BIL-T":"c03_1_bilt",
-    "BIL-D":"c04_1_bild",
-    "ALB":"alb_heparin",
-    "ALT":"alt_heparin",
-    "AST/GOT":"c07_heparin",
-    "ALP": "alp_heparin",
-    "GGT": "ggt_heparin",
-    "PRO": "pro_heparin",
-    "UREA": "urea_heparin",
-    "CERA": "crea_heparin",
-    "GLUC": "gluc_heparin",
-    "LACT": "lact_heparin"
+    "BILT3":"c03_1_bilt",
+    "BILD2":"c04_1_bild",
+    "ALB2":"alb_heparin",
+    "ALTL":"alt_heparin",
+    "ASTL":"c07_heparin",
+    "ALP2S": "alp_heparin",
+    "GGTS2": "ggt_heparin",
+    "TP2M": "pro_heparin"
   },
 
-  "BIOCHEMISTRY_VALUE": {
-    "BIL-T": "c03_2_if_done",
-    "BIL-D": "c04_1",
-    "ALB": "c05_2_if_done",
-    "ALT": "c05_2_if_done_2",
-    "AST/GOT": "c07_2_if_done",
-    "ALP": "c08_2_if_done",
-    "GGT": "c09_2_if_done",
-    "PRO": "c10_2_if_done",
-    "UERA": "c11_2_if_done",
-    "CERA": "c12_2_if_done",
-    "GLUC": "c13_2_if_done",
-    "LACT": "c14_2_if_done"
+  "BIOCHEMISTRY_SM": {
+    "VSIST_NO": "visit_no_sid",
+    "UREL": "urea_heparin",
+    "CREJ2": "crea_heparin",
+    "GLU2": "gluc_heparin",
+    "LACT2": "lact_heparin"
+  },
+
+  "BIOCHEMISTRY_VALUE_UM": {
+    "BILT3": "c03_2_if_done",
+    "BILD2": "c04_1",
+    "ALB2": "c05_2_if_done",
+    "ALTL": "c05_2_if_done_2",
+    "ASTL": "c07_2_if_done",
+    "ALP2S": "c08_2_if_done",
+    "GGTS2": "c09_2_if_done",
+    "TP2M": "c10_2_if_done"
+  },
+
+  "BIOCHEMISTRY_VALUE_SM": {
+    "UREL": "c11_2_if_done",
+    "CREJ2": "c12_2_if_done",
+    "GLU2": "c13_2_if_done",
+    "LACT2": "c14_2_if_done"
   },
 
   "FBC_RM": {

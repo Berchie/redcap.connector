@@ -342,21 +342,23 @@ def transfer_result(project, period):
 
                         # loop through the children object to get values or results of the analysis
                         if len(client_sample_id) > 11 and not len(client_sample_id) >= 14:
-                            for child in range(r_data_dict_items[i]["children_count"] - 2):
+                            for child in range(len(children_data) - 1):
 
                                 # check if the analysis title or name is found in the redcap_variables dictionary
                                 # if children_data[child]["title"] in redcap_variables:
                                 # if true, get the key value of the analysis title from the redcap_variables json file
                                 # and use it as the key for the Result value e.g {"lf_fbchgb_q":"9.5"}
-                                if r_data_dict_items[i]["children"][child]["Result"] == '----':
+                                if r_data_dict_items[i]["children"][child].get("Result","----") == '----':
                                     result = 0.0
                                 else:
                                     result = r_data_dict_items[i]["children"][child]["Result"]
-                                analyses_data.update({str(children_data[child]["Keyword"]).lower(): result})
 
-                                # add the unit of the analysis
-                                unit_variable_name = f'{str(children_data[child]["Keyword"]).lower()}_unit'
-                                analyses_data.update({unit_variable_name: str(children_data[child]["Unit"])})
+                                if children_data[child]["title"] != "":
+                                    analyses_data.update({str(children_data[child]["Keyword"]).lower(): result})
+
+                                    # add the unit of the analysis
+                                    unit_variable_name = f'{str(children_data[child]["Keyword"]).lower()}_unit'
+                                    analyses_data.update({unit_variable_name: str(children_data[child]["Unit"])})
 
                             # add the redcap complete form status for haematology instrument
                             # 0 --> Incomplete, 1 --> Unverified,  2 --> Complete
@@ -396,7 +398,7 @@ def transfer_result(project, period):
 
 if __name__ == '__main__':
     time_start_ = time.perf_counter()
-    fbc = transfer_result('M19', 'this-week')
+    fbc = transfer_result('M19', 'yesterday')
     print(json.dumps(fbc, indent=4))
     time_end_ = time.perf_counter()
     print(f'process time: {(time_end_ - time_start_)} seconds')
