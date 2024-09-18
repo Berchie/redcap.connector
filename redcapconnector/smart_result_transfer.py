@@ -521,7 +521,7 @@ def transfer_smart_result(period, sample_type):
 
                             # data entry
                             data_entry = record_ids[0]["id_um"][-3:]
-                            print(f"Data Entry: {data_entry}({record_id})")
+                            # print(f"Data Entry: {data_entry}({record_id})")
                         elif len(record_ids) == 1:
                             # print(f"Record IDs f: {record_ids}")
                             record_id = record_ids[0]['id_um']
@@ -529,7 +529,7 @@ def transfer_smart_result(period, sample_type):
 
                             # data entry
                             data_entry = record_ids[0]["id_um"][-3:]
-                            print(f"Data Entry: {data_entry}({record_id})")
+                            # print(f"Data Entry: {data_entry}({record_id})")
 
                     vhour = res_data_dict_items[item]["getClientReference"]
                     vday = ''
