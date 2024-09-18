@@ -29,7 +29,7 @@ def cli() -> None:
 
 cli.add_command(senaite_connect.senaite_connect)
 cli.add_command(get_result.transfer_result)
-# cli.add_command(srt.transfer_smart_result)
+cli.add_command(srt.transfer_smart_result)
 cli.add_command(cs.status)
 cli.add_command(ec.export_csv)
 
