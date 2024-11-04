@@ -1,0 +1,181 @@
+{
+  "VISIT_DAYS":{
+    "D00": "day_0",
+    "D01": "day_1",
+    "D02": "day_2",
+    "D03": "day_3",
+    "D04": "day_4",
+    "D05": "day_5",
+    "D06": "day_6",
+    "D07": "day_7",
+    "D14": "day_14",
+    "D21": "day_21",
+    "D28": "day_28",
+    "D35": "day_35",
+    "D42": "day_42",
+    "U": "unscheduled"
+  },
+
+  "TIME": {
+    "H00": "hour_0",
+    "H08": "hour_8",
+    "H12": "hour_12",
+    "H24": "hour_24",
+    "H36": "hour_36",
+    "H48": "hour_48",
+    "H60": "hour_60",
+    "H72": "hour_72",
+    "ALH00": "al_hour_0",
+    "ALH08": "al_hour_8",
+    "ALH24": "al_hour_24",
+    "ALH36": "al_hour_36",
+    "ALH48": "al_hour_48",
+    "ALH60": "al_hour_60",
+    "ALH72": "al_hour_72"
+  },
+
+  "VISIT_NO_EDTA": {
+    "hour_0_day_0":"1",
+    "hour_8_day_0":"2",
+    "hour_12_day_0": "3",
+    "hour_24_day_1":"4",
+    "hour_36_day_1": "5",
+    "hour_48_day_2": "6",
+    "hour_60_day_2": "7",
+    "hour_72_day_3":"8",
+    "day_3":"8",
+    "day_7":"9",
+    "day_14":"10",
+    "day_21":"11",
+    "day_28":"12",
+    "day_35":"13",
+    "day_42":"14",
+    "U": "15"
+  },
+
+  "UM_VISIT_NO_EDTA": {
+    "hour_0_day_0":"1",
+    "hour_8_day_0":"2",
+    "hour_12_day_0": "3",
+    "hour_24_day_1":"4",
+    "hour_36_day_1": "5",
+    "hour_48_day_2": "6",
+    "hour_60_day_2": "7",
+    "hour_72_day_3":"8",
+    "day_3":"8",
+    "day_7":"9",
+    "day_14":"10",
+    "day_21":"11",
+    "day_28":"12",
+    "day_35":"13",
+    "day_42":"14",
+    "U": "15"
+  },
+
+  "VISIT_NO_HEPARIN": {
+    "D0": "1",
+    "D00": "1",
+    "D3": "2",
+    "D03": "2",
+    "D7": "3",
+    "D07": "3",
+    "D14": "4",
+    "D21": "5",
+    "D28": "6",
+    "D35": "7",
+    "D42": "8",
+    "U": "9"
+  },
+
+  "VISIT_NO_HEPARIN_SM": {
+    "D0": "1",
+    "D00": "1",
+    "D3": "2",
+    "D03": "2",
+    "D7": "3",
+    "D07": "3",
+    "D21": "4",
+    "U": "5"
+  },
+
+  "DATA_ACCESS_GROUP": {
+    "AG": "agogo",
+    "AF": "assin_fosu"
+  },
+
+  "FBC": {
+    "id": "id_um",
+    "Event_Name": "redcap_event_name",
+    "HGB": "hgb_edta",
+    "HCT": "hct_edta",
+    "LYMPH%": "lym_edta",
+    "MONO%": "mon_edta",
+    "NEUT%": "neu_edta",
+    "PLT": "plt_edta",
+    "RBC": "rbc_edta",
+    "WBC": "wbc_edta",
+    "EO%": "eosi_edta",
+    "BASO%": "bas_edta"
+  },
+
+  "BIOCHEMISTRY_UM": {
+    "VSIST_NO": "visit_no_sid",
+    "BILT3":"c03_1_bilt",
+    "BILD2":"c04_1_bild",
+    "ALB2":"alb_heparin",
+    "ALTL":"alt_heparin",
+    "ASTL":"c07_heparin",
+    "ALP2S": "alp_heparin",
+    "GGTS2": "ggt_heparin",
+    "TP2M": "pro_heparin"
+  },
+
+  "BIOCHEMISTRY_SM": {
+    "VSIST_NO": "visit_no_sid",
+    "UREL": "urea_heparin",
+    "CREJ2": "crea_heparin",
+    "GLU2": "gluc_heparin",
+    "LACT2": "lact_heparin"
+  },
+
+  "BIOCHEMISTRY_VALUE_UM": {
+    "BILT3": "c03_2_if_done",
+    "BILD2": "c04_1",
+    "ALB2": "c05_2_if_done",
+    "ALTL": "c05_2_if_done_2",
+    "ASTL": "c07_2_if_done",
+    "ALP2S": "c08_2_if_done",
+    "GGTS2": "c09_2_if_done",
+    "TP2M": "c10_2_if_done"
+  },
+
+  "BIOCHEMISTRY_VALUE_SM": {
+    "UREL": "c11_2_if_done",
+    "CREJ2": "c12_2_if_done",
+    "GLU2": "c13_2_if_done",
+    "LACT2": "c14_2_if_done"
+  },
+
+  "FBC_RM": {
+    "id": "id_um",
+    "Event_Name": "redcap_event_name",
+    "HGB": "hgb_rm",
+    "HCT": "hct_rm",
+    "LYMPH%": "lym_rm",
+    "MONO%": "mon_rm",
+    "NEUT%": "neu_rm",
+    "PLT": "plt_rm",
+    "RBC": "rbc_rm",
+    "WBC": "wbc_rm",
+    "EO%": "eosi_rm",
+    "BASO%": "bas_rm"
+  },
+
+  "VISIT_NO_FBC_RM": {
+    "D7": "1",
+    "D07": "1",
+    "D14": "2",
+    "D21": "3",
+    "D28": "4"
+  }
+}

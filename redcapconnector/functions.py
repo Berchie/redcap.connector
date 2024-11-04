@@ -26,37 +26,33 @@ def is_not_empty_file(filepath):
         logger.exception(f"An error occurred while locating the file: {Argument}", exc_info=True)
 
 
+@logger.catch
 def read_json(file_path):
-    try:
-        # Opening JSON file
-        file_json = open(file_path, 'r')
-        # returns JSON object as a dictionary
-        file_data = json.loads(file_json.read())
+    # Opening JSON file
+    file_json = open(file_path, 'r')
+    # returns JSON object as a dictionary
+    file_data = json.loads(file_json.read())
 
-        # closing file
-        file_json.close()
+    # closing file
+    file_json.close()
 
-        return file_data
-    except IOError as ioer:
-        logger.error(f"There's an error reading the file. {ioer}", exc_info=True)
-    except Exception as error:
-        logger.exception(f"There's an error reading the file. {error}", exc_info=True)
+    return file_data
 
 
+@logger.catch
 def write_json(dictionary):
-    try:
-        # serializing json
-        # json_object = json.dumps(dictionary, indent=4)
+    # writing to the import_data.json
+    with open(os.path.join(os.path.dirname(__file__), "data", "import_data.json"), "a+") as importfile:
+        # importfile.write(json_object)
+        json.dump(dictionary, importfile, indent=4)
 
-        # writing to the import_data.json
-        with open(os.path.join(os.path.dirname(__file__), "data", "import_data.json"), "a+") as importfile:
-            # importfile.write(json_object)
-            json.dump(dictionary, importfile, indent=4)
 
-    except IOError:
-        logger.error('An error occurred while writing to the file.', exc_info=True)
-    except Exception as error:
-        logger.exception(f'An error occurred while writing to the file. {error}', exc_info=True)
+@logger.catch
+def write_json_smart(dictionary, json_file):
+    # writing to the import_data.json
+    with open(os.path.join(os.path.dirname(__file__), "data", json_file), "a+") as importfile:
+        # importfile.write(json_object)
+        json.dump(dictionary, importfile, indent=4)
 
 
 # write the results to csv file

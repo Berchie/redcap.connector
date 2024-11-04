@@ -104,7 +104,83 @@ def json_csv():
         csv_writer.writerow(result.values())
 
 
-def data_import(project_id):
+# writing the imported results to CSV file
+@logger.catch
+def result_csv():
+    csv_file = os.path.join(os.path.dirname(__file__), "data", "csv", "haematology.csv")
+
+    # open or read the json file
+    with open(os.path.join(os.path.dirname(__file__), "data", "import_data.json")) as json_file:
+        json_results = json.load(json_file)
+
+    # open the csv file
+    if os.path.isfile(csv_file) and os.path.getsize(csv_file) > 0:
+        data_file = open(csv_file, 'a', newline='')
+    else:
+        data_file = open(csv_file, 'w', newline='')
+
+    # create the csv writer object
+    csv_writer = csv.writer(data_file)
+
+    # Counter variable used for writing
+    # headers to the CSV file
+    # if the CSV file exist and not empty set the counter to 1 to write the rows
+    if os.path.isfile(csv_file) and os.path.getsize(csv_file) > 0:
+        counter = 1
+    else:
+        counter = 0
+
+    for result in json_results:
+
+        if counter == 0:
+            # Writing headers of CSV file
+            header = result.keys()
+            csv_writer.writerow(header)
+            counter += 1
+
+        # writing data of the CSV file
+        csv_writer.writerow(result.values())
+
+
+# convert json data to CSV file for the daily run (SMART Project)
+@logger.catch
+def json_csv_smart():
+    csv_file = os.path.join(os.path.dirname(__file__), "data", "daily_result", f"{strftime("%Y%m%d", localtime())}_smart_haematology.csv")
+
+    # open or read the json file
+    with open(os.path.join(os.path.dirname(__file__), "data", "import_data.json")) as json_file:
+        json_results = json.load(json_file)
+
+    # open the csv file
+    if os.path.isfile(csv_file) and os.path.getsize(csv_file) > 0:
+        data_file = open(csv_file, 'a', newline='')
+    else:
+        data_file = open(csv_file, 'w', newline='')
+
+    # create the csv writer object
+    csv_writer = csv.writer(data_file)
+
+    # Counter variable used for writing
+    # headers to the CSV file
+    # if the CSV file exist and not empty set the counter to 1 to write the rows
+    if os.path.isfile(csv_file) and os.path.getsize(csv_file) > 0:
+        counter = 1
+    else:
+        counter = 0
+
+    for result in json_results:
+
+        if counter == 0:
+            # Writing headers of CSV file
+            header = result.keys()
+            csv_writer.writerow(header)
+            counter += 1
+
+        # writing data of the CSV file
+        csv_writer.writerow(result.values())
+
+
+def data_import(project_id, record_ids):
     # m19_csv_file = 'import_m19_data.csv'
     # p21_csv_file = 'import_p21_data.csv'
     # record = f'{os.path.abspath("..")}/data/import_data.json'
@@ -153,7 +229,7 @@ def data_import(project_id):
                     sample_ids = res
 
                     # email notification
-                    email_notification(import_success_msg, sample_ids)
+                    email_notification(msg=import_success_msg, record_id=record_ids)
 
                     # convert json to CSV
                     json_csv()

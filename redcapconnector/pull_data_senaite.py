@@ -189,7 +189,6 @@ transfer_example_context = """
     help='period or date the sample or analyses was published'
 )
 def transfer_result(project, period):
-
     # display info
     """
     \b
@@ -220,6 +219,9 @@ def transfer_result(project, period):
 
     mbc_t6_t12 = ['T6', 'T7', 'T8', 'T9', 'T10', 'T11']
     mbc_fever_visits = ['F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12', 'F13', 'F14', 'F15']
+
+    # store the M19 or longitudinal project event record id. this id will be sent via email to DB manager
+    record_ids = []
 
     try:
         # assign project name. This name will be used with
@@ -267,7 +269,7 @@ def transfer_result(project, period):
                 # returns respond data as a JSON object
                 r_data = json.dumps(items_resp.json())
 
-                # cast the response json data python object dictionary
+            # cast the response json data to python object dictionary
             r_data_dict = json.loads(r_data)
 
             # next_batch = r_data_dict['next']  # url for the next batch of records
@@ -301,6 +303,9 @@ def transfer_result(project, period):
                         if client_sample_id:
                             if client_id == 'M19':
                                 if len(client_sample_id) > 11 and not len(client_sample_id) >= 14:
+
+                                    # add client_sample_id to the record_ids dictionary
+                                    record_ids.append(client_sample_id)
 
                                     # replace the last characters of the client sample id (record id used by REDCap) with 'T0'
                                     record_id = client_sample_id.replace(client_sample_id[10:], "T0")
@@ -337,21 +342,23 @@ def transfer_result(project, period):
 
                         # loop through the children object to get values or results of the analysis
                         if len(client_sample_id) > 11 and not len(client_sample_id) >= 14:
-                            for child in range(r_data_dict_items[i]["children_count"] - 2):
+                            for child in range(len(children_data) - 1):
 
                                 # check if the analysis title or name is found in the redcap_variables dictionary
                                 # if children_data[child]["title"] in redcap_variables:
                                 # if true, get the key value of the analysis title from the redcap_variables json file
                                 # and use it as the key for the Result value e.g {"lf_fbchgb_q":"9.5"}
-                                if r_data_dict_items[i]["children"][child]["Result"] == '----':
+                                if r_data_dict_items[i]["children"][child].get("Result","----") == '----':
                                     result = 0.0
                                 else:
                                     result = r_data_dict_items[i]["children"][child]["Result"]
-                                analyses_data.update({str(children_data[child]["Keyword"]).lower(): result})
 
-                                # add the unit of the analysis
-                                unit_variable_name = f'{str(children_data[child]["Keyword"]).lower()}_unit'
-                                analyses_data.update({unit_variable_name: str(children_data[child]["Unit"])})
+                                if children_data[child]["title"] != "":
+                                    analyses_data.update({str(children_data[child]["Keyword"]).lower(): result})
+
+                                    # add the unit of the analysis
+                                    unit_variable_name = f'{str(children_data[child]["Keyword"]).lower()}_unit'
+                                    analyses_data.update({unit_variable_name: str(children_data[child]["Unit"])})
 
                             # add the redcap complete form status for haematology instrument
                             # 0 --> Incomplete, 1 --> Unverified,  2 --> Complete
@@ -375,7 +382,7 @@ def transfer_result(project, period):
             write_json(data)
 
         # importing the data or results into REDCap project database
-        data_import(project)
+        data_import(project, record_ids=record_ids)
 
         return data
 
@@ -391,7 +398,7 @@ def transfer_result(project, period):
 
 if __name__ == '__main__':
     time_start_ = time.perf_counter()
-    fbc = transfer_result('M19', 'this-week')
+    fbc = transfer_result('M19', 'yesterday')
     print(json.dumps(fbc, indent=4))
     time_end_ = time.perf_counter()
     print(f'process time: {(time_end_ - time_start_)} seconds')
