@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='redcap-connector',
-    version='0.1.3',
+    version='0.1.4',
     author='Berchie Agyemang',
     author_email='berchie@bnitm.de',
     description='Middleware for transferring analysis results from LIMS to REDCap',

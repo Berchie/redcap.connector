@@ -1,12 +1,16 @@
 import os
 import configparser
 import re
+from datetime import datetime
+
 import requests
 import json
 import logging.config
 import click
 from dotenv import dotenv_values, load_dotenv
 from loguru import logger
+from requests.auth import HTTPBasicAuth
+
 from redcapconnector.config.log_config import handlers
 from redcapconnector.functions import read_json, write_json_smart
 from redcapconnector.importdata_smart import data_import
@@ -264,10 +268,12 @@ def extract_edta_visit(sampleid, day, hour=''):
                     event_s_hday = '_'.join((event_s[0], event_s[1], event_s[2], event_s[3]))
                     event_s_day = '_'.join((event_s[2], event_s[3]))
                     if event_s_hday in smart_variables["VISIT_NO_EDTA"]:
-                        if len(event_s[1]) == 1 and event_s[1] == visit_hour and event_s_day == visit_day and event[-5:] == id_arm:
+                        if len(event_s[1]) == 1 and event_s[1] == visit_hour and event_s_day == visit_day and event[
+                                                                                                              -5:] == id_arm:
                             # print(evt[0:12])
                             return smart_variables["VISIT_NO_EDTA"][event_s_hday]
-                        elif len(event_s[1]) == 2 and event_s[1] == visit_hour and event_s_day == visit_day and event[-5:] == id_arm:
+                        elif len(event_s[1]) == 2 and event_s[1] == visit_hour and event_s_day == visit_day and event[
+                                                                                                                -5:] == id_arm:
                             # print(evt[0:12])  # hour_8_day_0_arm_4
                             return smart_variables["VISIT_NO_EDTA"][event_s_hday]
                 case "day":
@@ -322,11 +328,13 @@ def extract_um_edta_visit(sampleid, day, hour=''):
                     event_s_hday = '_'.join((event_s[0], event_s[1], event_s[2], event_s[3]))
                     event_s_day = '_'.join((event_s[2], event_s[3]))
                     if event_s_hday in smart_variables["UM_VISIT_NO_EDTA"]:
-                        if len(event_s[1]) == 1 and event_s[1] == visit_hour and event_s_day == visit_day and event[-5:] == id_arm:
+                        if len(event_s[1]) == 1 and event_s[1] == visit_hour and event_s_day == visit_day and event[
+                                                                                                              -5:] == id_arm:
                             # print(evt[0:12])
                             # print(f"Visit Number: {smart_variables["UM_VISIT_NO_EDTA"][event_s_hday]}")
                             return smart_variables["UM_VISIT_NO_EDTA"][event_s_hday]
-                        elif len(event_s[1]) == 2 and event_s[1] == visit_hour and event_s_day == visit_day and event[-5:] == id_arm:
+                        elif len(event_s[1]) == 2 and event_s[1] == visit_hour and event_s_day == visit_day and event[
+                                                                                                                -5:] == id_arm:
                             # print(evt[0:12])  # hour_8_day_0_arm_4
                             # print(f"Visit Number: {smart_variables["UM_VISIT_NO_EDTA"][event_s_hday]}")
                             return smart_variables["UM_VISIT_NO_EDTA"][event_s_hday]
@@ -398,7 +406,8 @@ def extract_rm_edta_visit(sample_id):
 @logger.catch
 def getSampleTypeUID(sample_title):
     data = {}
-    res = requests.get(os.environ["BASE_URL"] + "/SampleType", cookies={cookie_config["Cookie"]["name"]: cookie_config["Cookie"]["value"]})
+    res = requests.get(os.environ["BASE_URL"] + "/SampleType",
+                       cookies={cookie_config["Cookie"]["name"]: cookie_config["Cookie"]["value"]})
     data_resp = res.json()["items"]
     for item in range(len(data_resp)):
         data.update({data_resp[item]["title"]: data_resp[item]["uid"]})
@@ -408,19 +417,22 @@ def getSampleTypeUID(sample_title):
 
 @click.command(options_metavar='<options>')
 @click.option(
-    '--period',
-    type=click.Choice(['today', 'yesterday', 'this-week', 'this-month', 'this-year']),
-    default='today',
-    show_default=True,
-    help='period or date the sample or analyses was published'
-)
-@click.option(
-    '-s','--sample_type',
+    '-s', '--sample_type',
     type=click.Choice(['EDTA Blood', 'Heparin']),
     required=True,
     help='sample type'
 )
-def transfer_smart_result(period, sample_type):
+@click.option(
+    '-f','--from_date',
+    defualt=None,
+    help='from what date'
+)
+@click.option(
+    '-t','--to_date',
+    defualt=None,
+    help='to what date'
+)
+def transfer_smart_result(sample_type, from_date=None, to_date=None):
     # display info
     """
     \b
@@ -464,18 +476,98 @@ def transfer_smart_result(period, sample_type):
         biochem_variables_dict = None
         biochem_values_dict = None
         record_id_2de = None
-        sm_event_names_heparin = ["hour_0_day_0_arm_1", "hour_72_day_3_arm_1", "day_7_arm_1", "day_21_arm_1", "unscheduled_visit_arm_1"]
-        um_event_names_heaprin = ["hour_0_day_0_arm_1", "hour_72_day_3_arm_1", "day_7_arm_1", "day_21_arm_1", "day_21_arm_1", "day_28_arm_1", "day_35_arm_1",
-                          "day_45_arm_1", "unsheduled_visit_arm_1"]
+        b_start = 0
+        sm_event_names_heparin = ["hour_0_day_0_arm_1", "hour_72_day_3_arm_1", "day_7_arm_1", "day_21_arm_1",
+                                  "unscheduled_visit_arm_1"]
+        um_event_names_heaprin = ["hour_0_day_0_arm_1", "hour_72_day_3_arm_1", "day_7_arm_1", "day_21_arm_1",
+                                  "day_21_arm_1", "day_28_arm_1", "day_35_arm_1",
+                                  "day_45_arm_1", "unsheduled_visit_arm_1"]
 
         #get sample type uid
         sample_type_uid = getSampleTypeUID(sample_type)
         # print(sample_type_uid)
 
-        items_resp = requests.get(os.environ["BASE_URL"] + "/search", params={"catalog": "senaite_catalog_sample", "getClientTitle": "SMART",
-                                                                              "sort_on": "getDateSampled","sort_order": "asc", "review_state": "published",
-                                                                              "recent_modified": period, "children": "true"},
-                                  cookies={cookie_config["Cookie"]["name"]: cookie_config["Cookie"]["value"]})
+        # processing the input date
+        from_date_str = None
+        to_date_str = None
+        from_date_regx_1 = None
+        from_date_regx_2 = None
+        to_date_regx_1 = None
+        to_date_regx_2 = None
+
+        if from_date:
+            from_date_regx_1 = re.match(r'^[0-9][0-9]/[0-9][0-9]/[1-2][0-9][0-9][0-9]', from_date)
+            from_date_regx_2 = re.match(r'^[0-9][0-9]-[0-9][0-9]-[1-2][0-9][0-9][0-9]', from_date)
+
+        if to_date:
+            to_date_regx_1 = re.match(r'^[0-9][0-9]/[0-9][0-9]/[1-2][0-9][0-9][0-9]', to_date)
+            to_date_regx_2 = re.match(r'^[0-9][0-9]-[0-9][0-9]-[1-2][0-9][0-9][0-9]', to_date)
+
+        if from_date_regx_1:
+            from_date_str = datetime.strptime(from_date_regx_1.string, '%d/%m/%Y').date()
+        elif from_date_regx_2:
+            from_date_str = datetime.strptime(from_date_regx_2.string, '%d-%m-%Y').date()
+
+        if to_date_regx_1:
+            to_date_str = datetime.strptime(to_date_regx_1.string, '%d/%m/%Y').date()
+        elif to_date_regx_2:
+            to_date_str = datetime.strptime(to_date_regx_2.string, '%d-%m-%Y').date()
+
+        #Define Headers JSON API request
+        headers={
+            "Accept":"Application/json",
+            "Content-type":"Application/json",
+            "Cookie": f"{cookie_config["Cookie"]["name"]}={cookie_config["Cookie"]["value"]}"
+        }
+
+        # parameters
+        params = None
+
+        if from_date and to_date:
+            params = [
+                ("portal_type", "AnalysisRequest"),
+                ("getDatePublished.query:record:list:date", from_date_str),
+                ("getDatePublished.range:record", "min:max"),
+                ("getDatePublished.query:record:list:date", to_date_str),
+                ("getClientTitle", "SMART"),
+                ("sort_on", "created"),
+                ("sort_order", "ascending"),
+                ("review_start", "published"),
+                ("limit", 50),
+                ("children", 1)
+            ]
+        elif from_date and to_date is None:
+            params = {
+                "portal_type": "AnalysisRequest",
+                "getDatePublished.query:record:list:date": from_date_str,
+                "getDatePublished.range:record": "min",
+                "getClientTitle": "SMART",
+                "sort_on": "created",
+                "sort_order": "ascending",
+                "review_start": "published",
+                "limit": 50,
+                "children": 1
+            }
+        else:
+            params = {
+                "portal_type": "AnalysisRequest",
+                "getDatePublished.query:record:list:date": datetime.date(datetime.today()),
+                "getDatePublished.range:record": "min",
+                "getClientTitle": "SMART",
+                "sort_on": "created",
+                "sort_order": "ascending",
+                "review_start": "published",
+                "limit": 50,
+                "children": 1
+            }
+
+        # Make a GET request
+        items_resp = requests.get(
+            os.environ["BASE_URL"] + "/search",
+            headers=headers,
+            params=params,
+            # auth=HTTPBasicAuth(os.environ["SENAITE_USERNAME"], os.environ["SENAITE_PASSWORD"])
+        )
 
         next_pages = int(items_resp.json()["pages"])
         http_status_code = items_resp.status_code
@@ -486,7 +578,14 @@ def transfer_smart_result(period, sample_type):
 
             if batch > 0:
 
-                next_batch_resp = requests.get(next_batch, cookies={cookie_config["Cookie"]["name"]: cookie_config["Cookie"]["value"]})
+                #Next page start count
+                b_start += 50
+
+                #Make GET request
+                next_batch_resp = requests.get(
+                    f"{items_resp.url}&b_start={b_start}",
+                    auth=HTTPBasicAuth(os.environ["SENAITE_USERNAME"], os.environ["SENAITE_PASSWORD"])
+                )
 
                 # returns respond data as a JSON object
                 res_data = json.dumps(next_batch_resp.json())
@@ -561,14 +660,16 @@ def transfer_smart_result(period, sample_type):
                                         cid = "-".join([client_sample_id, 'D00'])
                                         vday = extract_visit_day(cid)
                                         vhour = "H00"
-                                        smart_analysis_data.update({"redcap_event_name": extract_event_name(cid, vday, vhour)})
+                                        smart_analysis_data.update(
+                                            {"redcap_event_name": extract_event_name(cid, vday, vhour)})
                                     elif 11 < len(client_sample_id.strip()) <= 15:
                                         vday = extract_visit_day(client_sample_id)
                                         if vday == 'day_3':
                                             vhour = 'H72'
                                         elif vday == 'day_0':
                                             vhour = "H00"
-                                        smart_analysis_data.update({"redcap_event_name": extract_event_name(client_sample_id, vday, vhour)})
+                                        smart_analysis_data.update(
+                                            {"redcap_event_name": extract_event_name(client_sample_id, vday, vhour)})
                                         # else:
                                         #     vhr = 'H00'
                                         #     smart_analysis_data.update({"redcap_event_name": extract_event_name(client_sample_id, vday, vhr)})
@@ -579,30 +680,38 @@ def transfer_smart_result(period, sample_type):
 
                                 # data access ground name
                                 pid = client_sample_id[0:11]
-                                smart_analysis_data.update({"redcap_data_access_group": smart_variables["DATA_ACCESS_GROUP"][pid[9:11]]})
+                                smart_analysis_data.update(
+                                    {"redcap_data_access_group": smart_variables["DATA_ACCESS_GROUP"][pid[9:11]]})
 
                                 if case_type == "UM":
                                     if sample_type == "EDTA Blood":
-                                        smart_analysis_data.update({"visit_no_edta": extract_um_edta_visit(client_sample_id, vday, vhour)})
-                                    # getClientOrderNumber
+                                        smart_analysis_data.update(
+                                            {"visit_no_edta": extract_um_edta_visit(client_sample_id, vday, vhour)})
+                                        # getClientOrderNumber
 
                                         smart_analysis_data.update({"fblood_edta": "1"})
 
-                                        smart_analysis_data.update({"c01_date_and_time_of_fbc": res_data_dict_items[item]["getClientOrderNumber"]})
+                                        smart_analysis_data.update({"c01_date_and_time_of_fbc":
+                                                                        res_data_dict_items[item][
+                                                                            "getClientOrderNumber"]})
 
                                 elif case_type == "SM":
                                     if sample_type == "EDTA Blood":
-                                        smart_analysis_data.update({"visit_no_edta": extract_edta_visit(client_sample_id, vday, vhour)})
+                                        smart_analysis_data.update(
+                                            {"visit_no_edta": extract_edta_visit(client_sample_id, vday, vhour)})
 
                                         smart_analysis_data.update({"fblood_edta": "1"})
 
-                                        smart_analysis_data.update({"c01_date_and_time_of_fbc": res_data_dict_items[item]["getClientOrderNumber"]})
+                                        smart_analysis_data.update({"c01_date_and_time_of_fbc":
+                                                                        res_data_dict_items[item][
+                                                                            "getClientOrderNumber"]})
 
                                 else:
                                     # "RM"
                                     smart_analysis_data.update({"visitno_rm1": extract_rm_edta_visit(client_sample_id)})
                                     smart_analysis_data.update({"b03_rm": "1"})
-                                    smart_analysis_data.update({"c01_rm1": res_data_dict_items[item]["getClientOrderNumber"]})
+                                    smart_analysis_data.update(
+                                        {"c01_rm1": res_data_dict_items[item]["getClientOrderNumber"]})
 
                             elif sample_type_uid == stuid and sample_type == "Heparin":
                                 # record id
@@ -614,14 +723,16 @@ def transfer_smart_result(period, sample_type):
                                         cid = "-".join([client_sample_id, 'D00'])
                                         vday = extract_visit_day(cid)
                                         vhour = "H00"
-                                        smart_analysis_data.update({"redcap_event_name": extract_event_name(cid, vday, vhour)})
+                                        smart_analysis_data.update(
+                                            {"redcap_event_name": extract_event_name(cid, vday, vhour)})
                                     elif 11 < len(client_sample_id.strip()) <= 15:
                                         vday = extract_visit_day(client_sample_id)
                                         if vday == 'day_3':
                                             vhour = 'H72'
                                         elif vday == 'day_0':
                                             vhour = "H00"
-                                        smart_analysis_data.update({"redcap_event_name": extract_event_name(client_sample_id, vday, vhour)})
+                                        smart_analysis_data.update(
+                                            {"redcap_event_name": extract_event_name(client_sample_id, vday, vhour)})
                                         # else:
                                         #     vhr = 'H00'
                                         #     smart_analysis_data.update({"redcap_event_name": extract_event_name(client_sample_id, vday, vhr)})
@@ -632,19 +743,22 @@ def transfer_smart_result(period, sample_type):
 
                                 # data access ground name
                                 pid = client_sample_id[0:11]
-                                smart_analysis_data.update({"redcap_data_access_group": smart_variables["DATA_ACCESS_GROUP"][pid[9:11]]})
+                                smart_analysis_data.update(
+                                    {"redcap_data_access_group": smart_variables["DATA_ACCESS_GROUP"][pid[9:11]]})
 
                                 if case_type == "UM":
                                     # if sample_type == "Heparin":
                                     # heparin
-                                    smart_analysis_data.update({"visit_no_sid": extract_heparin_visit(client_sample_id)})
+                                    smart_analysis_data.update(
+                                        {"visit_no_sid": extract_heparin_visit(client_sample_id)})
 
                                     smart_analysis_data.update({"sptaken_heparin": "1"})
 
                                 elif case_type == "SM":
                                     # if sample_type == "Heparin":
                                     # heparin
-                                    smart_analysis_data.update({"visit_no_sid": extract_heparin_visit(client_sample_id)})
+                                    smart_analysis_data.update(
+                                        {"visit_no_sid": extract_heparin_visit(client_sample_id)})
 
                                     smart_analysis_data.update({"sptaken_heparin": "1"})
 
@@ -704,15 +818,20 @@ def transfer_smart_result(period, sample_type):
                                     # analysis results/count
                                     fbc_keys = smart_variables["FBC"].keys()
                                     rm_fbc_keys = smart_variables["FBC_RM"].keys()
-                                    fbc_title = re.sub(r'[\[\]]', '', str([analysis_counts[analysis_count]["title"]])).strip("'")
+                                    fbc_title = re.sub(r'[\[\]]', '',
+                                                       str([analysis_counts[analysis_count]["title"]])).strip("'")
                                     # print(fbc_keys)
                                     if case_type == "RM":
                                         if fbc_title in rm_fbc_keys:
-                                            smart_analysis_data.update({smart_variables["FBC_RM"][analysis_counts[analysis_count]["title"]]: result})
+                                            smart_analysis_data.update({smart_variables["FBC_RM"][
+                                                                            analysis_counts[analysis_count][
+                                                                                "title"]]: result})
 
                                     else:
                                         if fbc_title in fbc_keys:
-                                            smart_analysis_data.update({smart_variables["FBC"][analysis_counts[analysis_count]["title"]]: result})
+                                            smart_analysis_data.update({smart_variables["FBC"][
+                                                                            analysis_counts[analysis_count][
+                                                                                "title"]]: result})
 
                                 elif sample_type == "Heparin":
                                     # sample type -> Heparin Blood
@@ -734,7 +853,8 @@ def transfer_smart_result(period, sample_type):
                                         biochem_variables_dict = smart_variables["BIOCHEMISTRY_SM"]
                                         biochem_values_dict = smart_variables["BIOCHEMISTRY_VALUE_SM"]
 
-                                    chem_title = re.sub(r'[\[\]]', '', str([analysis_counts[analysis_count]["title"]])).strip("'")
+                                    chem_title = re.sub(r'[\[\]]', '',
+                                                        str([analysis_counts[analysis_count]["title"]])).strip("'")
 
                                     # if analysis_counts[analysis_count]["Result"]:
                                     if heparin_result:
@@ -744,14 +864,15 @@ def transfer_smart_result(period, sample_type):
                                             smart_analysis_data.update({biochem_variables_dict["LACT2"]: "1"})
 
                                         if chem_title in chem_count_keys:
-                                            smart_analysis_data.update({biochem_values_dict[chem_title]: heparin_result})
+                                            smart_analysis_data.update(
+                                                {biochem_values_dict[chem_title]: heparin_result})
                                         elif chem_title == "LACT":
                                             smart_analysis_data.update({biochem_values_dict["LACT2"]: heparin_result})
 
                         # append analysis counts data list
                         if smart_analysis_data and record_id:
                             if case_type == "UM" and client_sample_id[:5] == "S24-1":
-                                print(f"UM: {client_sample_id}\n")
+                                # print(f"UM: {client_sample_id}\n")
                                 # place 'if condition' here for element length
                                 if sample_type == "EDTA Blood":
                                     um_data.append(smart_analysis_data.copy())
@@ -768,18 +889,18 @@ def transfer_smart_result(period, sample_type):
                                     #     record_id_2de = record_ids[0]["id_um"]
 
                                     #if data_entry == "--1":
-                                    if "--1" == um_data[len(um_data)-1]["id_um"][-3:]:
+                                    if "--1" == um_data[len(um_data) - 1]["id_um"][-3:]:
                                         # print(f"First ID: {um_data[len(um_data)-1]["id_um"]}")
                                         # record_id_2de = f"{record_id_2de}--2"
-                                        record_id_2de =f"{um_data[len(um_data)-1]["id_um"][0:12]}--2"
+                                        record_id_2de = f"{um_data[len(um_data) - 1]["id_um"][0:12]}--2"
                                         # print(f"Second ID: {record_id_2de}\n")
                                         # print(f"First ID: {um_data[len(um_data)-1]["id_um"][0:12]}")
 
                                     #elif data_entry == "--2":
-                                    elif "--2" == um_data[len(um_data)-1]["id_um"][-3:]:
+                                    elif "--2" == um_data[len(um_data) - 1]["id_um"][-3:]:
                                         # print(f"First ID: {um_data[len(um_data) - 1]["id_um"]}")
                                         # record_id_2de = f"{record_id_2de}--1"
-                                        record_id_2de =f"{um_data[len(um_data)-1]["id_um"][0:12]}--2"
+                                        record_id_2de = f"{um_data[len(um_data) - 1]["id_um"][0:12]}--2"
                                         # print(f"Second ID: {record_id_2de}\n")
 
                                     #if len(record_id_2de) == 15:
@@ -814,7 +935,7 @@ def transfer_smart_result(period, sample_type):
 
                             elif case_type == "SM" and client_sample_id[:5] == "S24-2":
                                 # SM
-                                print(f"SM: {client_sample_id}\n")
+                                # print(f"SM: {client_sample_id}\n")
                                 if sample_type == "EDTA Blood":
                                     sm_data.append(smart_analysis_data.copy())
 
@@ -894,7 +1015,6 @@ def transfer_smart_result(period, sample_type):
             else:
                 logger.info(f"SENAITE: No SMART {'lab count'} lab records was found!")
 
-            next_batch = res_data_dict["next"]
 
         # write to json file
         sm_json_file = os.path.join(os.path.dirname(__file__), "data", "smart_sm_import_data.json")
@@ -925,4 +1045,4 @@ def transfer_smart_result(period, sample_type):
 
 
 if __name__ == '__main__':
-    transfer_smart_result("this-month", "Heparin")
+    transfer_smart_result("Heparin", "01-08-2024", "07-11-2024")

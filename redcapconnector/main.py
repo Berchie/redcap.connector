@@ -10,7 +10,7 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 @click.group('cli', context_settings=CONTEXT_SETTINGS)
 @click.version_option(
-    '0.1.2',
+    '0.1.4',
     '-v', '--version',
     prog_name="redcap-connector"
 )

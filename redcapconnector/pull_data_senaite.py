@@ -1,4 +1,7 @@
 import configparser
+from datetime import datetime
+
+from requests.auth import HTTPBasicAuth
 
 from redcapconnector.functions import read_json, write_json
 from redcapconnector.extract_redcap_data import *
@@ -182,13 +185,23 @@ transfer_example_context = """
     help="name of the project. 'M19' => MBC, 'P21' => PEDVAC"
 )
 @click.option(
-    '--period',
-    type=click.Choice(['today', 'yesterday', 'this-week', 'this-month', 'this-year']),
-    default='today',
-    show_default=True,
-    help='period or date the sample or analyses was published'
+    '-f','--from_date',
+    defualt=None,
+    help='from what date of a published analysis'
 )
-def transfer_result(project, period):
+@click.option(
+    '-t','--to_date',
+    defualt=None,
+    help='to what date of a published analysis'
+)
+# @click.option(
+#     '--period',
+#     type=click.Choice(['today', 'yesterday', 'this-week', 'this-month', 'this-year']),
+#     default='today',
+#     show_default=True,
+#     help='period or date the sample or analyses was published'
+# )
+def transfer_result(project, from_date, to_date):
     # display info
     """
     \b
@@ -235,13 +248,96 @@ def transfer_result(project, period):
         client_title = get_clients()
         client_title = client_title[project]
         project_arm = project_event_arm(project_name)
+        
+        # next page start count variable
+        b_start = 0
 
-        next_batch = None
+        # processing the input date
+        from_date_str = None
+        to_date_str = None
+        from_date_regx_1 = None
+        from_date_regx_2 = None
+        to_date_regx_1 = None
+        to_date_regx_2 = None
 
-        items_resp = requests.get(os.environ["BASE_URL"] + "/search", params={"catalog": "senaite_catalog_sample", "getClientTitle": client_title,
-                                                                              "sort_on": "getDateSampled", "sort_order": "asc", "review_state": "published",
-                                                                              "recent_modified": period, "children": "true"},
-                                  cookies={cookie_config["Cookie"]["name"]: cookie_config["Cookie"]["value"]}, stream=True)
+        if from_date:
+            from_date_regx_1 = re.match(r'^[0-9][0-9]/[0-9][0-9]/[1-2][0-9][0-9][0-9]', from_date)
+            from_date_regx_2 = re.match(r'^[0-9][0-9]-[0-9][0-9]-[1-2][0-9][0-9][0-9]', from_date)
+
+        if to_date:
+            to_date_regx_1 = re.match(r'^[0-9][0-9]/[0-9][0-9]/[1-2][0-9][0-9][0-9]', to_date)
+            to_date_regx_2 = re.match(r'^[0-9][0-9]-[0-9][0-9]-[1-2][0-9][0-9][0-9]', to_date)
+
+        if from_date_regx_1:
+            from_date_str = datetime.strptime(from_date_regx_1.string, '%d/%m/%Y').date()
+        elif from_date_regx_2:
+            from_date_str = datetime.strptime(from_date_regx_2.string, '%d-%m-%Y').date()
+
+        if to_date_regx_1:
+            to_date_str = datetime.strptime(to_date_regx_1.string, '%d/%m/%Y').date()
+        elif to_date_regx_2:
+            to_date_str = datetime.strptime(to_date_regx_2.string, '%d-%m-%Y').date()
+
+        # Define Headers JSON API request
+        headers = {
+            "Accept": "Application/json",
+            "Content-type": "Application/json",
+            "Cookie": f"{cookie_config["Cookie"]["name"]}={cookie_config["Cookie"]["value"]}"
+        }
+
+        # parameters
+        params = None
+
+        if from_date and to_date:
+            params = [
+                ("portal_type", "AnalysisRequest"),
+                ("getDatePublished.query:record:list:date", from_date_str),
+                ("getDatePublished.range:record", "min:max"),
+                ("getDatePublished.query:record:list:date", to_date_str),
+                ("getClientTitle", client_title),
+                ("sort_on", "created"),
+                ("sort_order", "ascending"),
+                ("review_start", "published"),
+                ("limit", 50),
+                ("children", 1)
+            ]
+        elif from_date and to_date is None:
+            params = {
+                "portal_type": "AnalysisRequest",
+                "getDatePublished.query:record:list:date": from_date_str,
+                "getDatePublished.range:record": "min",
+                "getClientTitle": client_title,
+                "sort_on": "created",
+                "sort_order": "ascending",
+                "review_start": "published",
+                "limit": 50,
+                "children": 1
+            }
+        else:
+            params = {
+                "portal_type": "AnalysisRequest",
+                "getDatePublished.query:record:list:date": datetime.date(datetime.today()),
+                "getDatePublished.range:record": "min",
+                "getClientTitle": client_title,
+                "sort_on": "created",
+                "sort_order": "ascending",
+                "review_start": "published",
+                "limit": 50,
+                "children": 1
+            }
+
+        # Make a GET request
+        items_resp = requests.get(
+            os.environ["BASE_URL"] + "/search",
+            headers=headers,
+            params=params,
+            # auth=HTTPBasicAuth(os.environ["SENAITE_USERNAME"], os.environ["SENAITE_PASSWORD"])
+        )
+
+        # items_resp = requests.get(os.environ["BASE_URL"] + "/search", params={"catalog": "senaite_catalog_sample", "getClientTitle": client_title,
+        #                                                                       "sort_on": "getDateSampled", "sort_order": "asc", "review_state": "published",
+        #                                                                       "recent_modified": period, "children": "true"},
+        #                           cookies={cookie_config["Cookie"]["name"]: cookie_config["Cookie"]["value"]}, stream=True)
 
         resp_pages = int(items_resp.json()["pages"])
         # next_batch = items_resp.json()['next']  # url for the next batch of records
@@ -258,8 +354,16 @@ def transfer_result(project, period):
             #     for batch in bar:
             if batch > 0:
 
-                next_batch_resp = requests.get(next_batch, cookies={cookie_config["Cookie"]["name"]: cookie_config["Cookie"]["value"]})
+                # Next page start count
+                b_start += 50
 
+                # Make GET request
+                next_batch_resp = requests.get(
+                    f"{items_resp.url}&b_start={b_start}",
+                    headers=headers,
+                    # auth=HTTPBasicAuth(os.environ["SENAITE_USERNAME"], os.environ["SENAITE_PASSWORD"])
+                )
+                
                 # returns respond data as a JSON object
                 r_data = json.dumps(next_batch_resp.json())
 
@@ -374,7 +478,7 @@ def transfer_result(project, period):
             else:
                 logger.info(f"SENAITE: No {project} lab records was found!")
 
-            next_batch = r_data_dict['next']  # url for the next batch of records
+            # next_batch = r_data_dict['next']  # url for the next batch of records
             # print(f"Next Page: {next_batch}")
 
         # print or return data or write to json file

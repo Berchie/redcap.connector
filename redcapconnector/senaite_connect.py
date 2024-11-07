@@ -61,7 +61,7 @@ def senaite_connect():
         env_config = dotenv_values("../.env")
 
         reqs = requests.post(os.environ["BASE_URL"] + "/login", params={"__ac_name": os.environ['SENAITE_USERNAME'],
-                                                                        "__ac_password": os.environ['SEANITE_PASSWORD']})
+                                                                        "__ac_password": os.environ['SENAITE_PASSWORD']})
 
         # check if the response status is OK(200) and return data is not empty
         # before proceeding with writing the cookies to a file
