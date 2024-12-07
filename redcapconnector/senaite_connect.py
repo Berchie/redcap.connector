@@ -49,10 +49,12 @@ def senaite_connect():
         \b
         example 1:
             login to SENAITE
+            \b
             $ redcon senaite-connect
         \b
         example 2:
             help option for senaite-connect command
+            \b
             $ redcon senaite-connect -h
     """
 

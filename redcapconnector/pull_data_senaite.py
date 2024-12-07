@@ -209,24 +209,32 @@ def transfer_result(project, from_date, to_date):
 
     \b
     syntax:
-        redcon transfer-result <options1>[-p|--project|-h|--help] <options2>[--period]
+        redcon transfer-result <options1>[-p|--project|-h|--help] <options2>[-f|--from_date] <options3>[-t|--to_date]
     \b
     Examples:
         \b
         example 1:
-            transferring results without the period.[default period value: today]
+            transferring result that was published today
+            \b
             $ redcon transfer-result -p M19
         \b
         example 2:
-            transferring result that was published today
-            $ redcon transfer-result -p M19 --period today
+            transferring result that was published base on "from date" filter to date
+            \b
+            $ redcon transfer-result -p M19 -f 20-03-2024
+            \b
+            $ redcon transfer-result -p M19 --f 20-03-2024
         \b
         example 3:
-            transferring result that was published three months ago or this month
-            $ redcon transfer-result -p M19 --period this-month
+            transferring result that was published base on "from date" and "to date" filter
+            \b
+            $ redcon transfer-result -p M19 -f 20-03-2024 -t 20-04-2024
+            \b
+            $ redcon transfer-result -p M19 --from_date 20-03-2024 --to_date 20-04-2024
         \b
         example 4:
             help option for transfer-result command
+            \b
             $ redcon transfer-result -h
     """
 
@@ -502,7 +510,7 @@ def transfer_result(project, from_date, to_date):
 
 if __name__ == '__main__':
     time_start_ = time.perf_counter()
-    fbc = transfer_result('M19', 'yesterday')
+    fbc = transfer_result('M19', '01-11-2024', '07-11-2024')
     print(json.dumps(fbc, indent=4))
     time_end_ = time.perf_counter()
     print(f'process time: {(time_end_ - time_start_)} seconds')

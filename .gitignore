@@ -22,3 +22,4 @@ out
 gen
 /.python-version
 /.venv/
+/redcapconnector/test_date_range.py

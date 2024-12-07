@@ -154,6 +154,10 @@ def extract_visit_day(sampleid):
         if len(visit.strip('-')) == 2 or len(visit.strip(' ')) == 2:
             # visit = visit.strip('-') or visit.strip(' ')
             visit = visit[1:]
+
+            # change visit H0 to D0
+            if visit == "H0": visit="D0"
+
             visit_day = f"{visit.strip()[0:1]}0{visit[-1:]}"
             return smart_variables["VISIT_DAYS"][visit_day]
     else:
@@ -440,24 +444,32 @@ def transfer_smart_result(sample_type, from_date=None, to_date=None):
 
     \b
     syntax:
-        redcon transfer-smart-result <options1>[-period|-h|--help] <options2>[-s|--sample_type]
+        redcon transfer-smart-result <options1>[-s|--sample_type|-h|--help] <options2>[-f|--from_date] <options3>[-t|--to_date]
     \b
     Examples:
         \b
         example 1:
-            transferring results without the period.[default period value: today]
-            $ redcon transfer-smart-result -s EDTA Blood
+            transferring result that was published today
+            \b
+            $ redcon transfer-smart-result -s "EDTA Blood"
         \b
         example 2:
-            transferring result that was published today
-            $ redcon transfer-result --period today -s EDTA Blood
+            transferring result that was published base on "from date" filter to date
+            \b
+            $ redcon transfer-result -s "EDTA Blood" -f 10-02-2024
+            \b
+            $ redcon transfer-result -s "EDTA Blood" --from_date 10-02-2024
         \b
         example 3:
-            transferring result that was published three months ago or this month
-            $ redcon transfer-smart-result --period this-month -s EDTA Blood
+            transferring result that was published base on "from date" and "to date" filter
+            \b
+            $ redcon transfer-smart-result -s "EDTA Blood" -f 10-03-2024 -t 30-03-2024
+            \b
+            $ redcon transfer-smart-result -s "EDTA Blood" --from_date 10-03-2024 --to_date 30-03-2024
         \b
         example 4:
             help option for transfer-smart-result command
+            \b
             $ redcon transfer-result -h
     """
 
@@ -689,22 +701,74 @@ def transfer_smart_result(sample_type, from_date=None, to_date=None):
                                             {"visit_no_edta": extract_um_edta_visit(client_sample_id, vday, vhour)})
                                         # getClientOrderNumber
 
+                                        # Was the sample collected
+                                        smart_analysis_data.update({"visitp_edta": "1"})
+
+                                        #place the  date of sample
+                                        if  res_data_dict_items[item]["getDateSampled"]:
+                                            data_sampled = str(res_data_dict_items[item]["getDateSampled"])[0:16].replace("T"," ")
+                                            smart_analysis_data.update({"vdate_heparin_la": data_sampled})
+
+                                        # Blood collection method
+                                        smart_analysis_data.update({"blood_la": "1"})
+
+                                        #  Initials of phlebotomist
+                                        smart_analysis_data.update({"a04_initials_of_phlebotomi_la": "RdC"})
+
+                                        # Date and time sample received in the lab:
+                                        if  res_data_dict_items[item]["getDateReceived"]:
+                                            data_received = str(res_data_dict_items[item]["getDateReceived"])[0:16].replace("T"," ")
+                                            smart_analysis_data.update({"dat_edta": data_received})
+
+                                        #  Full blood count performed?
                                         smart_analysis_data.update({"fblood_edta": "1"})
 
-                                        smart_analysis_data.update({"c01_date_and_time_of_fbc":
+                                        #  Date and time of FBC
+                                        if  res_data_dict_items[item]["getClientOrderNumber"]:
+                                            smart_analysis_data.update({"c01_date_and_time_of_fbc":
                                                                         res_data_dict_items[item][
                                                                             "getClientOrderNumber"]})
+                                        else:
+                                            smart_analysis_data.update({"c01_date_and_time_of_fbc":str(datetime.today())[0:16]})
+
+                                        # Initials of Lab tech
+                                        smart_analysis_data.update({"lab_edta": "AsB"})
 
                                 elif case_type == "SM":
                                     if sample_type == "EDTA Blood":
                                         smart_analysis_data.update(
                                             {"visit_no_edta": extract_edta_visit(client_sample_id, vday, vhour)})
 
+                                        # Was the sample collected
+                                        smart_analysis_data.update({"samplec_edta": "1"})
+
+                                        # place the  date of sample
+                                        if res_data_dict_items[item]["getDateSampled"]:
+                                            data_sampled = str(res_data_dict_items[item]["getDateSampled"])[0:16].replace("T", " ")
+                                            smart_analysis_data.update({"vdate_heparin_la": data_sampled})
+
+                                        # Blood collection method
+                                        smart_analysis_data.update({"blood_la": "1"})
+
+                                        #  Initials of phlebotomist
+                                        smart_analysis_data.update({"a04_initials_of_phlebotomi_la": "RdC"})
+
+                                        # Date and time sample received in the lab:
+                                        if res_data_dict_items[item]["getDateReceived"]:
+                                            data_received = str(res_data_dict_items[item]["getDateReceived"])[0:16].replace("T", " ")
+                                            smart_analysis_data.update({"dat_edta": data_received})
+
+                                        #  Full blood count performed?
                                         smart_analysis_data.update({"fblood_edta": "1"})
 
-                                        smart_analysis_data.update({"c01_date_and_time_of_fbc":
-                                                                        res_data_dict_items[item][
-                                                                            "getClientOrderNumber"]})
+                                        #  Date and time of FBC
+                                        if res_data_dict_items[item]["getClientOrderNumber"]:
+                                            smart_analysis_data.update({"c01_date_and_time_of_fbc": res_data_dict_items[item]["getClientOrderNumber"]})
+                                        else:
+                                            smart_analysis_data.update({"c01_date_and_time_of_fbc": str(datetime.today())[0:16]})
+
+                                        # Initials of Lab tech
+                                        smart_analysis_data.update({"lab_edta": "AsB"})
 
                                 else:
                                     # "RM"
@@ -752,7 +816,30 @@ def transfer_smart_result(sample_type, from_date=None, to_date=None):
                                     smart_analysis_data.update(
                                         {"visit_no_sid": extract_heparin_visit(client_sample_id)})
 
+                                    # Was the sample collected? [samplec_heparin]
+                                    smart_analysis_data.update({"samplec_heparin": "1"})
+
+                                    #  A01. Sampling date and time:  [vdate_heparin]
+                                    if res_data_dict_items[item]["getDateSampled"]:
+                                        data_sampled = str(res_data_dict_items[item]["getDateSampled"])[0:16].replace("T", " ")
+                                        smart_analysis_data.update({"vdate_heparin": data_sampled})
+
+                                    # sample taken
                                     smart_analysis_data.update({"sptaken_heparin": "1"})
+
+                                    # Date and time sample received in the lab:  [blab_dat]
+                                    if res_data_dict_items[item]["getDateReceived"]:
+                                        data_received = str(res_data_dict_items[item]["getDateReceived"])[0:16].replace("T", " ")
+                                        smart_analysis_data.update({"blab_dat": data_received})
+
+                                    # B03. Biochemistry performed (BHPb)? [b03_biochemistry_performed]
+                                    smart_analysis_data.update({"b03_biochemistry_performed": "1"})
+
+                                    # C01. Date and time of Biochemistry: [c01_date_and_time_of_bioch]
+                                    if res_data_dict_items[item]["getClientOrderNumber"]:
+                                        smart_analysis_data.update({"c01_date_and_time_of_bioch": res_data_dict_items[item]["getClientOrderNumber"]})
+                                    else:
+                                        smart_analysis_data.update({"c01_date_and_time_of_bioch": str(datetime.today())[0:16]})
 
                                 elif case_type == "SM":
                                     # if sample_type == "Heparin":
@@ -760,7 +847,30 @@ def transfer_smart_result(sample_type, from_date=None, to_date=None):
                                     smart_analysis_data.update(
                                         {"visit_no_sid": extract_heparin_visit(client_sample_id)})
 
+                                    # Was the sample collected? [samplec_heparin]
+                                    smart_analysis_data.update({"samplec_heparin": "1"})
+
+                                    #  A01. Sampling date and time:  [vdate_heparin]
+                                    if res_data_dict_items[item]["getDateSampled"]:
+                                        data_sampled = str(res_data_dict_items[item]["getDateSampled"])[0:16].replace("T", " ")
+                                        smart_analysis_data.update({"vdate_heparin": data_sampled})
+
+                                    # sample taken
                                     smart_analysis_data.update({"sptaken_heparin": "1"})
+
+                                    # Date and time sample received in the lab:  [blab_dat]
+                                    if res_data_dict_items[item]["getDateReceived"]:
+                                        data_received = str(res_data_dict_items[item]["getDateReceived"])[0:16].replace("T", " ")
+                                        smart_analysis_data.update({"blab_dat": data_received})
+
+                                    # Biochemistry performed (BHPb)? [b03_biochemistry_performed]
+                                    smart_analysis_data.update({"b03_biochemistry_performed": "1"})
+
+                                    # C01. Date and time of Biochemistry: [c01_date_and_time_of_bioch]
+                                    if res_data_dict_items[item]["getClientOrderNumber"]:
+                                        smart_analysis_data.update({"c01_date_and_time_of_bioch": res_data_dict_items[item]["getClientOrderNumber"]})
+                                    else:
+                                        smart_analysis_data.update({"c01_date_and_time_of_bioch": str(datetime.today())[0:16]})
 
                             # edta/biochemistry visit
                             # print(vhour)
@@ -890,18 +1000,18 @@ def transfer_smart_result(sample_type, from_date=None, to_date=None):
 
                                     #if data_entry == "--1":
                                     if "--1" == um_data[len(um_data) - 1]["id_um"][-3:]:
-                                        # print(f"First ID: {um_data[len(um_data)-1]["id_um"]}")
+                                        # print(f"UM First ID: {um_data[len(um_data)-1]["id_um"]}")
                                         # record_id_2de = f"{record_id_2de}--2"
                                         record_id_2de = f"{um_data[len(um_data) - 1]["id_um"][0:12]}--2"
-                                        # print(f"Second ID: {record_id_2de}\n")
+                                        # print(f"UM Second ID: {record_id_2de}\n")
                                         # print(f"First ID: {um_data[len(um_data)-1]["id_um"][0:12]}")
 
                                     #elif data_entry == "--2":
                                     elif "--2" == um_data[len(um_data) - 1]["id_um"][-3:]:
-                                        # print(f"First ID: {um_data[len(um_data) - 1]["id_um"]}")
+                                        # print(f"UM First ID: {um_data[len(um_data) - 1]["id_um"]}")
                                         # record_id_2de = f"{record_id_2de}--1"
-                                        record_id_2de = f"{um_data[len(um_data) - 1]["id_um"][0:12]}--2"
-                                        # print(f"Second ID: {record_id_2de}\n")
+                                        record_id_2de = f"{um_data[len(um_data) - 1]["id_um"][0:12]}--1"
+                                        # print(f"UM Second ID: {record_id_2de}\n")
 
                                     #if len(record_id_2de) == 15:
                                     smart_analysis_data.update({"id_um": record_id_2de})
@@ -924,7 +1034,7 @@ def transfer_smart_result(sample_type, from_date=None, to_date=None):
                                         elif "--2" == um_data[len(um_data) - 1]["id_um"][-3:]:
                                             # print(f"First ID: {um_data[len(um_data) - 1]["id_um"]}")
                                             # record_id_2de = f"{record_id_2de}--1"
-                                            record_id_2de = f"{um_data[len(um_data) - 1]["id_um"][0:12]}--2"
+                                            record_id_2de = f"{um_data[len(um_data) - 1]["id_um"][0:12]}--1"
                                             # print(f"Second ID: {record_id_2de}\n")
 
                                         # if len(record_id_2de) == 15:
@@ -1045,4 +1155,4 @@ def transfer_smart_result(sample_type, from_date=None, to_date=None):
 
 
 if __name__ == '__main__':
-    transfer_smart_result("Heparin", "01-08-2024", "07-11-2024")
+    transfer_smart_result("Heparin", "01-10-2024", "04-12-2024")
