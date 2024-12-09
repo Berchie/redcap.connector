@@ -38,14 +38,17 @@ def export_csv(dst):
         \b
         example 1:
             export the csv file to the default location
+            /b
             $ redcon export-csv
         \b
         example 2:
             export the csv file to document dir/folder
+            /b
             $ redcon export-csv /home/berchie/Documents
         \b
         example 3:
         help option for export-csv command
+        /b
         $ redcon export-csv --help
     """
 
