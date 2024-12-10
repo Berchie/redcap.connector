@@ -186,12 +186,12 @@ transfer_example_context = """
 )
 @click.option(
     '-f','--from_date',
-    defualt=None,
+    default=None,
     help='from what date of a published analysis'
 )
 @click.option(
     '-t','--to_date',
-    defualt=None,
+    default=None,
     help='to what date of a published analysis'
 )
 # @click.option(

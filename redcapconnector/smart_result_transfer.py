@@ -2,6 +2,7 @@ import os
 import configparser
 import re
 from datetime import datetime
+from email.policy import default
 
 import requests
 import json
@@ -428,12 +429,12 @@ def getSampleTypeUID(sample_title):
 )
 @click.option(
     '-f','--from_date',
-    defualt=None,
+    default=None,
     help='from what date'
 )
 @click.option(
     '-t','--to_date',
-    defualt=None,
+    default=None,
     help='to what date'
 )
 def transfer_smart_result(sample_type, from_date=None, to_date=None):
