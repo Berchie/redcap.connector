@@ -520,11 +520,15 @@ def transfer_smart_result(sample_type, from_date=None, to_date=None):
             from_date_str = datetime.strptime(from_date_regx_1.string, '%d/%m/%Y').date()
         elif from_date_regx_2:
             from_date_str = datetime.strptime(from_date_regx_2.string, '%d-%m-%Y').date()
+        else:
+            from_date_str = from_date
 
         if to_date_regx_1:
             to_date_str = datetime.strptime(to_date_regx_1.string, '%d/%m/%Y').date()
         elif to_date_regx_2:
             to_date_str = datetime.strptime(to_date_regx_2.string, '%d-%m-%Y').date()
+        else:
+            to_date_str = to_date
 
         #Define Headers JSON API request
         headers={
@@ -1156,4 +1160,4 @@ def transfer_smart_result(sample_type, from_date=None, to_date=None):
 
 
 if __name__ == '__main__':
-    transfer_smart_result("Heparin", "01-10-2024", "04-12-2024")
+    transfer_smart_result("Heparin", "2024-12-09", "2024-12-11")

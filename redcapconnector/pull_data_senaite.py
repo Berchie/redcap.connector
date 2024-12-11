@@ -280,11 +280,15 @@ def transfer_result(project, from_date, to_date):
             from_date_str = datetime.strptime(from_date_regx_1.string, '%d/%m/%Y').date()
         elif from_date_regx_2:
             from_date_str = datetime.strptime(from_date_regx_2.string, '%d-%m-%Y').date()
+        else:
+            from_date_str = from_date
 
         if to_date_regx_1:
             to_date_str = datetime.strptime(to_date_regx_1.string, '%d/%m/%Y').date()
         elif to_date_regx_2:
             to_date_str = datetime.strptime(to_date_regx_2.string, '%d-%m-%Y').date()
+        else:
+            to_date_str = to_date
 
         # Define Headers JSON API request
         headers = {
